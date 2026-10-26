@@ -1,0 +1,126 @@
+/* ringring.run design tokens. Light is the default; dark follows prefers-color-scheme.
+   Raw values live here; globals.css maps them into Tailwind utilities. See DESIGN.md. */
+
+:root {
+  /* Color: neutrals */
+  --color-bg: #fbfbfd;
+  --color-fg: #1d1d1f;
+  --color-surface-1: #ffffff;
+  --color-surface-2-raw: #f5f5f7;
+  --color-sunken-raw: #f2f2f5;
+  --color-muted-raw: #636368;
+  --color-subtle-raw: #6f6f74;
+  --color-hairline-raw: rgba(0, 0, 0, 0.08);
+  --color-hairline-strong-raw: rgba(0, 0, 0, 0.14);
+  --color-inverse-raw: #1d1d1f;
+  --color-inverse-fg-raw: #ffffff;
+
+  /* Color: brand (the ring) */
+  --color-accent-raw: #0066cc;         /* text and links */
+  --color-accent-solid-raw: #0071e3;   /* fills behind white text */
+  --color-accent-hover-raw: #0077ed;
+  --color-accent-fg-raw: #ffffff;
+  --color-accent-soft-raw: rgba(0, 113, 227, 0.1);
+
+  /* Color: status */
+  --color-success-raw: #1a7f37;
+  --color-success-soft-raw: rgba(52, 199, 89, 0.13);
+  --color-warning-raw: #935200;
+  --color-warning-soft-raw: rgba(255, 159, 10, 0.15);
+  --color-danger-raw: #c9251d;
+  --color-danger-soft-raw: rgba(255, 59, 48, 0.11);
+
+  /* Materials */
+  --material-bar-bg: rgba(251, 251, 253, 0.72);
+
+  /* Type */
+  --font-system: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono-raw: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --type-display-size: clamp(2.5rem, 1.6rem + 4vw, 4.5rem);
+  --type-title-1-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+
+  /* Spacing (4px grid; Tailwind's spacing scale is the same grid) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-section: clamp(4rem, 3rem + 5vw, 7.5rem);
+  --space-gutter: clamp(1.25rem, 0.9rem + 1.5vw, 2rem);
+
+  /* Radius */
+  --radius-sm-raw: 0.5rem;
+  --radius-md-raw: 0.75rem;
+  --radius-lg-raw: 1.125rem;
+  --radius-xl-raw: 1.5rem;
+
+  /* Shadow: bigger surfaces read as thicker */
+  --shadow-card-raw: 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px var(--color-hairline-raw);
+  --shadow-raised-raw: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px -8px rgba(0, 0, 0, 0.1), 0 0 0 1px var(--color-hairline-raw);
+  --shadow-float-raw: 0 2px 6px rgba(0, 0, 0, 0.05), 0 24px 60px -18px rgba(0, 0, 0, 0.22), 0 0 0 1px var(--color-hairline-raw);
+
+  /* Motion. Springs are expressed as CSS linear() curves sampled from Apple's
+     damping/response model. CSS transitions retarget from the current on-screen
+     value, so state changes stay interruptible. */
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-base: 300ms;
+  --duration-slow: 500ms;
+  /* damping 1.0, response 0.35s: settles in ~480ms, no overshoot. Default for UI. */
+  --duration-spring: 480ms;
+  --ease-spring-raw: linear(0, 0.07, 0.214, 0.371, 0.514, 0.634, 0.73, 0.803, 0.858, 0.899, 0.929, 0.95, 0.965, 0.976, 0.983, 0.988, 0.992, 0.995, 0.996, 0.997, 1);
+  /* damping 0.8, response 0.35s: ~1.5% overshoot. Only after momentum. */
+  --duration-spring-bouncy: 450ms;
+  --ease-spring-bouncy-raw: linear(0, 0.036, 0.122, 0.235, 0.356, 0.475, 0.585, 0.682, 0.764, 0.831, 0.885, 0.926, 0.957, 0.98, 0.995, 1.005, 1.011, 1.014, 1.015, 1.015, 1.014, 1.012, 1.01, 1.008, 1.007, 1.005, 1.004, 1.003, 1);
+  --ease-out-raw: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #000000;
+    --color-fg: #f5f5f7;
+    --color-surface-1: #161618;
+    --color-surface-2-raw: #1c1c1e;
+    --color-sunken-raw: #0c0c0d;
+    --color-muted-raw: #a1a1a6;
+    --color-subtle-raw: #8d8d92;
+    --color-hairline-raw: rgba(255, 255, 255, 0.1);
+    --color-hairline-strong-raw: rgba(255, 255, 255, 0.18);
+    --color-inverse-raw: #f5f5f7;
+    --color-inverse-fg-raw: #1d1d1f;
+
+    --color-accent-raw: #2997ff;
+    --color-accent-solid-raw: #0071e3;
+    --color-accent-hover-raw: #0077ed;
+    --color-accent-fg-raw: #ffffff;
+    --color-accent-soft-raw: rgba(41, 151, 255, 0.16);
+
+    --color-success-raw: #30d158;
+    --color-success-soft-raw: rgba(48, 209, 88, 0.15);
+    --color-warning-raw: #ffb340;
+    --color-warning-soft-raw: rgba(255, 159, 10, 0.17);
+    --color-danger-raw: #ff6961;
+    --color-danger-soft-raw: rgba(255, 69, 58, 0.17);
+
+    --material-bar-bg: rgba(0, 0, 0, 0.68);
+
+    --shadow-card-raw: 0 0 0 1px var(--color-hairline-raw);
+    --shadow-raised-raw: 0 0 0 1px var(--color-hairline-raw), 0 12px 32px -12px rgba(0, 0, 0, 0.7);
+    --shadow-float-raw: 0 0 0 1px var(--color-hairline-strong-raw), 0 30px 70px -20px rgba(0, 0, 0, 0.85);
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --color-hairline-raw: rgba(0, 0, 0, 0.3);
+    --color-muted-raw: #3a3a3c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-hairline-raw: rgba(255, 255, 255, 0.4);
+      --color-muted-raw: #d1d1d6;
+    }
+  }
+}

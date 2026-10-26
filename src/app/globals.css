@@ -1,37 +1,191 @@
 @import "tailwindcss";
+@import "./tokens.css";
 
-:root {
-  --background: #fbfbfd;
-  --foreground: #1d1d1f;
-  --muted: #6e6e73;
-  --hairline: rgba(0, 0, 0, 0.08);
-  --accent: #0071e3;
-}
-
+/* -------------------------------------------------------------------------
+   Tailwind theme: maps design tokens (tokens.css) to utilities.
+   Colors: bg-surface, text-muted, ring-hairline, bg-accent-soft, ...
+   Type:   text-display, text-title-1 ... text-caption (size + leading + tracking)
+   Radius: rounded-sm/md/lg/xl/pill  Shadow: shadow-card, shadow-raised, shadow-float
+   Motion: duration-instant/fast/base/slow, ease-spring, ease-spring-bouncy, ease-out
+   See DESIGN.md.
+   ------------------------------------------------------------------------- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-hairline: var(--hairline);
-  --color-accent: var(--accent);
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Inter", system-ui, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-fg);
+  --color-surface: var(--color-surface-1);
+  --color-surface-2: var(--color-surface-2-raw);
+  --color-sunken: var(--color-sunken-raw);
+  --color-muted: var(--color-muted-raw);
+  --color-subtle: var(--color-subtle-raw);
+  --color-hairline: var(--color-hairline-raw);
+  --color-hairline-strong: var(--color-hairline-strong-raw);
+  --color-accent: var(--color-accent-raw);
+  --color-accent-solid: var(--color-accent-solid-raw);
+  --color-accent-hover: var(--color-accent-hover-raw);
+  --color-accent-fg: var(--color-accent-fg-raw);
+  --color-accent-soft: var(--color-accent-soft-raw);
+  --color-success: var(--color-success-raw);
+  --color-success-soft: var(--color-success-soft-raw);
+  --color-warning: var(--color-warning-raw);
+  --color-warning-soft: var(--color-warning-soft-raw);
+  --color-danger: var(--color-danger-raw);
+  --color-danger-soft: var(--color-danger-soft-raw);
+  --color-inverse: var(--color-inverse-raw);
+  --color-inverse-fg: var(--color-inverse-fg-raw);
+
+  --font-sans: var(--font-system);
+  --font-mono: var(--font-mono-raw);
+
+  /* Type scale. Tracking tightens as size grows; leading loosens as size shrinks. */
+  --text-display: var(--type-display-size);
+  --text-display--line-height: 1.04;
+  --text-display--letter-spacing: -0.032em;
+  --text-display--font-weight: 650;
+  --text-title-1: var(--type-title-1-size);
+  --text-title-1--line-height: 1.1;
+  --text-title-1--letter-spacing: -0.024em;
+  --text-title-1--font-weight: 650;
+  --text-title-2: 1.5rem;
+  --text-title-2--line-height: 1.2;
+  --text-title-2--letter-spacing: -0.018em;
+  --text-title-2--font-weight: 600;
+  --text-title-3: 1.1875rem;
+  --text-title-3--line-height: 1.3;
+  --text-title-3--letter-spacing: -0.012em;
+  --text-title-3--font-weight: 600;
+  --text-headline: 1.0625rem;
+  --text-headline--line-height: 1.4;
+  --text-headline--letter-spacing: -0.008em;
+  --text-headline--font-weight: 600;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.5;
+  --text-body--letter-spacing: -0.006em;
+  --text-callout: 0.9375rem;
+  --text-callout--line-height: 1.5;
+  --text-callout--letter-spacing: -0.003em;
+  --text-footnote: 0.8125rem;
+  --text-footnote--line-height: 1.45;
+  --text-footnote--letter-spacing: 0;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+  --text-caption--letter-spacing: 0.01em;
+  --text-eyebrow: 0.75rem;
+  --text-eyebrow--line-height: 1.3;
+  --text-eyebrow--letter-spacing: 0.06em;
+  --text-eyebrow--font-weight: 600;
+
+  --radius-sm: var(--radius-sm-raw);
+  --radius-md: var(--radius-md-raw);
+  --radius-lg: var(--radius-lg-raw);
+  --radius-xl: var(--radius-xl-raw);
+  --radius-pill: 9999px;
+
+  --shadow-card: var(--shadow-card-raw);
+  --shadow-raised: var(--shadow-raised-raw);
+  --shadow-float: var(--shadow-float-raw);
+
+  --ease-spring: var(--ease-spring-raw);
+  --ease-spring-bouncy: var(--ease-spring-bouncy-raw);
+  --ease-out: var(--ease-out-raw);
+
+  --animate-ring: ring-out 3.2s var(--ease-out-raw) infinite;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
+@utility duration-instant { transition-duration: var(--duration-instant); }
+@utility duration-fast { transition-duration: var(--duration-fast); }
+@utility duration-base { transition-duration: var(--duration-base); }
+@utility duration-slow { transition-duration: var(--duration-slow); }
+
+/* Pointer-down feedback: the press shows instantly, release eases back on a spring. */
+@utility pressable {
+  transition-property: transform, background-color, color, box-shadow, opacity;
+  transition-duration: var(--duration-spring);
+  transition-timing-function: var(--ease-spring-raw);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+    transition-duration: var(--duration-instant);
+    transition-timing-function: var(--ease-out-raw);
+  }
 }
 
-@keyframes ring-pulse {
-  0% { transform: scale(0.6); opacity: 0.55; }
+/* Large translucent chrome: blur + saturation, content scrolls underneath. */
+@utility material-bar {
+  background: var(--material-bar-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-system);
+    font-size: var(--text-body);
+    line-height: 1.5;
+    letter-spacing: -0.006em;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Ease light <-> dark instead of a hard brightness jump. */
+    transition: background-color var(--duration-slow) var(--ease-out-raw), color var(--duration-slow) var(--ease-out-raw);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent-raw);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  ::selection {
+    background: var(--color-accent-soft-raw);
+  }
+  input, select, textarea, button { font: inherit; letter-spacing: inherit; }
+  input[type="number"] { font-variant-numeric: tabular-nums; }
+}
+
+/* Ring motif: concentric rings expanding from the handset. */
+@keyframes ring-out {
+  0% { transform: scale(0.62); opacity: 0.5; }
   100% { transform: scale(1.6); opacity: 0; }
 }
-.ring-pulse { transform-origin: center; animation: ring-pulse 3.2s cubic-bezier(0.2, 0.6, 0.3, 1) infinite; }
-.ring-pulse-2 { animation-delay: 1.07s; }
-.ring-pulse-3 { animation-delay: 2.14s; }
+.ring-wave { transform-origin: center; transform-box: fill-box; animation: var(--animate-ring); }
+.ring-wave-2 { animation-delay: 1.07s; }
+.ring-wave-3 { animation-delay: 2.14s; }
+
+/* Live dot for running work. */
+@keyframes live-ping {
+  0% { transform: scale(1); opacity: 0.55; }
+  80%, 100% { transform: scale(2.4); opacity: 0; }
+}
+.live-ping { animation: live-ping 1.6s var(--ease-out-raw) infinite; }
+
+/* New timeline rows arrive on a critically damped spring (no overshoot). */
+.timeline-enter {
+  transition: opacity var(--duration-spring) var(--ease-spring-raw), transform var(--duration-spring) var(--ease-spring-raw);
+  @starting-style {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .ring-pulse { animation: none; opacity: 0.15; }
+  .ring-wave { animation: none; opacity: 0.14; transform: scale(1.1); }
+  .ring-wave-2 { transform: scale(1.32); opacity: 0.08; }
+  .ring-wave-3 { display: none; }
+  .live-ping { animation: none; opacity: 0; }
+  .timeline-enter {
+    transition: opacity var(--duration-fast) linear;
+    @starting-style { opacity: 0; transform: none; }
+  }
+  .pressable:active:not(:disabled) { transform: none; opacity: 0.7; }
+  *, *::before, *::after { scroll-behavior: auto !important; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .material-bar { background: var(--color-bg); backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
