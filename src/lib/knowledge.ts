@@ -2,11 +2,10 @@ import type { NewKnowledgeFact } from "./store/types";
 import type { Business, WebPage } from "./types";
 import { isSuspicious, neutralize } from "./untrusted";
 
-// Knowledge facts: the stored raw material for a later per-business voice
-// agent "knowledge pack" (hours, services, prices, FAQs). Every fact carries
-// its source so the pack can cite it. Phase 1 only extracts facts
-// deterministically from the listing and from labeled lines on the homepage.
-// No voice agent or calling is built here.
+// Knowledge facts: the raw material for the per-business agent config
+// (src/lib/agent). Every fact carries its source so the agent can cite it.
+// Facts are extracted deterministically from the listing and from labeled
+// lines on the homepage. Instruction-like text is never stored as a fact.
 
 type Fact = Omit<NewKnowledgeFact, "business_id">;
 

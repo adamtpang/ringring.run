@@ -19,7 +19,8 @@ const principles = [
 const plan = [
   { label: "Market and single-business scans", live: true },
   { label: "Cited diagnosis with editable ROI", live: true },
-  { label: "Per-business AI phone agent", live: false },
+  { label: "Per-business agent config, tested by simulated callers", live: true },
+  { label: "Answering real calls on a phone number", live: false },
 ];
 
 function Check({ live }: { live: boolean }) {
