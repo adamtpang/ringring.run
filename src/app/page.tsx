@@ -1,6 +1,8 @@
 import { RingEmblem } from "@/components/Logo";
 import { MarketingFooter, MarketingHeader } from "@/components/MarketingChrome";
+import { ModeSwitch } from "@/components/ModeSwitch";
 import { Badge, ButtonLink, Card, SectionHeader } from "@/components/ds";
+import { MODES } from "@/lib/modes";
 
 // Only what the code does today is marked "Live". Everything else says "Next".
 const steps = [
@@ -50,15 +52,21 @@ export default function Home() {
             <p className="mt-5 max-w-lg text-body text-pretty text-muted sm:text-[1.1875rem]">
               Scan a business on Google Maps. See its problems with cited proof and the ROI math.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <ButtonLink href="/dashboard" size="lg">
-                Try the demo
-              </ButtonLink>
-              <ButtonLink href="#how" size="lg" variant="plain">
+            <div className="mt-8">
+              <ModeSwitch size="md" fallback="customers" />
+              <dl className="mt-4 grid max-w-lg gap-2 text-footnote">
+                {MODES.map((m) => (
+                  <div key={m.id} className="flex gap-2">
+                    <dt className="w-28 shrink-0 font-medium">{m.label}</dt>
+                    <dd className="text-muted">{m.blurb}</dd>
+                  </div>
+                ))}
+              </dl>
+              <ButtonLink href="#how" size="sm" variant="plain" className="-ml-3 mt-3">
                 How it works
               </ButtonLink>
             </div>
-            <p className="mt-4 text-caption text-subtle">Demo runs on labeled sample data until API keys are added.</p>
+            <p className="mt-2 text-caption text-subtle">Demo runs on labeled sample data until API keys are added.</p>
           </div>
           <div className="order-1 mx-auto w-48 sm:w-64 md:order-2 md:w-full md:max-w-sm">
             <RingEmblem className="aspect-square w-full" />

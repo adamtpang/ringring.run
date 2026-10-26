@@ -1,24 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BusinessTable } from "@/components/BusinessTable";
 import { Button, ButtonLink, Card, Field, SectionHeader } from "@/components/ds";
 import { dateTime12, PageShell, RunStatusPill, runTitle, usePoll } from "@/components/ui";
+import { useStartScan } from "@/components/useStartScan";
 import type { Business, Run } from "@/lib/types";
 
 const isActive = (r: Run) => r.status === "queued" || r.status === "running";
 
 export function DashboardClient() {
-  const router = useRouter();
   const [kind, setKind] = useState<"category" | "name">("category");
   const [category, setCategory] = useState("plumbers");
   const [name, setName] = useState("");
   const [city, setCity] = useState("Austin TX");
   const [maxCount, setMaxCount] = useState(10);
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const { start, submitting, error: formError } = useStartScan();
 
   const runs = usePoll<{ runs: Run[] }>("/api/runs", (d) => d.runs.some(isActive));
   const latest = runs.data?.runs[0];
@@ -27,23 +25,9 @@ export function DashboardClient() {
     () => (latest ? isActive(latest) : false),
   );
 
-  async function submit(e: React.FormEvent) {
+  function submit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitting(true);
-    setFormError(null);
-    try {
-      const res = await fetch("/api/scan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(kind === "name" ? { name, city } : { category, city, maxCount }),
-      });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.issues?.join("; ") || body.error || "Scan failed to start");
-      router.push(`/runs/${body.run.id}`);
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : String(err));
-      setSubmitting(false);
-    }
+    void start(kind === "name" ? { name, city } : { category, city, maxCount });
   }
 
   return (

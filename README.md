@@ -26,7 +26,11 @@ Built for the AITX x MLOps World hackathon (Antler agents track). No calls are p
 - Simulated caller evals: 8 scripted callers (hours, known price, unknown price, booking, angry caller, off-hours, prompt injection, asking for the owner), graded on AI disclosure, facts against the KB, task success, invented claims, and turn latency. At `/evals` and `pnpm eval` (also in CI).
 - Untrusted input handling: scraped text is fenced and filtered before it reaches any prompt or the knowledge base (see below).
 - One failing business never fails the run. The run ends as `completed_with_errors` and the failure is logged.
-- Web UI: landing page at `/`, dashboard at `/dashboard`, run view at `/runs/[id]` (with the stopwatch), business view at `/businesses/[id]` (with the agent), `/evals`, and `/health`.
+- Two modes, switched from the header or the landing page and remembered in the browser:
+  - **For customers** (`/find`): your location (asked with a reason, rounded to about 100 m) or a typed city or ZIP (Nominatim, falls back to Austin, TX). Nearby businesses from OpenStreetMap via Overpass (about 2 km, up to 40, cached 10 minutes, endpoint fallback and one retry) on a Leaflet map with OSM tiles, no API key. Category chips, free text, and a "What are you looking for?" box (LLM routing with a key, labeled keyword matching without). Pick a place to see its OSM details, chat with its AI, or scan it.
+  - **Chat with a business's AI**: built from the business's scan when one exists, else from its OSM tags, each fact cited to its source. Says it is an AI first, answers only from facts on file, shows the facts it used, and never passes messages to the business. With `XAI_API_KEY` it uses the LLM and swaps out any reply with a price, time, or phone number not on file; without it a rule-based "Demo responder" answers. Owner callbacks from chat: Next.
+  - **For owners** (`/owners`): find your business by name and city, then the existing scan, report, and agent flow.
+- Web UI: landing page at `/`, `/find`, `/owners`, dashboard at `/dashboard`, run view at `/runs/[id]` (with the stopwatch), business view at `/businesses/[id]` (with the agent), `/evals`, and `/health`.
 - CLI: `pnpm scan`, `pnpm eval`.
 
 ## How it works
@@ -114,6 +118,7 @@ Put these in `.env.local` (gitignored). Never commit real values.
 | `LLM_REASONING_EFFORT` | No | `low`, `medium`, or `high` for models that support it |
 | `APIFY_MAX_REVIEWS` | No | Reviews per place, default 20 |
 | `APIFY_TIMEOUT_SECS` | No | Apify run timeout |
+| `OVERPASS_URL` | No | Overpass endpoint(s) for `/find`, comma separated. Default: public instances, tried in order |
 | `FORCE_DEMO` | No | Set to `1` to force demo mode even with keys |
 | `LOCAL_DB_PATH` | No | Local store file, default `.data/local-db.json` |
 | `ELEVENLABS_API_KEY` | Only to deploy an agent | ElevenLabs > Developers > API Keys |
@@ -213,6 +218,8 @@ Honest status against the AITX criteria (technical execution, value and impact, 
 - Spanish. Agents are generated in English only.
 - Owner-provided facts. Knowledge comes from the listing, the website, and reviews.
 - No part has been run against live Apify, xAI, Supabase, or ElevenLabs yet.
+- `/find` search uses OpenStreetMap only. It does not enrich results with Apify; "Scan this business" runs the Google Maps scan.
+- Public Overpass instances are slow and rate limited (10 to 50 seconds per query from a cloud box in testing). The search cache is in memory, per server instance.
 
 ## Guardrails
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Wordmark } from "./Logo";
+import { ModeSwitch } from "./ModeSwitch";
 import { Badge, Timeline, TimelineStep, type BadgeTone } from "./ds";
 import type { Run, RunMode, RunStatus, RunStep } from "@/lib/types";
 
@@ -90,9 +91,9 @@ export function runTitle(r: Pick<Run, "category" | "city" | "search_kind">) {
 }
 
 const NAV = [
-  { href: "/dashboard", label: "Scans" },
-  { href: "/evals", label: "Evals" },
-  { href: "/health", label: "Health" },
+  { href: "/dashboard", label: "Scans", hide: "hidden lg:inline-flex" },
+  { href: "/evals", label: "Evals", hide: "hidden lg:inline-flex" },
+  { href: "/health", label: "Health", hide: "hidden lg:inline-flex" },
 ];
 
 export function AppHeader() {
@@ -100,9 +101,10 @@ export function AppHeader() {
   return (
     <header className="material-bar sticky top-0 z-20 shadow-[0_1px_0_var(--color-hairline-raw)]">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-[var(--space-gutter)]">
-        <Link href="/" aria-label="ringring.run home" className="pressable rounded-sm">
+        <Link href="/" aria-label="ringring.run home" className="pressable shrink-0 rounded-sm">
           <Wordmark />
         </Link>
+        <ModeSwitch className="min-w-0" />
         <nav className="flex items-center gap-1 text-footnote">
           {NAV.map((n) => {
             const active = path === n.href || (n.href === "/dashboard" && (path.startsWith("/runs") || path.startsWith("/businesses")));
@@ -111,13 +113,13 @@ export function AppHeader() {
                 key={n.href}
                 href={n.href}
                 aria-current={active ? "page" : undefined}
-                className={`pressable rounded-pill px-3 py-1.5 ${active ? "bg-surface-2 font-medium text-foreground" : "text-muted hover:text-foreground"}`}
+                className={`pressable ${n.hide} rounded-pill px-3 py-1.5 ${active ? "bg-surface-2 font-medium text-foreground" : "text-muted hover:text-foreground"}`}
               >
                 {n.label}
               </Link>
             );
           })}
-          <span className="ml-2">
+          <span className="ml-2 hidden sm:inline-flex">
             <ModeBadge />
           </span>
         </nav>

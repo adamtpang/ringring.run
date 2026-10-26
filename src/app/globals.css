@@ -189,3 +189,21 @@
 @media (prefers-reduced-transparency: reduce) {
   .material-bar { background: var(--color-bg); backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
+
+/* /find map pins (Leaflet divIcon). */
+.rr-pin {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--color-accent-solid-raw);
+  box-shadow: 0 0 0 2px #fff, 0 1px 4px rgba(0, 0, 0, 0.35);
+  transition: transform var(--duration-fast) var(--ease-spring-raw);
+}
+.rr-pin.is-hovered { background: var(--color-accent-hover-raw); }
+.rr-pin.is-selected {
+  background: var(--color-fg);
+  box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--color-accent-soft-raw), 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+.leaflet-container { font: inherit; }
+.leaflet-control-attribution { font-size: 11px; }
