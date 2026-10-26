@@ -31,7 +31,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
       const finding = (await store.listFindings(roi.business_id)).find((f) => f.id === roi.finding_id);
       const run = business ? await store.getRun(business.run_id) : null;
       if (!business || !finding) return json({ error: "Finding not found" }, 404);
-      assumptions = defaultAssumptions(finding.kind, { ...business, searchCategory: run?.category });
+      assumptions = defaultAssumptions(finding.kind, { ...business, searchCategory: run?.search_kind === "category" ? run.category : undefined });
     } else {
       assumptions = applyEdits(roi.assumptions, parsed.data.assumptions);
     }

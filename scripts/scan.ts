@@ -52,7 +52,7 @@ async function main() {
     console.log(`  ${String(i + 1).padStart(2)}. ${b.name.padEnd(34)} score ${String(b.opportunity_score).padStart(3)}  ${status}`);
   });
   console.log(
-    `\n${summary.status}: ${summary.businessCount} businesses, ${summary.diagnosedCount} diagnosed, ` +
+    `\n${summary.status}: ${summary.businessCount} ${summary.businessCount === 1 ? "business" : "businesses"}, ${summary.diagnosedCount} diagnosed, ` +
       `${summary.failedCount} failed, ${summary.findingCount} findings kept, ${summary.droppedFindings} dropped by citation check ` +
       `(${((Date.now() - t0) / 1000).toFixed(1)}s)`,
   );
