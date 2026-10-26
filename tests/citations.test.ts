@@ -28,13 +28,13 @@ describe("citation substring check", () => {
   it("keeps a verbatim review quote and maps the alias to the stored id", () => {
     const { kept, dropped } = validateFindings(diag([{ evidence: [ev({ source: "review", review_id: "r1", quote: "it went straight to voicemail" })] }]), business, reviews, alias);
     expect(dropped).toEqual([]);
-    expect(kept[0].evidence[0]).toMatchObject({ source: "review", review_id: "rev-a" });
+    expect(kept[0]!.evidence[0]).toMatchObject({ source: "review", review_id: "rev-a" });
   });
 
   it("drops a fabricated quote", () => {
     const { kept, dropped } = validateFindings(diag([{ evidence: [ev({ source: "review", review_id: "r1", quote: "they hung up on me twice" })] }]), business, reviews, alias);
     expect(kept).toHaveLength(0);
-    expect(dropped[0].reason).toMatch(/not found/);
+    expect(dropped[0]!.reason).toMatch(/not found/);
   });
 
   it("ignores case-insensitive near matches (case sensitive)", () => {
@@ -50,7 +50,7 @@ describe("citation substring check", () => {
       diag([{ kind: "booking_friction", title: "Phone only booking", detail: "Booking needs a call.", evidence: [ev({ source: "website", quote: "To schedule service, call our office" })] }]),
       business, reviews, alias, [page],
     );
-    expect(kept[0].evidence[0]).toEqual({ source: "website", page_id: "page-1", url: "https://example.com", quote: "To schedule service, call our office" });
+    expect(kept[0]!.evidence[0]).toEqual({ source: "website", page_id: "page-1", url: "https://example.com", quote: "To schedule service, call our office" });
   });
 
   it("drops a website quote that is not on the page, or when the page failed", () => {
@@ -62,19 +62,19 @@ describe("citation substring check", () => {
 
   it("drops listing facts that do not hold", () => {
     const { dropped } = validateFindings(diag([{ kind: "no_website", title: "No website", detail: "x", evidence: [ev({ source: "listing", listing_fact: "no_website" })] }]), business, reviews, alias);
-    expect(dropped[0].reason).toMatch(/does not hold/);
+    expect(dropped[0]!.reason).toMatch(/does not hold/);
   });
 
   it("drops numbers the evidence does not support", () => {
     expect(unsupportedNumbers("Lost 40 calls", "went to voicemail")).toEqual(["40"]);
     const { dropped } = validateFindings(diag([{ title: "Missed 40 calls a week", evidence: [ev({ source: "review", review_id: "r1", quote: "it went straight to voicemail" })] }]), business, reviews, alias);
-    expect(dropped[0].reason).toMatch(/numbers/);
+    expect(dropped[0]!.reason).toMatch(/numbers/);
   });
 
   it("drops duplicate kinds", () => {
     const e = [ev({ source: "review", review_id: "r1", quote: "it went straight to voicemail" })];
     const { kept, dropped } = validateFindings(diag([{ evidence: e }, { evidence: e }]), business, reviews, alias);
     expect(kept).toHaveLength(1);
-    expect(dropped[0].reason).toMatch(/duplicate/);
+    expect(dropped[0]!.reason).toMatch(/duplicate/);
   });
 });

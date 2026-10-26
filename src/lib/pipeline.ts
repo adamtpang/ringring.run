@@ -116,7 +116,7 @@ async function mapLimit<T>(items: T[], limit: number, fn: (item: T, i: number) =
   const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
     while (next < items.length) {
       const i = next++;
-      await fn(items[i], i);
+      await fn(items[i] as T, i);
     }
   });
   await Promise.all(workers);

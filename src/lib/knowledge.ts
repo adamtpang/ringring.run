@@ -37,7 +37,7 @@ export function websiteKnowledge(page: Pick<WebPage, "id" | "status" | "text">):
     if (!line || line.length > 300) continue;
     const s = line.match(SERVICE_LINE);
     if (s) {
-      for (const item of s[2].replace(/\.$/, "").split(/,|;|\band\b/)) {
+      for (const item of (s[2] ?? "").replace(/\.$/, "").split(/,|;|\band\b/)) {
         const v = item.trim();
         if (v.length >= 3) out.push({ ...base, kind: "service", label: "Service", value: v, quote: line });
       }
@@ -45,7 +45,7 @@ export function websiteKnowledge(page: Pick<WebPage, "id" | "status" | "text">):
     }
     const h = line.match(HOURS_LINE);
     if (h) {
-      out.push({ ...base, kind: "hours", label: "Hours (website)", value: h[2].replace(/\.$/, ""), quote: line });
+      out.push({ ...base, kind: "hours", label: "Hours (website)", value: (h[2] ?? "").replace(/\.$/, ""), quote: line });
       continue;
     }
     if (PRICE_LINE.test(line)) out.push({ ...base, kind: "price", label: "Pricing note", value: line, quote: line });

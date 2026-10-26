@@ -39,7 +39,7 @@ describe("pipeline in fixture mode", () => {
     // Others after it still finished.
     expect(businesses.filter((b) => b.diagnosis_status === "ok")).toHaveLength(11);
     // Ranked by value, all fixtures.
-    expect(businesses[0].est_monthly_value).toBeGreaterThanOrEqual(businesses[1].est_monthly_value);
+    expect(businesses[0]!.est_monthly_value).toBeGreaterThanOrEqual(businesses[1]!.est_monthly_value);
     expect(businesses.every((b) => b.is_fixture)).toBe(true);
   });
 
@@ -58,7 +58,7 @@ describe("pipeline in fixture mode", () => {
 
     const rooter = businesses.find((b) => b.name === "Demo Rooter Services")!;
     const pages = await d.store.listWebPages(rooter.id);
-    expect(pages[0].status).toBe("failed");
+    expect(pages[0]!.status).toBe("failed");
     expect(rooter.diagnosis_status).toBe("ok");
     expect(steps.some((s) => s.business_id === rooter.id && s.step === "website" && s.status === "warn")).toBe(true);
 
@@ -68,7 +68,7 @@ describe("pipeline in fixture mode", () => {
 
   it("stores knowledge facts with sources", async () => {
     const { businesses, d } = await scan({ category: "plumbers", city: "Austin TX", maxCount: 1 });
-    const facts = await d.store.listKnowledgeFacts(businesses[0].id);
+    const facts = await d.store.listKnowledgeFacts(businesses[0]!.id);
     expect(facts.some((f) => f.kind === "contact" && f.label === "Phone" && f.source_type === "listing")).toBe(true);
     expect(facts.some((f) => f.kind === "hours" && f.source_type === "listing")).toBe(true);
     const svc = facts.filter((f) => f.kind === "service" && f.source_type === "website");
@@ -85,15 +85,15 @@ describe("pipeline in fixture mode", () => {
   it("warns that demo mode cannot look up a real business name", async () => {
     const { businesses, steps } = await scan({ kind: "name", category: "Joe's Plumbing", city: "Austin TX", maxCount: 1 });
     expect(businesses).toHaveLength(1);
-    expect(businesses[0].is_fixture).toBe(true);
-    expect(businesses[0].name).not.toMatch(/Joe/);
+    expect(businesses[0]!.is_fixture).toBe(true);
+    expect(businesses[0]!.name).not.toMatch(/Joe/);
     expect(steps.some((s) => s.status === "warn" && /cannot look up real businesses/.test(s.message))).toBe(true);
   });
 
   it("dedupes places by Google place id", async () => {
     const dupe: Scraper = {
       mode: "fixture",
-      scrape: async () => [FIXTURE_PLACES[0], FIXTURE_PLACES[1], structuredClone(FIXTURE_PLACES[0])].map((p) => structuredClone(p)),
+      scrape: async () => [FIXTURE_PLACES[0]!, FIXTURE_PLACES[1]!, FIXTURE_PLACES[0]!].map((p) => structuredClone(p)),
     };
     const { businesses, steps } = await scan({ category: "plumbers", city: "Austin TX", maxCount: 10 }, deps({ scraper: dupe }));
     expect(businesses).toHaveLength(2);

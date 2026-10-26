@@ -29,7 +29,7 @@ export function fixtureScraper(): Scraper {
         await hooks?.onProgress?.(
           `Demo mode cannot look up real businesses. No fictional fixture matches "${input.category}", so this shows a fictional sample. Add APIFY_TOKEN for live lookups.`,
         );
-        return [structuredClone(FIXTURE_PLACES[0])];
+        return FIXTURE_PLACES.slice(0, 1).map((p) => structuredClone(p));
       }
       await hooks?.onProgress?.(`Demo mode: loading ${FIXTURE_PLACES.length} fictional fixture places`);
       return FIXTURE_PLACES.slice(0, input.maxCount).map((p) => structuredClone(p));

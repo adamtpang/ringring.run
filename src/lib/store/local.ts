@@ -74,7 +74,8 @@ export function createLocalStore(opts: { file?: string | null } = {}): Store {
 
   function patchRow<T extends { id: string }>(rows: T[], id: string, patch: Partial<T>) {
     const i = rows.findIndex((r) => r.id === id);
-    if (i >= 0) rows[i] = { ...rows[i], ...patch, id };
+    const row = rows[i];
+    if (row) rows[i] = { ...row, ...patch, id };
   }
 
   return {

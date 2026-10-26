@@ -112,7 +112,7 @@ export function parseDiagnosis(raw: unknown):
 function stripFences(s: string): string {
   const t = s.trim();
   const m = t.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
-  return m ? m[1] : t;
+  return m?.[1] ?? t;
 }
 
 /**

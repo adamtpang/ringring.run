@@ -51,14 +51,18 @@ const RAW: Record<string, string> = {
 };
 
 function lum(hex: string) {
-  const [r, g, b] = [1, 3, 5].map((i) => {
+  const ch = (i: number) => {
     const v = parseInt(hex.slice(i, i + 2), 16) / 255;
     return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-  });
+  };
+  const [r, g, b] = [ch(1), ch(3), ch(5)];
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 function contrast(a: string, b: string) {
-  const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+  const la = lum(a);
+  const lb = lum(b);
+  const hi = Math.max(la, lb);
+  const lo = Math.min(la, lb);
   return (hi + 0.05) / (lo + 0.05);
 }
 

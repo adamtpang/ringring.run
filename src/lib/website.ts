@@ -42,12 +42,12 @@ export function htmlToText(html: string): { title: string | null; text: string }
     .join("\n")
     .replace(/\.\./g, ".")
     .slice(0, MAX_TEXT_CHARS);
-  return { title: titleMatch ? decode(titleMatch[1]).replace(/\s+/g, " ").trim() || null : null, text };
+  return { title: titleMatch?.[1] ? decode(titleMatch[1]).replace(/\s+/g, " ").trim() || null : null, text };
 }
 
 function isPrivateIp(ip: string): boolean {
   if (net.isIPv4(ip)) {
-    const [a, b] = ip.split(".").map(Number);
+    const [a = 0, b = 0] = ip.split(".").map(Number);
     return (
       a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) ||
       (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127) || a >= 224
