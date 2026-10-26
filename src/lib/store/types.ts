@@ -1,4 +1,4 @@
-import type { Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, WebPage } from "../types";
+import type { AgentRecord, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, WebPage } from "../types";
 
 export type NewRun = Omit<Run, "id" | "created_at">;
 export type NewStep = Omit<RunStep, "id" | "created_at" | "updated_at">;
@@ -8,6 +8,7 @@ export type NewFinding = Omit<Finding, "id" | "created_at">;
 export type NewRoi = Omit<RoiEstimate, "id" | "updated_at">;
 export type NewWebPage = Omit<WebPage, "id" | "fetched_at">;
 export type NewKnowledgeFact = Omit<KnowledgeFact, "id" | "created_at">;
+export type NewAgent = Omit<AgentRecord, "id" | "created_at" | "updated_at">;
 
 export interface Store {
   kind: "supabase" | "local";
@@ -41,6 +42,12 @@ export interface Store {
 
   insertKnowledgeFacts(rows: NewKnowledgeFact[]): Promise<KnowledgeFact[]>;
   listKnowledgeFacts(businessId: string): Promise<KnowledgeFact[]>;
+
+  insertAgent(a: NewAgent): Promise<AgentRecord>;
+  updateAgent(id: string, patch: Partial<AgentRecord>): Promise<void>;
+  /** Latest agent for a business, or null. */
+  getAgentForBusiness(businessId: string): Promise<AgentRecord | null>;
+  listAgents(opts?: { runId?: string; limit?: number }): Promise<AgentRecord[]>;
 }
 
 export const now = () => new Date().toISOString();

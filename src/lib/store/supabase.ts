@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, WebPage } from "../types";
+import type { AgentRecord, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, WebPage } from "../types";
 import { newId, now, type Store } from "./types";
 
 // Supabase (Postgres) store. Server side only: uses the service role key,
@@ -120,6 +120,27 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): Store 
       const { data, error } = await sb.from("knowledge_facts").select("*").eq("business_id", businessId).order("kind");
       if (error) throw new Error(error.message);
       return data as KnowledgeFact[];
+    },
+
+    insertAgent: (a) => insert<AgentRecord>("agents", { ...a, id: newId() }),
+    updateAgent: (id, patch) => update("agents", id, { ...patch, updated_at: now() }),
+    async getAgentForBusiness(businessId) {
+      const { data, error } = await sb
+        .from("agents")
+        .select("*")
+        .eq("business_id", businessId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return (data as AgentRecord) ?? null;
+    },
+    async listAgents(o = {}) {
+      let q = sb.from("agents").select("*").order("created_at", { ascending: false }).limit(o.limit ?? 200);
+      if (o.runId) q = q.eq("run_id", o.runId);
+      const { data, error } = await q;
+      if (error) throw new Error(error.message);
+      return data as AgentRecord[];
     },
   };
 }

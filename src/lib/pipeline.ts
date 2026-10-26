@@ -8,11 +8,14 @@ import { dedupePlaces, normalizePlace } from "./scraper/normalize";
 import { getStore, type Store } from "./store";
 import { listingKnowledge, websiteKnowledge } from "./knowledge";
 import { readWebsite, type WebsiteReadResult } from "./website";
+import { generateAgentConfig } from "./agent/generate";
 import type { Business, Run, RunMode, RunStep, ScanInput, StepStatus, WebPage } from "./types";
 
 // The scan pipeline. One run = scrape, dedupe, store, then per business:
-// read website -> diagnose -> validate citations -> ROI. A failing business is marked failed
-// and logged; it never stops the run.
+// read website -> diagnose -> validate citations -> ROI -> phone agent config.
+// A failing business is marked failed and logged; it never stops the run.
+// Stopwatch: run.agent_ready_ms is the time from run created (business named)
+// to the first agent config that passed validation.
 
 export interface PipelineDeps {
   store: Store;
@@ -65,6 +68,8 @@ export async function createRun(input: ScanInput, deps: Pick<PipelineDeps, "stor
     error: null,
     started_at: null,
     finished_at: null,
+    agent_ready_at: null,
+    agent_ready_ms: null,
   });
 }
 
@@ -130,6 +135,9 @@ export interface RunSummary {
   failedCount: number;
   droppedFindings: number;
   findingCount: number;
+  agentsReady: number;
+  /** Stopwatch: ms from run created to the first agent ready. */
+  agentReadyMs: number | null;
 }
 
 export async function executeRun(runId: string, deps: PipelineDeps): Promise<RunSummary> {
@@ -144,6 +152,8 @@ export async function executeRun(runId: string, deps: PipelineDeps): Promise<Run
     failedCount: 0,
     droppedFindings: 0,
     findingCount: 0,
+    agentsReady: 0,
+    agentReadyMs: null,
   };
 
   const run = await store.getRun(runId);
@@ -288,6 +298,8 @@ async function processBusiness(
       const msg = errorMessage(e);
       await dStep.update("error", `${b.name}: diagnosis failed after retries: ${msg}`);
       await store.updateBusiness(b.id, { diagnosis_status: "failed", diagnosis_error: msg });
+      // The agent only needs stored facts, so it is still built when diagnosis fails.
+      await agentStep(b, run, [], deps, steps, summary);
       return false;
     }
     await dStep.update("ok", `${b.name}: ${plural(result.diagnosis.findings.length, "candidate finding")}`);
@@ -305,7 +317,9 @@ async function processBusiness(
     );
 
     let total = 0;
+    const builtFor: { kind: string; title: string }[] = [];
     for (const f of kept) {
+      builtFor.push({ kind: f.kind, title: f.title });
       const finding = await store.insertFinding({ ...f, business_id: b.id, run_id: run.id });
       const assumptions = defaultAssumptions(f.kind, { ...b, searchCategory: byNameRun(run) ? undefined : run.category });
       const monthly = computeMonthlyValue(assumptions);
@@ -333,6 +347,7 @@ async function processBusiness(
       `${b.name}: est. $${total.toLocaleString("en-US")}/mo across ${plural(kept.length, "finding")} (editable assumptions)`,
       b.id,
     );
+    await agentStep(b, run, builtFor, deps, steps, summary);
     return true;
   } catch (e) {
     const msg = errorMessage(e);
@@ -343,6 +358,43 @@ async function processBusiness(
 }
 
 const byNameRun = (run: Run) => run.search_kind === "name";
+
+/** Build and store the phone agent config. Never throws. Updates the run stopwatch on the first success. */
+async function agentStep(
+  b: Business,
+  run: Run,
+  builtFor: { kind: string; title: string }[],
+  deps: PipelineDeps,
+  steps: ReturnType<typeof stepLogger>,
+  summary: RunSummary,
+) {
+  const { store } = deps;
+  const step = await steps.start("agent", `${b.name}: building phone agent from stored facts`, b.id);
+  try {
+    const [facts, reviews] = await Promise.all([store.listKnowledgeFacts(b.id), store.listReviews(b.id)]);
+    const config = generateAgentConfig({ business: b, facts, reviews, findings: builtFor });
+    const readyAt = new Date();
+    const readyMs = readyAt.getTime() - Date.parse(run.created_at);
+    await store.insertAgent({
+      business_id: b.id,
+      run_id: run.id,
+      status: "ready",
+      config,
+      ready_ms: readyMs,
+      provider: null,
+      external_agent_id: null,
+      deploy_message: null,
+    });
+    summary.agentsReady++;
+    if (summary.agentReadyMs === null) {
+      summary.agentReadyMs = readyMs;
+      await store.updateRun(run.id, { agent_ready_ms: readyMs, agent_ready_at: readyAt.toISOString() }).catch(() => undefined);
+    }
+    await step.update("ok", `${b.name}: agent ready with ${plural(config.knowledge.length, "cited fact")} (${(readyMs / 1000).toFixed(1)} s since the run started)`);
+  } catch (e) {
+    await step.update("warn", `${b.name}: agent not built: ${errorMessage(e)}`);
+  }
+}
 
 /** Read website step. Never throws: a failed read is logged and the business continues with reviews and listing data. */
 async function readSiteStep(b: Business, deps: PipelineDeps, steps: ReturnType<typeof stepLogger>): Promise<WebPage[]> {

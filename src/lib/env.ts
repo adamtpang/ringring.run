@@ -31,6 +31,8 @@ export const ENV_KEYS = [
   { name: "NEXT_PUBLIC_SUPABASE_ANON_KEY", required: false, purpose: "Reserved for browser reads (unused in Phase 1)" },
   { name: "APIFY_MAX_REVIEWS", required: false, purpose: "Reviews per place (default 20)" },
   { name: "APIFY_TIMEOUT_SECS", required: false, purpose: "Apify run timeout" },
+  { name: "ELEVENLABS_API_KEY", required: false, purpose: "Deploy phone agents to ElevenLabs Agents (Next: not live tested)" },
+  { name: "ELEVENLABS_PHONE_NUMBER_ID", required: false, purpose: "ElevenLabs phone number to assign the agent to" },
   { name: "FORCE_DEMO", required: false, purpose: "Force demo mode even with keys" },
   { name: "LOCAL_DB_PATH", required: false, purpose: "Local demo store file" },
 ] as const;
@@ -45,6 +47,7 @@ export function configured() {
     apify: has("APIFY_TOKEN"),
     supabase: has("SUPABASE_URL") && has("SUPABASE_SERVICE_ROLE_KEY"),
     llm: has("XAI_API_KEY") || has("LLM_API_KEY"),
+    voice: has("ELEVENLABS_API_KEY") && has("ELEVENLABS_PHONE_NUMBER_ID"),
   };
 }
 

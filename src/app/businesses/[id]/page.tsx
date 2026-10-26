@@ -3,10 +3,12 @@
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Badge, Button, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
+import { AgentPanel, type VoiceStatus } from "@/components/AgentPanel";
 import { BackLink, money, PageShell, StepTimeline, usePoll } from "@/components/ui";
 import { computeMonthlyValue, opportunityScore } from "@/lib/roi";
 import { KIND_LABELS, SOLUTIONS } from "@/lib/solutions";
-import type { Assumption, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, SolutionId, WebPage } from "@/lib/types";
+import { isSuspicious } from "@/lib/untrusted";
+import type { AgentRecord, Assumption, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, SolutionId, WebPage } from "@/lib/types";
 
 interface Report {
   business: Business;
@@ -17,6 +19,8 @@ interface Report {
   steps: RunStep[];
   pages: (Omit<WebPage, "text"> & { chars: number; preview: string })[];
   knowledge: KnowledgeFact[];
+  agent: AgentRecord | null;
+  voice: VoiceStatus | null;
 }
 
 const KNOWLEDGE_ORDER = ["contact", "hours", "service", "price", "policy", "faq", "service_area"];
@@ -136,7 +140,13 @@ function RoiEditor({ roi, onSaved }: { roi: RoiEstimate; onSaved: () => void }) 
 
 export default function BusinessPage() {
   const { id } = useParams<{ id: string }>();
-  const { data, error, reload } = usePoll<Report>(`/api/businesses/${id}`, (d) => d.business.diagnosis_status === "running" || d.business.diagnosis_status === "pending");
+  const { data, error, reload } = usePoll<Report>(
+    `/api/businesses/${id}`,
+    (d) =>
+      d.business.diagnosis_status === "running" ||
+      d.business.diagnosis_status === "pending" ||
+      (!d.agent && (d.run?.status === "running" || d.run?.status === "queued")),
+  );
 
   const roiByFinding = useMemo(() => new Map((data?.roi ?? []).map((r) => [r.finding_id, r])), [data]);
   const solutionIds = useMemo(() => [...new Set((data?.findings ?? []).map((f) => f.solution))] as SolutionId[], [data]);
@@ -276,8 +286,11 @@ export default function BusinessPage() {
         )}
       </Card>
 
+      {data.agent && <AgentPanel agent={data.agent} voice={data.voice} isFixture={b.is_fixture} onDeployed={() => reload()} />}
+
+      {!data.agent && (
       <Card padding="lg" className="space-y-3">
-        <SectionHeader title="Knowledge on file" size="sm" description="Facts with their source, saved for a future phone agent. No agent is built yet." />
+        <SectionHeader title="Knowledge on file" size="sm" description="Facts with their source. The phone agent is built from these when the run reaches this business." />
         {(data.knowledge ?? []).length === 0 ? (
           <p className="text-footnote text-muted">No facts stored.</p>
         ) : (
@@ -297,13 +310,21 @@ export default function BusinessPage() {
           </ul>
         )}
       </Card>
+      )}
 
       <Card padding="lg" className="space-y-3">
         <SectionHeader title="Reviews analyzed" size="sm" />
         <ul className="divide-y divide-hairline">
           {data.reviews.map((r) => (
             <li key={r.id} className="py-3">
-              <Stars n={r.rating} />
+              <div className="flex flex-wrap items-center gap-2">
+                <Stars n={r.rating} />
+                {isSuspicious(r.text) && (
+                  <Badge tone="danger" title="Instruction-like text. Fenced and redacted in prompts, never used as a fact.">
+                    Prompt injection ignored
+                  </Badge>
+                )}
+              </div>
               <p className="mt-1 text-footnote">{r.text}</p>
               <p className="mt-1 text-caption text-muted">{r.owner_response ? `Owner replied: ${r.owner_response}` : "No owner reply"}</p>
             </li>

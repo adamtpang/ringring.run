@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, WebPage } from "../types";
+import type { AgentRecord, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, WebPage } from "../types";
 import { newId, now, rankBusinesses, type Store } from "./types";
 
 // DEMO / LOCAL store. In-memory tables, optionally persisted to a JSON file
@@ -16,6 +16,7 @@ interface Tables {
   roi_estimates: RoiEstimate[];
   web_pages: WebPage[];
   knowledge_facts: KnowledgeFact[];
+  agents: AgentRecord[];
 }
 
 const empty = (): Tables => ({
@@ -27,6 +28,7 @@ const empty = (): Tables => ({
   roi_estimates: [],
   web_pages: [],
   knowledge_facts: [],
+  agents: [],
 });
 
 export function createLocalStore(opts: { file?: string | null } = {}): Store {
@@ -151,5 +153,22 @@ export function createLocalStore(opts: { file?: string | null } = {}): Store {
       return out;
     }),
     listKnowledgeFacts: (businessId) => read(() => db.knowledge_facts.filter((k) => k.business_id === businessId)),
+
+    insertAgent: (a) => mutate(() => {
+      const t = now();
+      const row: AgentRecord = { ...a, id: newId(), created_at: t, updated_at: t };
+      db.agents.push(row);
+      return row;
+    }),
+    updateAgent: (id, patch) => mutate(() => patchRow(db.agents, id, { ...patch, updated_at: now() })),
+    getAgentForBusiness: (businessId) =>
+      read(() => db.agents.filter((a) => a.business_id === businessId).sort((a, b) => b.created_at.localeCompare(a.created_at))[0] ?? null),
+    listAgents: (o = {}) =>
+      read(() =>
+        db.agents
+          .filter((a) => !o.runId || a.run_id === o.runId)
+          .sort((a, b) => b.created_at.localeCompare(a.created_at))
+          .slice(0, o.limit ?? 200),
+      ),
   };
 }

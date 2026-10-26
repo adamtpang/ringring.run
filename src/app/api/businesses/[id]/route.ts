@@ -1,4 +1,5 @@
 import { fail, json } from "@/lib/api";
+import { elevenLabsProvider } from "@/lib/agent/providers";
 import { getStore } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -18,9 +19,16 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
       store.listWebPages(id),
       store.listKnowledgeFacts(id),
     ]);
+    // Agents table may be missing on an older Supabase schema: the report still renders without it.
+    const agent = await store.getAgentForBusiness(id).catch(() => null);
     // Page text can be long; the report shows a preview, the full text stays in the store.
     const pageSummaries = pages.map(({ text, ...p }) => ({ ...p, chars: text.length, preview: text.slice(0, 600) }));
-    return json({ business, run, reviews, findings, roi, steps, pages: pageSummaries, knowledge });
+    return json({
+      business, run, reviews, findings, roi, steps, pages: pageSummaries, knowledge,
+      agent,
+      // Names and booleans only; never key values.
+      voice: elevenLabsProvider.status(),
+    });
   } catch (e) {
     return fail(e);
   }

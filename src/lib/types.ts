@@ -40,6 +40,10 @@ export interface Run {
   created_at: string;
   started_at: string | null;
   finished_at: string | null;
+  /** Stopwatch: when the first phone agent config of this run passed validation. */
+  agent_ready_at: string | null;
+  /** Milliseconds from run created (business named) to first agent ready. */
+  agent_ready_ms: number | null;
 }
 
 export interface RunStep {
@@ -207,4 +211,22 @@ export interface ScanInput {
   category: string;
   city: string;
   maxCount: number;
+}
+
+export type AgentStatus = "ready" | "deployed" | "deploy_failed";
+
+/** A generated phone agent for one business. config is a Zod-validated AgentConfig (src/lib/agent/schema.ts). */
+export interface AgentRecord {
+  id: string;
+  business_id: string;
+  run_id: string;
+  status: AgentStatus;
+  config: import("./agent/schema").AgentConfig;
+  /** Milliseconds from run created to this agent's config passing validation. */
+  ready_ms: number | null;
+  provider: string | null;
+  external_agent_id: string | null;
+  deploy_message: string | null;
+  created_at: string;
+  updated_at: string;
 }
