@@ -1,179 +1,149 @@
-import Link from "next/link";
-import { Wordmark } from "@/components/Logo";
+import { RingEmblem } from "@/components/Logo";
+import { MarketingFooter, MarketingHeader } from "@/components/MarketingChrome";
+import { Badge, ButtonLink, Card, SectionHeader } from "@/components/ds";
 
+// Only what the code does today is marked "Live". Everything else says "Next".
 const steps = [
-  {
-    n: "1",
-    title: "Scan",
-    status: "In the demo",
-    body: "Pulls the business from Google Maps with its reviews: phone, website, hours, rating, and what customers actually say.",
-  },
-  {
-    n: "2",
-    title: "Diagnose with ROI",
-    status: "In the demo",
-    body: "Finds evidence-backed problems like missed calls or unanswered reviews, then prices each one from stated assumptions you can see and edit.",
-  },
-  {
-    n: "3",
-    title: "Owner call",
-    status: "Coming soon",
-    body: "An AI interviews the owner about what the scan found. It only calls with consent, and it always says it is an AI.",
-  },
-  {
-    n: "4",
-    title: "Deploy voice agent",
-    status: "Coming soon",
-    body: "An AI phone agent that answers as that business, trained on its hours and services, so no customer call goes unanswered.",
-  },
+  { n: 1, title: "Scan", live: true, body: "Pulls the business from Google Maps: reviews, hours, phone, and website." },
+  { n: 2, title: "Diagnose", live: true, body: "Finds problems like missed calls. Each one quotes a review, website line, or listing field." },
+  { n: 3, title: "Price", live: true, body: "Estimates monthly value from assumptions you can see and edit." },
+  { n: 4, title: "Answer", live: false, body: "A phone agent per business, trained on its hours and services. It says it is an AI." },
 ];
 
 const principles = [
-  {
-    title: "Cites its sources",
-    body: "Every finding points to the exact review, website text, or listing field behind it. A quote that cannot be found in the source is thrown out.",
-  },
-  {
-    title: "Shows the math",
-    body: "Each estimate is plain multiplication, like missed calls per week times close rate times average ticket. Change any number and the estimate updates. Estimates are labeled as estimates.",
-  },
-  {
-    title: "Says it is AI",
-    body: "Owner calls happen only with consent, and the agent always discloses that it is an AI. A person approves anything sent to a business.",
-  },
+  { title: "Cited", body: "Quotes that cannot be found in the source are thrown out." },
+  { title: "Checkable", body: "Every estimate is plain multiplication. Change a number, the total updates." },
+  { title: "Honest", body: "Estimates are labeled. Sample data is labeled. AI says it is AI." },
 ];
 
-function Rings() {
-  return (
-    <svg viewBox="0 0 400 400" className="h-full w-full text-accent" aria-hidden="true">
-      <circle className="ring-pulse" cx="200" cy="200" r="120" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <circle className="ring-pulse ring-pulse-2" cx="200" cy="200" r="120" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <circle className="ring-pulse ring-pulse-3" cx="200" cy="200" r="120" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="200" cy="200" r="64" fill="currentColor" opacity="0.08" />
-      <circle cx="200" cy="200" r="44" fill="currentColor" />
-      <path
-        d="M186 184c0-2 1.6-3.6 3.6-3.6h4.2c1.6 0 3 1 3.4 2.6l1.6 5.6c.4 1.4-.1 2.9-1.2 3.8l-2.3 1.8a22 22 0 0 0 10.9 10.9l1.8-2.3c.9-1.1 2.4-1.6 3.8-1.2l5.6 1.6c1.6.4 2.6 1.8 2.6 3.4v4.2c0 2-1.6 3.6-3.6 3.6h-1.8C198.3 218 182 201.7 182 185.8V184z"
-        fill="white"
-        transform="translate(-2 -2)"
-      />
+const plan = [
+  { label: "Market and single-business scans", live: true },
+  { label: "Cited diagnosis with editable ROI", live: true },
+  { label: "Per-business AI phone agent", live: false },
+];
+
+function Check({ live }: { live: boolean }) {
+  return live ? (
+    <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0 text-accent" aria-hidden="true">
+      <path d="m3.5 8.5 3 3 6-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0 text-subtle" aria-hidden="true">
+      <circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="2.5 2.5" />
     </svg>
   );
 }
 
 export default function Home() {
   return (
-    <main className="flex-1">
-      <header className="sticky top-0 z-10 border-b border-hairline bg-background/80 backdrop-blur-xl">
-        <nav className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
-          <Link href="/" aria-label="ringring.run home">
-            <Wordmark />
-          </Link>
-          <Link
-            href="/dashboard"
-            className="rounded-full bg-foreground px-4 py-1.5 text-sm font-medium text-white transition hover:opacity-85"
-          >
-            Try the demo
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-5xl items-center gap-10 px-6 pb-20 pt-16 md:grid-cols-[1.15fr_1fr] md:pt-24">
-        <div>
-          <p className="text-sm font-medium text-accent">AI voice agent for small businesses</p>
-          <h1 className="mt-3 text-5xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
-            Every call answered.
-            <br />
-            <span className="text-muted">Every leak priced.</span>
-          </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-            ringring.run is AI that picks up every call and finds where AI saves the business money. It
-            learns a business from the outside, shows the evidence for each problem, and prices it with
-            math you can check.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <Link
-              href="/dashboard"
-              className="rounded-full bg-accent px-6 py-3 text-base font-medium text-white shadow-sm transition hover:opacity-90"
-            >
-              Try the demo
-            </Link>
-            <span className="text-sm text-muted">The demo uses clearly labeled sample data until API keys are added.</span>
+    <>
+      <MarketingHeader />
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="mx-auto grid max-w-5xl items-center gap-8 px-[var(--space-gutter)] pb-16 pt-12 sm:pt-20 md:grid-cols-[1.2fr_1fr] md:gap-12 md:pb-24">
+          <div className="order-2 md:order-1">
+            <p className="text-eyebrow uppercase text-accent">AI voice agent for small businesses</p>
+            <h1 className="mt-4 text-display text-balance">
+              Every missed call, <span className="text-muted">found and priced.</span>
+            </h1>
+            <p className="mt-5 max-w-lg text-body text-pretty text-muted sm:text-[1.1875rem]">
+              Scan a business on Google Maps. See its problems with cited proof and the ROI math.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <ButtonLink href="/dashboard" size="lg">
+                Try the demo
+              </ButtonLink>
+              <ButtonLink href="#how" size="lg" variant="plain">
+                How it works
+              </ButtonLink>
+            </div>
+            <p className="mt-4 text-caption text-subtle">Demo runs on labeled sample data until API keys are added.</p>
           </div>
-        </div>
-        <div className="mx-auto aspect-square w-full max-w-sm">
-          <Rings />
-        </div>
-      </section>
+          <div className="order-1 mx-auto w-48 sm:w-64 md:order-2 md:w-full md:max-w-sm">
+            <RingEmblem className="aspect-square w-full" />
+          </div>
+        </section>
 
-      <section id="how-it-works" className="border-t border-hairline bg-white">
-        <div className="mx-auto max-w-5xl px-6 py-20">
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">How it works</h2>
-          <p className="mt-3 max-w-2xl text-lg text-muted">
-            Four steps from a Google Maps listing to a phone agent that answers for the business.
-          </p>
-          <ol className="mt-12 grid gap-5 sm:grid-cols-2">
-            {steps.map((s) => {
-              const live = s.status === "In the demo";
-              return (
-                <li key={s.n} className="rounded-3xl border border-hairline bg-background p-7">
+        {/* How it works */}
+        <section id="how" className="scroll-mt-14 border-t border-hairline bg-surface-2/60">
+          <div className="mx-auto max-w-5xl px-[var(--space-gutter)] py-[var(--space-section)]">
+            <SectionHeader eyebrow="How it works" title="From a listing to a phone agent." size="lg" />
+            <ol className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {steps.map((s) => (
+                <Card key={s.n} as="li" padding="md" className="flex flex-col">
                   <div className="flex items-center justify-between">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-sm font-semibold text-white">
+                    <span
+                      className={`flex h-8 w-8 items-center justify-center rounded-pill text-footnote font-semibold ${s.live ? "bg-accent-solid text-accent-fg" : "bg-surface-2 text-muted ring-1 ring-inset ring-hairline"}`}
+                    >
                       {s.n}
                     </span>
-                    <span
-                      className={
-                        "rounded-full px-3 py-1 text-xs font-medium " +
-                        (live ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500")
-                      }
-                    >
-                      {s.status}
-                    </span>
+                    <Badge tone={s.live ? "success" : "neutral"}>{s.live ? "Live" : "Next"}</Badge>
                   </div>
-                  <h3 className="mt-5 text-xl font-semibold tracking-tight">{s.title}</h3>
-                  <p className="mt-2 leading-relaxed text-muted">{s.body}</p>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-      </section>
-
-      <section className="border-t border-hairline">
-        <div className="mx-auto max-w-5xl px-6 py-20">
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Built on evidence, not guesses</h2>
-          <div className="mt-10 grid gap-8 md:grid-cols-3">
-            {principles.map((p) => (
-              <div key={p.title}>
-                <h3 className="text-lg font-semibold tracking-tight">{p.title}</h3>
-                <p className="mt-2 leading-relaxed text-muted">{p.body}</p>
-              </div>
-            ))}
+                  <h3 className="mt-5 text-title-3">{s.title}</h3>
+                  <p className="mt-1.5 text-footnote text-muted">{s.body}</p>
+                </Card>
+              ))}
+            </ol>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="border-t border-hairline bg-white">
-        <div className="mx-auto flex max-w-5xl flex-col items-center px-6 py-20 text-center">
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">See it work.</h2>
-          <p className="mt-3 max-w-xl text-lg text-muted">
-            Run a scan, watch the agent work step by step, and open a report with quotes, assumptions, and a
-            suggested fix.
-          </p>
-          <Link
-            href="/dashboard"
-            className="mt-8 rounded-full bg-accent px-6 py-3 text-base font-medium text-white shadow-sm transition hover:opacity-90"
-          >
-            Try the demo
-          </Link>
-        </div>
-      </section>
+        {/* Principles */}
+        <section className="border-t border-hairline">
+          <div className="mx-auto grid max-w-5xl gap-8 px-[var(--space-gutter)] py-[var(--space-section)] md:grid-cols-[1fr_2fr]">
+            <SectionHeader eyebrow="Evidence first" title="No guesses." size="lg" />
+            <dl className="grid gap-6 sm:grid-cols-3">
+              {principles.map((p) => (
+                <div key={p.title}>
+                  <dt className="text-headline">{p.title}</dt>
+                  <dd className="mt-1 text-footnote text-muted">{p.body}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
 
-      <footer className="border-t border-hairline">
-        <div className="mx-auto flex max-w-5xl flex-col gap-2 px-6 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-          <Wordmark />
-          <span>Built at the AITX x MLOps World hackathon in Austin.</span>
-        </div>
-      </footer>
-    </main>
+        {/* Pricing (illustrative) */}
+        <section id="pricing" className="scroll-mt-14 border-t border-hairline bg-surface-2/60">
+          <div className="mx-auto max-w-5xl px-[var(--space-gutter)] py-[var(--space-section)]">
+            <SectionHeader eyebrow="Pricing" title="One plan." align="center" size="lg" description="Illustrative pricing. Not on sale yet." />
+            <Card padding="lg" className="mx-auto mt-10 max-w-md shadow-float">
+              <div className="flex items-center justify-between">
+                <h3 className="text-title-3">Starter</h3>
+                <Badge tone="warning">Illustrative</Badge>
+              </div>
+              <p className="mt-4 flex items-baseline gap-1">
+                <span className="text-display tabular-nums">$149</span>
+                <span className="text-callout text-muted">/ month</span>
+              </p>
+              <p className="mt-1 text-footnote text-muted">14-day free trial. Cancel anytime.</p>
+              <ul className="mt-6 space-y-3 border-t border-hairline pt-6">
+                {plan.map((f) => (
+                  <li key={f.label} className="flex items-center gap-3 text-callout">
+                    <Check live={f.live} />
+                    <span className={f.live ? "" : "text-muted"}>{f.label}</span>
+                    {!f.live && <Badge className="ml-auto">Next</Badge>}
+                  </li>
+                ))}
+              </ul>
+              <ButtonLink href="/dashboard" size="lg" className="mt-8 w-full">
+                Try the demo
+              </ButtonLink>
+            </Card>
+          </div>
+        </section>
+
+        {/* Closing CTA */}
+        <section className="border-t border-hairline">
+          <div className="mx-auto flex max-w-5xl flex-col items-center px-[var(--space-gutter)] py-[var(--space-section)] text-center">
+            <h2 className="text-title-1 text-balance">See it work.</h2>
+            <p className="mt-3 max-w-md text-callout text-muted">Run a scan and watch the agent work, step by step.</p>
+            <ButtonLink href="/dashboard" size="lg" className="mt-8">
+              Try the demo
+            </ButtonLink>
+          </div>
+        </section>
+      </main>
+      <MarketingFooter />
+    </>
   );
 }
