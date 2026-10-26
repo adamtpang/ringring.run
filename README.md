@@ -84,7 +84,7 @@ The demo fixture includes an injected website line and an injected review on pur
 Responders:
 
 - **Fixture**: a deterministic rule-based stand-in that follows the config exactly. It tests the config and the grader, not a model, so 8/8 here is a floor, not a claim about live call quality. A test runs a deliberately careless responder and checks that it fails every case.
-- **LLM**: sends the agent's system prompt and the transcript to the configured LLM (`pnpm eval --responder llm`, needs an LLM key). Not yet run against a live model.
+- **LLM**: sends the agent's system prompt and the transcript to the chat model (`pnpm eval --responder llm`, needs an LLM key). Live result on 2026-10-26 with `grok-4.20-0309-non-reasoning`: 8/8 on three runs in a row, slowest turn about 1.1 s. With the reasoning model `grok-4.7` as the chat model the answers were right but 6 of 8 cases missed the 3 s turn budget (2/8), which is why chat and simulated calls use a separate non-reasoning model (`LLM_CHAT_MODEL`). Before the prompt fix in this commit range the non-reasoning model scored 7/8 (it would not quote a price from the fenced KB).
 - **Voice**: Next. Simulated calls over audio are not built.
 
 ## Setup
@@ -111,7 +111,8 @@ Put these in `.env.local` (gitignored). Never commit real values.
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes, for Postgres storage | Supabase project > Project Settings > API (service_role, server only) |
 | `NEXT_PUBLIC_SUPABASE_URL` | No, reserved, unused in Phase 1 | Same as `SUPABASE_URL` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | No, reserved, unused in Phase 1 | Supabase project > Project Settings > API (anon) |
-| `LLM_MODEL` | No | Model id, default `grok-4.7` |
+| `LLM_MODEL` | No | Model for diagnosis, default `grok-4.7` |
+| `LLM_CHAT_MODEL` | No | Model for chat, concierge and simulated call turns, default `grok-4.20-0309-non-reasoning` (fast, no reasoning) |
 | `LLM_BASE_URL` | No | OpenAI-compatible base URL, default `https://api.x.ai/v1` |
 | `LLM_API_STYLE` | No | `responses` (default) or `chat` |
 | `LLM_API_KEY` | No | Key for a non-xAI endpoint, overrides `XAI_API_KEY` |
@@ -195,14 +196,14 @@ Honest status against the AITX criteria (technical execution, value and impact, 
 
 | Item | Status |
 | --- | --- |
-| Scanner by name or category + city, dedupe, raw evidence | Done (live Apify not yet run) |
-| Diagnosis with strict schema and verified citations | Done (live LLM not yet run) |
+| Scanner by name or category + city, dedupe, raw evidence | Done (live Apify run 2026-10-26: 12 Austin restaurants) |
+| Diagnosis with strict schema and verified citations | Done (live with grok-4.7 on 2026-10-26) |
 | Editable ROI with visible assumptions | Done |
 | Live step timeline, retries, timings, health page, demo mode | Done |
 | Untrusted input handling and injection tests | Done |
 | Per-business agent config with cited KB and AI disclosure | Done |
-| Stopwatch, business named to agent ready | Done (fixture runs; not yet timed live) |
-| Simulated caller evals, `/evals`, `pnpm eval`, CI | Done for fixture responder; LLM responder untested live; voice Next |
+| Stopwatch, business named to agent ready | Done (live: 70.4 s by name, 86.7 s to first agent for a 12 restaurant scan) |
+| Simulated caller evals, `/evals`, `pnpm eval`, CI | Done for fixture and live LLM responder (8/8); voice Next |
 | CI: lint, typecheck, test, eval, build | Done |
 | Deploy agent to a phone number (ElevenLabs) | Adapter written, untested live, off without keys |
 | Answering real inbound calls | Next |
@@ -217,7 +218,7 @@ Honest status against the AITX criteria (technical execution, value and impact, 
 - Answering or placing phone calls, SMS, calendar booking, outreach of any kind, and payments.
 - Spanish. Agents are generated in English only.
 - Owner-provided facts. Knowledge comes from the listing, the website, and reviews.
-- No part has been run against live Apify, xAI, Supabase, or ElevenLabs yet.
+- Apify and xAI have been run live (2026-10-26). Supabase and ElevenLabs have not.
 - `/find` search uses OpenStreetMap only. It does not enrich results with Apify; "Scan this business" runs the Google Maps scan.
 - Public Overpass instances are slow and rate limited (10 to 50 seconds per query from a cloud box in testing, and none answered on 2026-10-26). overpass-api.de is not in the default list because its policy asks hosted platforms not to call it, and mirrors are never queried in parallel. For production, set `OVERPASS_URL` to a self-hosted or paid instance. The search cache is in memory, per server instance.
 - The saved Austin snapshot is a point in time. Restaurants came from Overpass; the other categories came from Nominatim tag searches, which return at most a few pages, so they can be incomplete (the snapshot has one plumber).
