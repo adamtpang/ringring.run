@@ -13,8 +13,9 @@ export const KnowledgeItemSchema = z.object({
   kind: z.enum(KNOWLEDGE_KINDS),
   label: z.string().min(1).max(160),
   value: z.string().min(1).max(500),
-  source_type: z.enum(["listing", "website", "review", "owner"]),
-  /** Listing field name, web_pages id, or reviews id. */
+  /** "osm" marks facts from OpenStreetMap for a business that was not scanned (the /find chat preview). */
+  source_type: z.enum(["listing", "website", "review", "owner", "osm"]),
+  /** Listing field name, web_pages id, reviews id, or "osm-node-123 tag" for OpenStreetMap. */
   source_ref: z.string().min(1),
   /** Verbatim supporting text for website and review sources. */
   quote: z.string().nullable(),

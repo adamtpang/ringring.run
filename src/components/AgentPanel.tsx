@@ -12,11 +12,12 @@ export interface VoiceStatus {
   reason: string | null;
 }
 
-const SOURCE_LABEL: Record<KnowledgeFact["source_type"], string> = {
+const SOURCE_LABEL: Record<KnowledgeFact["source_type"] | "osm", string> = {
   listing: "Google listing",
   website: "Website",
   review: "Google review",
   owner: "Owner",
+  osm: "OpenStreetMap",
 };
 
 export function seconds(ms: number | null | undefined) {

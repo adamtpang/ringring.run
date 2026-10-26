@@ -7,7 +7,7 @@ import type { Responder, RespondInput } from "./types";
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const CONTACT_ASK = "What's your name and the best number to reach you?";
 
-function hoursSummary(c: AgentConfig): string {
+export function hoursSummary(c: AgentConfig): string {
   if (c.hours.length) {
     // Group consecutive days with identical hours: "Monday to Friday, 8 AM to 5 PM".
     const groups: { from: string; to: string; hours: string }[] = [];

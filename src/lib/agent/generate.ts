@@ -44,9 +44,11 @@ export function faqsFromReviews(services: string[], reviews: Review[], max = 4) 
 
 const KIND_ORDER = ["contact", "hours", "service", "price", "policy", "service_area", "faq"] as const;
 
+type FactInput = Pick<KnowledgeFact, "kind" | "label" | "value" | "source_ref" | "quote"> & { source_type: KnowledgeItem["source_type"] };
+
 export interface GenerateInput {
   business: Pick<Business, "id" | "name" | "phone" | "opening_hours">;
-  facts: Pick<KnowledgeFact, "kind" | "label" | "value" | "source_type" | "source_ref" | "quote">[];
+  facts: FactInput[];
   reviews: Review[];
   findings: { kind: string; title: string }[];
   now?: Date;

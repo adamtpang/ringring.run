@@ -33,6 +33,7 @@ export const ENV_KEYS = [
   { name: "APIFY_TIMEOUT_SECS", required: false, purpose: "Apify run timeout" },
   { name: "ELEVENLABS_API_KEY", required: false, purpose: "Deploy phone agents to ElevenLabs Agents (Next: not live tested)" },
   { name: "ELEVENLABS_PHONE_NUMBER_ID", required: false, purpose: "ElevenLabs phone number to assign the agent to" },
+  { name: "OVERPASS_URL", required: false, purpose: "Overpass endpoint(s) for /find, comma separated (default: public instances)" },
   { name: "FORCE_DEMO", required: false, purpose: "Force demo mode even with keys" },
   { name: "LOCAL_DB_PATH", required: false, purpose: "Local demo store file" },
 ] as const;
