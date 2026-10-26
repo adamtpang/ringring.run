@@ -57,6 +57,11 @@ export default function RunPage() {
             readyMs={data.run.agent_ready_ms}
             active={data.run.status === "queued" || data.run.status === "running"}
             label={data.run.search_kind === "name" ? "Business named to agent ready" : "Scan started to first agent ready"}
+            note={
+              data.run.mode.scraper === "fixture" && data.run.mode.diagnoser === "stub"
+                ? `Fixture run: no scraping or network calls, so this is near zero (${data.run.agent_ready_ms ?? 0} ms). A live run includes Apify and the LLM.`
+                : undefined
+            }
           />
           <StatGrid>
             <Stat label="Businesses" value={data.run.business_count} />

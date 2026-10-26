@@ -24,7 +24,10 @@ export function Stopwatch({
   active,
   label = "Business named to agent ready",
   targetMs = AGENT_TARGET_MS,
+  note,
 }: {
+  /** Optional caption under the bar, for example to explain a fixture run. */
+  note?: string;
   createdAt: string;
   readyMs: number | null | undefined;
   /** True while the run is still working (the clock ticks). */
@@ -71,6 +74,7 @@ export function Stopwatch({
           style={{ width: `${pct}%` }}
         />
       </div>
+      {note && <p className="text-caption text-muted">{note}</p>}
     </Card>
   );
 }
