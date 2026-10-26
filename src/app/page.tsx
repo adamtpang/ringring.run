@@ -31,7 +31,7 @@ const steps = [
 const principles = [
   {
     title: "Cites its sources",
-    body: "Every finding points to the exact review text or listing field behind it. A quote that cannot be found in the source is thrown out.",
+    body: "Every finding points to the exact review, website text, or listing field behind it. A quote that cannot be found in the source is thrown out.",
   },
   {
     title: "Shows the math",
