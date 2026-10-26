@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BusinessTable } from "@/components/BusinessTable";
-import { AppHeader, Card, dateTime12, RunStatusPill, runTitle, usePoll } from "@/components/ui";
+import { Button, ButtonLink, Card, Field, SectionHeader } from "@/components/ds";
+import { dateTime12, PageShell, RunStatusPill, runTitle, usePoll } from "@/components/ui";
 import type { Business, Run } from "@/lib/types";
 
 const isActive = (r: Run) => r.status === "queued" || r.status === "running";
@@ -46,98 +47,109 @@ export function DashboardClient() {
   }
 
   return (
-    <>
-      <AppHeader />
-      <main className="mx-auto max-w-6xl space-y-8 px-5 py-10">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Scan a market or one business</h1>
-          <p className="mt-1 text-muted">
-            Pick a category and a city, or look up one business by name. The agent pulls Google Maps data, reads each website, diagnoses each
-            business, and prices what it finds.
-          </p>
-        </div>
+    <PageShell>
+      <SectionHeader
+        level={1}
+        size="lg"
+        title="Scan"
+        description="A category in a city, or one business by name. Google Maps, website, diagnosis, and ROI in one run."
+      />
 
-        <Card>
-          <div role="tablist" aria-label="Scan type" className="mb-4 inline-flex rounded-full bg-background p-1 text-sm ring-1 ring-hairline">
-            {(["category", "name"] as const).map((k) => (
-              <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => setKind(k)}
-                className={`rounded-full px-4 py-1.5 ${kind === k ? "bg-white font-medium shadow-sm" : "text-muted"}`}>
-                {k === "category" ? "Category and city" : "One business by name"}
-              </button>
-            ))}
-          </div>
-          <form onSubmit={submit} className={`grid gap-4 sm:items-end ${kind === "category" ? "sm:grid-cols-[1fr_1fr_8rem_auto]" : "sm:grid-cols-[2fr_1fr_auto]"}`}>
-            {kind === "category" ? (
-              <label className="block text-sm">
-                <span className="text-muted">Category</span>
-                <input value={category} onChange={(e) => setCategory(e.target.value)} required minLength={2} maxLength={80}
-                  className="mt-1 w-full rounded-xl border border-hairline bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-accent/40" />
-              </label>
-            ) : (
-              <label className="block text-sm">
-                <span className="text-muted">Business name</span>
-                <input value={name} onChange={(e) => setName(e.target.value)} required minLength={2} maxLength={120}
-                  placeholder="Joe's Plumbing"
-                  className="mt-1 w-full rounded-xl border border-hairline bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-accent/40" />
-              </label>
-            )}
-            <label className="block text-sm">
-              <span className="text-muted">City</span>
-              <input value={city} onChange={(e) => setCity(e.target.value)} required minLength={2} maxLength={80}
-                className="mt-1 w-full rounded-xl border border-hairline bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-accent/40" />
-            </label>
-            {kind === "category" && (
-              <label className="block text-sm">
-                <span className="text-muted">Max businesses</span>
-                <input type="number" min={1} max={50} value={maxCount} onChange={(e) => setMaxCount(Number(e.target.value))}
-                  className="mt-1 w-full rounded-xl border border-hairline bg-background px-3 py-2 tabular-nums outline-none focus:ring-2 focus:ring-accent/40" />
-              </label>
-            )}
-            <button type="submit" disabled={submitting}
-              className="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white hover:bg-[#0077ed] disabled:opacity-50">
-              {submitting ? "Starting..." : "Run scan"}
+      <Card padding="lg">
+        <div role="tablist" aria-label="Scan type" className="relative mb-6 inline-grid grid-cols-2 rounded-pill bg-surface-2 p-1 text-footnote ring-1 ring-inset ring-hairline">
+          <span
+            aria-hidden="true"
+            className="absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-pill bg-surface shadow-raised transition-transform duration-[var(--duration-spring)] ease-spring motion-reduce:transition-none"
+            style={{ transform: kind === "name" ? "translateX(100%)" : "translateX(0)" }}
+          />
+          {(["category", "name"] as const).map((k) => (
+            <button
+              key={k}
+              type="button"
+              role="tab"
+              aria-selected={kind === k}
+              onPointerDown={() => setKind(k)}
+              onClick={() => setKind(k)}
+              className={`pressable relative z-10 rounded-pill px-4 py-1.5 ${kind === k ? "font-medium text-foreground" : "text-muted"}`}
+            >
+              {k === "category" ? "Category" : "One business"}
             </button>
-          </form>
-          {formError && <p className="mt-3 text-sm text-red-700">{formError}</p>}
-        </Card>
-
-        {latest && (
-          <Card>
-            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="text-lg font-semibold">
-                Latest run: {runTitle(latest)}
-              </h2>
-              <div className="flex items-center gap-3 text-sm">
-                <RunStatusPill status={latest.status} />
-                <Link href={`/runs/${latest.id}`} className="text-accent hover:underline">Timeline and logs</Link>
-              </div>
-            </div>
-            <BusinessTable businesses={latestBiz.data?.businesses ?? []} />
-          </Card>
+          ))}
+        </div>
+        <form
+          onSubmit={submit}
+          className={`grid gap-4 sm:items-end ${kind === "category" ? "sm:grid-cols-[1fr_1fr_7rem_auto]" : "sm:grid-cols-[2fr_1fr_auto]"}`}
+        >
+          {kind === "category" ? (
+            <Field label="Category" value={category} onChange={(e) => setCategory(e.target.value)} required minLength={2} maxLength={80} />
+          ) : (
+            <Field
+              label="Business name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              minLength={2}
+              maxLength={120}
+              placeholder="Joe's Plumbing"
+            />
+          )}
+          <Field label="City" value={city} onChange={(e) => setCity(e.target.value)} required minLength={2} maxLength={80} />
+          {kind === "category" && (
+            <Field label="Max" type="number" min={1} max={50} value={maxCount} onChange={(e) => setMaxCount(Number(e.target.value))} />
+          )}
+          <Button type="submit" size="lg" disabled={submitting} className="h-11 text-callout">
+            {submitting ? "Starting…" : "Run scan"}
+          </Button>
+        </form>
+        {formError && (
+          <p role="alert" className="mt-4 rounded-md bg-danger-soft px-3.5 py-2.5 text-footnote text-danger">
+            {formError}
+          </p>
         )}
+      </Card>
 
-        <Card>
-          <h2 className="mb-3 text-lg font-semibold">Runs</h2>
-          {runs.error && <p className="text-sm text-red-700">{runs.error}</p>}
-          {runs.data && runs.data.runs.length === 0 && <p className="text-sm text-muted">No runs yet. Start a scan above.</p>}
-          <ul>
-            {runs.data?.runs.map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline py-2.5 text-sm last:border-0">
-                <Link href={`/runs/${r.id}`} className="font-medium hover:text-accent">
-                  {runTitle(r)}
-                </Link>
-                <span className="flex items-center gap-3 text-muted">
-                  <span className="tabular-nums">
-                    {r.diagnosed_count}/{r.business_count} diagnosed{r.failed_count ? `, ${r.failed_count} failed` : ""}
-                  </span>
-                  <RunStatusPill status={r.status} />
-                  <span className="text-xs">{dateTime12(r.created_at)}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
+      {latest && (
+        <Card padding="lg" className="space-y-5">
+          <SectionHeader
+            eyebrow="Latest run"
+            title={runTitle(latest)}
+            action={
+              <>
+                <RunStatusPill status={latest.status} />
+                <ButtonLink href={`/runs/${latest.id}`} variant="secondary" size="sm">
+                  Timeline
+                </ButtonLink>
+              </>
+            }
+          />
+          <BusinessTable businesses={latestBiz.data?.businesses ?? []} />
         </Card>
-      </main>
-    </>
+      )}
+
+      <Card padding="lg" className="space-y-4">
+        <SectionHeader title="History" size="sm" />
+        {runs.error && <p className="text-footnote text-danger">{runs.error}</p>}
+        {runs.data && runs.data.runs.length === 0 && <p className="text-footnote text-muted">No runs yet.</p>}
+        <ul className="-mx-3">
+          {runs.data?.runs.map((r) => (
+            <li key={r.id}>
+              <Link
+                href={`/runs/${r.id}`}
+                className="pressable flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-md px-3 py-2.5 hover:bg-surface-2"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-callout font-medium">{runTitle(r)}</span>
+                  <span className="block font-mono text-caption tabular-nums text-muted">
+                    {dateTime12(r.created_at)} · {r.diagnosed_count}/{r.business_count} diagnosed
+                    {r.failed_count ? ` · ${r.failed_count} failed` : ""}
+                  </span>
+                </span>
+                <RunStatusPill status={r.status} />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Card>
+    </PageShell>
   );
 }

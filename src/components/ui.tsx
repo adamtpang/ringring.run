@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Wordmark } from "./Logo";
+import { Badge, Timeline, TimelineStep, type BadgeTone } from "./ds";
 import type { Run, RunMode, RunStatus, RunStep } from "@/lib/types";
 
 export function money(n: number) {
@@ -65,9 +67,9 @@ export function ModeBadge() {
   if (!data) return null;
   if (!data.demo) {
     return (
-      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
+      <Badge tone="success" dot>
         Live data
-      </span>
+      </Badge>
     );
   }
   const parts = [
@@ -76,12 +78,9 @@ export function ModeBadge() {
     data.mode.store === "local" && "local store",
   ].filter(Boolean);
   return (
-    <span
-      title={`Demo mode: ${parts.join(", ")}. Add API keys in .env.local for live data.`}
-      className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 ring-1 ring-amber-200"
-    >
+    <Badge tone="warning" dot title={`Demo mode: ${parts.join(", ")}. Add API keys in .env.local for live data.`}>
       Demo data
-    </span>
+    </Badge>
   );
 }
 
@@ -90,75 +89,103 @@ export function runTitle(r: Pick<Run, "category" | "city" | "search_kind">) {
   return r.search_kind === "name" ? `${r.category}, ${r.city}` : `${r.category} in ${r.city}`;
 }
 
+const NAV = [
+  { href: "/dashboard", label: "Scans" },
+  { href: "/health", label: "Health" },
+];
+
 export function AppHeader() {
+  const path = usePathname();
   return (
-    <header className="sticky top-0 z-10 border-b border-hairline bg-background/80 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-        <Link href="/" aria-label="ringring.run home">
+    <header className="material-bar sticky top-0 z-20 shadow-[0_1px_0_var(--color-hairline-raw)]">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-[var(--space-gutter)]">
+        <Link href="/" aria-label="ringring.run home" className="pressable rounded-sm">
           <Wordmark />
         </Link>
-        <nav className="flex items-center gap-4 text-sm">
-          <Link href="/dashboard" className="text-muted hover:text-foreground">
-            Dashboard
-          </Link>
-          <Link href="/health" className="text-muted hover:text-foreground">
-            Health
-          </Link>
-          <ModeBadge />
+        <nav className="flex items-center gap-1 text-footnote">
+          {NAV.map((n) => {
+            const active = path === n.href || (n.href === "/dashboard" && (path.startsWith("/runs") || path.startsWith("/businesses")));
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                aria-current={active ? "page" : undefined}
+                className={`pressable rounded-pill px-3 py-1.5 ${active ? "bg-surface-2 font-medium text-foreground" : "text-muted hover:text-foreground"}`}
+              >
+                {n.label}
+              </Link>
+            );
+          })}
+          <span className="ml-2">
+            <ModeBadge />
+          </span>
         </nav>
       </div>
     </header>
   );
 }
 
-const RUN_STATUS_STYLE: Record<RunStatus, string> = {
-  queued: "bg-black/5 text-muted",
-  running: "bg-blue-50 text-accent",
-  completed: "bg-emerald-50 text-emerald-700",
-  completed_with_errors: "bg-amber-50 text-amber-800",
-  failed: "bg-red-50 text-red-700",
+/** Page container shared by app screens. */
+export function PageShell({ children, width = "wide" }: { children: React.ReactNode; width?: "wide" | "narrow" }) {
+  return (
+    <>
+      <AppHeader />
+      <main className={`mx-auto w-full flex-1 space-y-8 px-[var(--space-gutter)] pb-20 pt-8 sm:pt-12 ${width === "wide" ? "max-w-6xl" : "max-w-3xl"}`}>
+        {children}
+      </main>
+    </>
+  );
+}
+
+export function BackLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link href={href} className="pressable -ml-2 inline-flex items-center gap-1 rounded-pill px-2 py-1 text-footnote font-medium text-accent hover:bg-accent-soft">
+      <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden="true">
+        <path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      {children}
+    </Link>
+  );
+}
+
+const RUN_STATUS: Record<RunStatus, { tone: BadgeTone; label: string }> = {
+  queued: { tone: "neutral", label: "Queued" },
+  running: { tone: "accent", label: "Running" },
+  completed: { tone: "success", label: "Completed" },
+  completed_with_errors: { tone: "warning", label: "Completed with errors" },
+  failed: { tone: "danger", label: "Failed" },
 };
 
 export function RunStatusPill({ status }: { status: RunStatus }) {
+  const s = RUN_STATUS[status];
   return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${RUN_STATUS_STYLE[status]}`}>
-      {status === "running" && <span className="mr-1 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-accent align-middle" />}
-      {status.replaceAll("_", " ")}
-    </span>
+    <Badge tone={s.tone} dot live={status === "running"}>
+      {s.label}
+    </Badge>
   );
 }
-
-const STEP_DOT: Record<RunStep["status"], string> = {
-  running: "bg-accent animate-pulse",
-  ok: "bg-emerald-500",
-  retry: "bg-amber-400",
-  warn: "bg-amber-500",
-  error: "bg-red-500",
-  skipped: "bg-black/20",
-};
 
 export function StepTimeline({ steps }: { steps: RunStep[] }) {
-  if (steps.length === 0) return <p className="text-sm text-muted">No steps yet.</p>;
+  if (steps.length === 0) return <p className="text-footnote text-muted">No steps yet.</p>;
   return (
-    <ol className="space-y-0">
-      {steps.map((s) => (
-        <li key={s.id} className="grid grid-cols-[auto_5.5rem_1fr_auto] items-baseline gap-3 border-b border-hairline py-2 text-sm last:border-0">
-          <span className={`mt-1.5 h-2 w-2 rounded-full ${STEP_DOT[s.status]}`} aria-label={s.status} />
-          <span className="font-mono text-xs uppercase tracking-wide text-muted">{s.step}</span>
-          <span className={s.status === "error" ? "text-red-700" : s.status === "warn" ? "text-amber-800" : ""}>
-            {s.message}
-            {s.attempt > 1 && <span className="ml-2 text-xs text-muted">attempt {s.attempt}</span>}
-          </span>
-          <span className="whitespace-nowrap text-xs tabular-nums text-muted">
-            {s.duration_ms != null && s.duration_ms > 0 ? `${(s.duration_ms / 1000).toFixed(1)}s · ` : ""}
-            {time12(s.created_at)}
-          </span>
-        </li>
+    <Timeline>
+      {steps.map((s, i) => (
+        <TimelineStep
+          key={s.id}
+          status={s.status}
+          last={i === steps.length - 1}
+          label={s.step}
+          meta={
+            <>
+              {s.duration_ms != null && s.duration_ms > 0 ? `${(s.duration_ms / 1000).toFixed(1)}s · ` : ""}
+              {time12(s.created_at)}
+            </>
+          }
+        >
+          {s.message}
+          {s.attempt > 1 && <span className="ml-2 text-caption text-muted">attempt {s.attempt}</span>}
+        </TimelineStep>
       ))}
-    </ol>
+    </Timeline>
   );
-}
-
-export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`rounded-2xl bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-hairline ${className}`}>{children}</section>;
 }
