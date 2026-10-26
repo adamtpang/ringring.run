@@ -1,5 +1,6 @@
 import { listingFacts } from "../listing";
 import type { Business, Review, WebPage } from "../types";
+import { fence, inline, UNTRUSTED_DATA_POLICY } from "../untrusted";
 
 export const WEBSITE_EXCERPT_CHARS = 6000;
 
@@ -18,7 +19,9 @@ Hard rules:
 2. Never invent facts. If there is no evidence for a kind, do not include it. Returning zero findings is fine.
 3. Do not write any numbers in title, detail, or summary unless that exact number appears in your quoted evidence. Do not estimate money, volumes, or percentages. ROI is computed elsewhere.
 4. At most one finding per kind. Severity 1 to 5 reflects how strongly the evidence shows lost customers.
-5. Set unused evidence fields to null.`;
+5. Set unused evidence fields to null.
+
+${UNTRUSTED_DATA_POLICY}`;
 
 export function buildUserPrompt(
   business: Business,
@@ -31,16 +34,18 @@ export function buildUserPrompt(
     const alias = `r${i + 1}`;
     aliasMap[alias] = r.id;
     const reply = r.owner_response ? "owner replied" : "no owner reply";
-    return `[${alias}] (${r.rating ?? "?"} stars, ${reply}) ${r.text.replace(/\s+/g, " ")}`;
+    // Review text is untrusted: neutralized and fenced. Whitespace is collapsed; the citation check normalizes it too.
+    return `[${alias}] (${r.rating ?? "?"} stars, ${reply})\n${fence("review", r.text.replace(/\s+/g, " "), { id: alias })}`;
   });
   const factLines = Object.entries(facts).map(([k, v]) => `- ${k}: ${v.holds ? "TRUE" : "false"} (${v.value})`);
   const page = pages.find((p) => p.status === "ok" && p.text.trim());
   const websiteBlock = page
-    ? `Website text (homepage ${page.url}, may be truncated):\n${page.text.slice(0, WEBSITE_EXCERPT_CHARS)}`
+    ? `Website text (homepage ${inline(page.url)}, may be truncated):\n${fence("website", page.text.slice(0, WEBSITE_EXCERPT_CHARS))}`
     : "Website text: (not available)";
-  const prompt = `Business: ${business.name}
-Category: ${business.category ?? "unknown"}
-Address: ${business.address ?? "unknown"}
+  // Listing fields are scraped too, so they are neutralized before they reach the prompt.
+  const prompt = `Business: ${inline(business.name)}
+Category: ${inline(business.category) || "unknown"}
+Address: ${inline(business.address) || "unknown"}
 
 Listing facts:
 ${factLines.join("\n")}

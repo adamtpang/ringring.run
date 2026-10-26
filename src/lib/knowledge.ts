@@ -1,5 +1,6 @@
 import type { NewKnowledgeFact } from "./store/types";
 import type { Business, WebPage } from "./types";
+import { isSuspicious, neutralize } from "./untrusted";
 
 // Knowledge facts: the stored raw material for a later per-business voice
 // agent "knowledge pack" (hours, services, prices, FAQs). Every fact carries
@@ -12,7 +13,9 @@ type Fact = Omit<NewKnowledgeFact, "business_id">;
 export function listingKnowledge(b: Pick<Business, "phone" | "address" | "website" | "category" | "opening_hours">): Fact[] {
   const out: Fact[] = [];
   const add = (kind: Fact["kind"], label: string, value: string | null, ref: string) => {
-    if (value && value.trim()) out.push({ kind, label, value: value.trim(), source_type: "listing", source_ref: ref, quote: null });
+    // Listing fields are scraped text: skip anything instruction-like, store the rest neutralized.
+    if (!value || !value.trim() || isSuspicious(value)) return;
+    out.push({ kind, label, value: neutralize(value).text.trim(), source_type: "listing", source_ref: ref, quote: null });
   };
   add("contact", "Phone", b.phone, "phone");
   add("contact", "Address", b.address, "address");
@@ -34,7 +37,8 @@ export function websiteKnowledge(page: Pick<WebPage, "id" | "status" | "text">):
   const base = { source_type: "website" as const, source_ref: page.id };
   for (const raw of page.text.split("\n")) {
     const line = raw.trim();
-    if (!line || line.length > 300) continue;
+    // Untrusted website text: an instruction-like line never becomes a fact.
+    if (!line || line.length > 300 || isSuspicious(line)) continue;
     const s = line.match(SERVICE_LINE);
     if (s) {
       for (const item of (s[2] ?? "").replace(/\.$/, "").split(/,|;|\band\b/)) {
