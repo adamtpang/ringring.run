@@ -16,7 +16,7 @@ import data from "./snapshot-austin.json";
 export interface SnapshotCategory {
   /** When this category was fetched (UTC ISO). */
   taken_at: string;
-  /** Where it came from, for example "overpass-api.de". */
+  /** Where it came from, for example "Overpass API" or "Nominatim". */
   source: string;
   radius_m: number;
   elements: unknown[];

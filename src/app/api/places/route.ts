@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
 // GET /api/places?lat=&lon=&category=restaurants|&q=tacos
-// Nearby businesses from OpenStreetMap: public Overpass mirrors raced in parallel,
+// Nearby businesses from OpenStreetMap: public Overpass mirrors tried one at a time,
 // cached 10 minutes per ~100 m cell. If no mirror answers, central Austin falls back
 // to a bundled saved snapshot (snapshot: true). Elsewhere it returns 503 with
 // code "unavailable" so the page can offer a Google Maps search instead.

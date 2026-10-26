@@ -15,14 +15,12 @@ export const CACHE_TTL_MS = 10 * 60 * 1000;
 export const USER_AGENT = "ringring.run/0.1 (+https://ringring.run; AITX hackathon demo)";
 
 /**
- * Public Overpass instances with global coverage and no key (OSM wiki, Oct 2026),
- * raced in parallel. overpass.kumi.systems is the old name of private.coffee and
- * is kept in case one of the two names stops resolving. OVERPASS_URL overrides the list.
+ * Public keyless Overpass instances (OSM wiki, Oct 2026), tried one at a time in
+ * this order. overpass-api.de is left out on purpose: its usage policy asks
+ * hosted platforms not to call it. OVERPASS_URL overrides the list.
  */
 export const PUBLIC_ENDPOINTS = [
-  "https://overpass-api.de/api/interpreter",
   "https://overpass.private.coffee/api/interpreter",
-  "https://overpass.kumi.systems/api/interpreter",
   "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 ];
 
@@ -32,8 +30,8 @@ export function overpassEndpoints(): string[] {
   return PUBLIC_ENDPOINTS;
 }
 
-/** Per-mirror timeout for the race. */
-export const MIRROR_TIMEOUT_MS = 8000;
+/** Per-mirror timeout. */
+export const MIRROR_TIMEOUT_MS = 5000;
 
 // Keys that mark a named feature as a business or service rather than a street or park.
 const BUSINESS_KEYS = ["amenity", "shop", "craft", "office", "healthcare", "tourism"];
@@ -65,8 +63,8 @@ export function buildOverpassQuery(p: SearchParams & { timeoutS?: number; maxOut
     // No category and no text: every chip category.
     for (const c of CATEGORIES) for (const [k, v] of c.tags) lines.push(`  nw["${k}"="${v}"]["name"]${around};`);
   }
-  // Short server timeout to match the client race; nodes and ways only (relations are rare for shops).
-  const timeout = p.timeoutS ?? 8;
+  // Short server timeout to match the client timeout; nodes and ways only (relations are rare for shops).
+  const timeout = p.timeoutS ?? 5;
   // Overpass returns in id order, not distance, so fetch some extra and sort by distance after parsing.
   const maxOut = p.maxOut ?? (p.limit ?? DEFAULT_LIMIT) * 2;
   return `[out:json][timeout:${timeout}];\n(\n${lines.join("\n")}\n);\nout center tags ${maxOut};`;
@@ -208,7 +206,7 @@ export class OverpassUnavailableError extends Error {
   }
 }
 
-// Mirrors that answered 429 or 406 rest for 30 s, per the overpass-api.de usage policy.
+// A mirror that answers 429, 406 or 504 rests for 30 s before it is tried again.
 const COOLDOWN_MS = 30_000;
 const cooldown = new Map<string, number>();
 // After every mirror fails, skip live search for a short while so the next
@@ -229,9 +227,9 @@ function validBody(json: unknown): json is { elements: unknown[]; remark?: strin
 }
 
 /**
- * Search nearby places. Races every mirror at once with a short timeout and takes
- * the first valid response; the rest are aborted. Throws OverpassUnavailableError
- * when all fail, so the caller can serve the saved snapshot.
+ * Search nearby places. Tries each mirror in turn (never in parallel), each with
+ * a short timeout, and returns the first valid response. Throws
+ * OverpassUnavailableError when all fail, so the caller can serve saved data.
  */
 export async function searchPlaces(p: SearchParams, deps: OverpassDeps = {}): Promise<SearchResult> {
   const c = deps.cache ?? cache;
@@ -241,78 +239,75 @@ export async function searchPlaces(p: SearchParams, deps: OverpassDeps = {}): Pr
 
   const doFetch = deps.fetch ?? fetch;
   const now = deps.now ?? Date.now;
-  const query = buildOverpassQuery(p);
   const timeoutMs = deps.timeoutMs ?? MIRROR_TIMEOUT_MS;
   if (allDownUntil > now()) throw new OverpassUnavailableError(["all mirrors failed in the last 30 s"]);
+  const query = buildOverpassQuery(p);
   const reasons: string[] = [];
-  const endpoints = (deps.endpoints ?? overpassEndpoints()).filter((url) => {
+
+  for (const url of deps.endpoints ?? overpassEndpoints()) {
     const until = cooldown.get(url);
     if (until && until > now()) {
       reasons.push(`${host(url)} cooling down`);
-      return false;
+      continue;
     }
-    return true;
-  });
-  if (endpoints.length === 0) throw new OverpassUnavailableError(reasons);
-
-  const stop = new AbortController();
-  const attempt = async (url: string) => {
-    // One controller per mirror, aborted by its own timer or when another mirror wins.
-    // (Plain timers rather than AbortSignal.any, which can fail to fire on Node 20.)
-    const ctrl = new AbortController();
-    const onStop = () => ctrl.abort(stop.signal.reason);
-    stop.signal.addEventListener("abort", onStop, { once: true });
-    const timer = setTimeout(() => ctrl.abort(new DOMException("timed out", "TimeoutError")), timeoutMs);
-    try {
-      const res = await doFetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": USER_AGENT, Accept: "application/json" },
-        body: `data=${encodeURIComponent(query)}`,
-        signal: ctrl.signal,
-      });
-      if (res.status === 429 || res.status === 406) cooldown.set(url, now() + COOLDOWN_MS);
-      if (!res.ok) throw new Error(`${host(url)} ${res.status}`);
-      const json: unknown = await res.json();
-      if (!validBody(json)) throw new Error(`${host(url)} invalid body`);
-      return { json, endpoint: host(url) };
-    } catch (e) {
-      const msg = e instanceof Error && e.message.startsWith(host(url)) ? e.message : `${host(url)} ${e instanceof Error ? e.name : "error"}`;
-      reasons.push(msg);
-      throw e;
-    } finally {
-      clearTimeout(timer);
-      stop.signal.removeEventListener("abort", onStop);
-    }
-  };
-
-  // Hard deadline as well, in case a fetch ignores its abort signal.
-  let deadline: ReturnType<typeof setTimeout> | undefined;
-  let winner: { json: unknown; endpoint: string };
-  try {
-    winner = await Promise.race([
-      Promise.any(endpoints.map(attempt)),
-      new Promise<never>((_, reject) => {
-        deadline = setTimeout(() => reject(new Error("deadline")), timeoutMs + 500);
-      }),
-    ]);
-  } catch {
-    allDownUntil = now() + ALL_DOWN_MS;
-    throw new OverpassUnavailableError(reasons.length ? reasons : ["all mirrors timed out"]);
-  } finally {
-    clearTimeout(deadline);
-    stop.abort();
+    const json = await tryMirror(url, query, doFetch, timeoutMs, now, reasons);
+    if (json === undefined) continue;
+    const out: SearchResult = {
+      places: parseOverpass(json, p, p.limit ?? DEFAULT_LIMIT),
+      endpoint: host(url),
+      source: "osm",
+      cached: false,
+      fetched_at: new Date(now()).toISOString(),
+      snapshot: false,
+    };
+    c.set(key, out);
+    return out;
   }
+  allDownUntil = now() + ALL_DOWN_MS;
+  throw new OverpassUnavailableError(reasons);
+}
 
-  const out: SearchResult = {
-    places: parseOverpass(winner.json, p, p.limit ?? DEFAULT_LIMIT),
-    endpoint: winner.endpoint,
-    source: "osm",
-    cached: false,
-    fetched_at: new Date(now()).toISOString(),
-    snapshot: false,
-  };
-  c.set(key, out);
-  return out;
+/** One mirror, one request. Returns the body, or undefined after noting why it failed. */
+async function tryMirror(
+  url: string,
+  query: string,
+  doFetch: typeof fetch,
+  timeoutMs: number,
+  now: () => number,
+  reasons: string[],
+): Promise<unknown> {
+  // Plain timers rather than AbortSignal.timeout/any, which can fail to fire on Node 20.
+  // The deadline also covers a fetch that ignores its abort signal.
+  const ctrl = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      ctrl.abort(new DOMException("timed out", "TimeoutError"));
+      reject(new DOMException("timed out", "TimeoutError"));
+    }, timeoutMs);
+  });
+  const request = (async () => {
+    const res = await doFetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": USER_AGENT, Accept: "application/json" },
+      body: `data=${encodeURIComponent(query)}`,
+      signal: ctrl.signal,
+    });
+    if (res.status === 429 || res.status === 406 || res.status === 504) cooldown.set(url, now() + COOLDOWN_MS);
+    if (!res.ok) throw new Error(`${host(url)} ${res.status}`);
+    const json: unknown = await res.json();
+    if (!validBody(json)) throw new Error(`${host(url)} invalid body`);
+    return json;
+  })();
+  request.catch(() => {}); // settled after the deadline wins
+  try {
+    return await Promise.race([request, deadline]);
+  } catch (e) {
+    reasons.push(e instanceof Error && e.message.startsWith(host(url)) ? e.message : `${host(url)} ${e instanceof Error ? e.name : "error"}`);
+    return undefined;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function host(url: string): string {

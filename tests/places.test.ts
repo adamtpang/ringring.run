@@ -57,7 +57,7 @@ const FIXTURE = {
 describe("overpass query builder", () => {
   it("builds a category query around a rounded point with a name filter", () => {
     const q = buildOverpassQuery({ lat: 30.267212345, lon: -97.743187, category: "restaurants", radius_m: 2000, limit: 40 });
-    expect(q).toContain("[out:json][timeout:8]");
+    expect(q).toContain("[out:json][timeout:5]");
     expect(q).toContain('nw["amenity"="restaurant"]["name"](around:2000,30.2672,-97.7432);');
     expect(q).toContain('nw["amenity"="fast_food"]');
     expect(q).not.toContain("nwr[");
@@ -122,74 +122,74 @@ describe("searchPlaces", () => {
   const ok = () => new Response(JSON.stringify(FIXTURE), { status: 200 });
   const never = (_url: string, init?: RequestInit) =>
     new Promise<Response>((_, reject) => init?.signal?.addEventListener("abort", () => reject(init.signal!.reason)));
+  const asFetch = (f: unknown) => f as typeof globalThis.fetch;
   beforeEach(() => resetOverpassCooldown());
 
-  it("races mirrors, takes the first valid answer, sends a User-Agent, and caches", async () => {
-    const seen: AbortSignal[] = [];
-    const fetch = vi.fn((url: string, init?: RequestInit) => {
-      seen.push(init!.signal!);
-      if (url.includes("slow")) return never(url, init);
-      if (url.includes("bad")) return Promise.resolve(new Response(JSON.stringify({ remark: "runtime error: timed out", elements: [] })));
-      return new Promise<Response>((r) => setTimeout(() => r(ok()), 5));
+  it("tries mirrors one at a time, skips bad answers, sends a User-Agent, and caches", async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const fetch = vi.fn(async (url: string) => {
+      inFlight++;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((r) => setTimeout(r, 5));
+      inFlight--;
+      if (url.includes("down")) return new Response("busy", { status: 503 });
+      if (url.includes("bad")) return new Response(JSON.stringify({ remark: "runtime error: timed out", elements: [] }));
+      return ok();
     });
     const cache = new TtlCache<SearchResult>(60_000, 10);
-    const deps = { fetch: fetch as unknown as typeof globalThis.fetch, cache, endpoints: ["https://slow.example/api", "https://bad.example/api", "https://good.example/api"] };
+    const deps = { fetch: asFetch(fetch), cache, endpoints: ["https://down.example/api", "https://bad.example/api", "https://good.example/api", "https://unused.example/api"] };
     const r = await searchPlaces({ ...AUSTIN, category: "restaurants" }, deps);
-    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(fetch.mock.calls.map((c) => c[0])).toEqual(deps.endpoints.slice(0, 3));
+    expect(maxInFlight).toBe(1);
     expect(r).toMatchObject({ endpoint: "good.example", cached: false, snapshot: false });
     expect(r.places).toHaveLength(3);
-    expect((fetch.mock.calls[0]![1] as { headers: Record<string, string> }).headers["User-Agent"]).toBe(USER_AGENT);
-    expect(seen[0]!.aborted).toBe(true); // the slow mirror was cancelled
+    expect((fetch.mock.calls[0] as unknown as [string, { headers: Record<string, string> }])[1].headers["User-Agent"]).toBe(USER_AGENT);
     const again = await searchPlaces({ ...AUSTIN, category: "restaurants" }, deps);
     expect(again.cached).toBe(true);
     expect(fetch).toHaveBeenCalledTimes(3);
   });
 
-  it("gives each mirror a short timeout, then throws a clear error", async () => {
+  it("times each mirror out, then throws a clear error and pauses for 30 s", async () => {
     const fetch = vi.fn(never);
     const t = Date.now();
-    await expect(
-      searchPlaces(
-        { ...AUSTIN, category: "cafes" },
-        { fetch: fetch as unknown as typeof globalThis.fetch, cache: new TtlCache(1000, 1), endpoints: ["https://a.example/api", "https://b.example/api"], timeoutMs: 50 },
-      ),
-    ).rejects.toBeInstanceOf(OverpassUnavailableError);
+    const deps = { fetch: asFetch(fetch), cache: new TtlCache<SearchResult>(1000, 1), endpoints: ["https://a.example/api", "https://b.example/api"], timeoutMs: 50 };
+    await expect(searchPlaces({ ...AUSTIN, category: "cafes" }, deps)).rejects.toBeInstanceOf(OverpassUnavailableError);
     expect(Date.now() - t).toBeLessThan(1000);
     expect(fetch).toHaveBeenCalledTimes(2);
-    // The next search skips the mirrors for 30 s and fails at once.
-    await expect(
-      searchPlaces({ ...AUSTIN, category: "salons" }, { fetch: fetch as unknown as typeof globalThis.fetch, cache: new TtlCache(1000, 1), endpoints: ["https://a.example/api"] }),
-    ).rejects.toThrow(/last 30 s/);
+    await expect(searchPlaces({ ...AUSTIN, category: "salons" }, deps)).rejects.toThrow(/last 30 s/);
     expect(fetch).toHaveBeenCalledTimes(2);
   });
 
   it("gives up on time even if a fetch ignores its abort signal", async () => {
     const fetch = vi.fn(() => new Promise<Response>(() => {}));
     await expect(
-      searchPlaces({ ...AUSTIN, category: "dentists" }, { fetch, cache: new TtlCache(1000, 1), endpoints: ["https://stuck.example/api"], timeoutMs: 50 }),
-    ).rejects.toBeInstanceOf(OverpassUnavailableError);
+      searchPlaces({ ...AUSTIN, category: "dentists" }, { fetch: asFetch(fetch), cache: new TtlCache(1000, 1), endpoints: ["https://stuck.example/api"], timeoutMs: 50 }),
+    ).rejects.toThrow(/stuck\.example TimeoutError/);
   });
 
   it("rests a mirror for 30 s after a 429", async () => {
     let now = Date.now();
     const fetch = vi.fn((url: string) => Promise.resolve(url.includes("busy") ? new Response("slow down", { status: 429 }) : ok()));
-    const deps = { fetch: fetch as unknown as typeof globalThis.fetch, cache: new TtlCache<SearchResult>(60_000, 10), endpoints: ["https://busy.example/api", "https://ok.example/api"], now: () => now };
+    const deps = { fetch: asFetch(fetch), cache: new TtlCache<SearchResult>(60_000, 10), endpoints: ["https://busy.example/api", "https://ok.example/api"], now: () => now };
     await searchPlaces({ ...AUSTIN, category: "cafes" }, deps);
     expect(fetch).toHaveBeenCalledTimes(2);
     await searchPlaces({ ...AUSTIN, category: "salons" }, deps);
     expect(fetch).toHaveBeenCalledTimes(3); // only ok.example
     now += 31_000;
     await searchPlaces({ ...AUSTIN, category: "dentists" }, deps);
-    expect(fetch).toHaveBeenCalledTimes(5); // busy.example is back in the race
+    expect(fetch).toHaveBeenCalledTimes(5); // busy.example is tried again
   });
 
-  it("uses OVERPASS_URL instead of the public list when set", () => {
+  it("defaults to private.coffee then maps.mail.ru, never overpass-api.de, and honors OVERPASS_URL", () => {
     const prev = process.env.OVERPASS_URL;
+    delete process.env.OVERPASS_URL;
+    expect(overpassEndpoints()).toEqual(["https://overpass.private.coffee/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter"]);
+    expect(PUBLIC_ENDPOINTS.some((u) => u.includes("overpass-api.de"))).toBe(false);
     process.env.OVERPASS_URL = "https://mine.example/api, https://backup.example/api";
     expect(overpassEndpoints()).toEqual(["https://mine.example/api", "https://backup.example/api"]);
-    delete process.env.OVERPASS_URL;
-    expect(overpassEndpoints()).toEqual(PUBLIC_ENDPOINTS);
-    if (prev !== undefined) process.env.OVERPASS_URL = prev;
+    if (prev === undefined) delete process.env.OVERPASS_URL;
+    else process.env.OVERPASS_URL = prev;
   });
 });
 
