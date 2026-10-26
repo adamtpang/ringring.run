@@ -3,6 +3,7 @@ import { AgentConfigSchema } from "@/lib/agent";
 import { chatFirstMessage, chatReply, chatSystemPrompt, demoChatReply } from "@/lib/chat/chat";
 import { routeRequest, routeWithLlm } from "@/lib/chat/concierge";
 import { osmAgentConfig } from "@/lib/chat/osm-agent";
+import { sameBusiness } from "@/lib/chat/resolve";
 import type { LlmClient } from "@/lib/diagnose/llm-client";
 import { MODE_STORAGE_KEY, modeFromPath, parseStoredMode, pathForMode } from "@/lib/modes";
 import type { Place } from "@/lib/places/types";
@@ -174,5 +175,20 @@ describe("modes", () => {
     expect(parseStoredMode("admin")).toBeNull();
     expect(parseStoredMode(null)).toBeNull();
     expect(MODE_STORAGE_KEY).toBe("ringring.mode");
+  });
+});
+
+describe("sameBusiness (scan to OSM match)", () => {
+  const b = { name: "WU Chow - Downtown", city: "Austin", address: "500 W 5th St #168, Austin, TX 78701" };
+  it("matches a Google branch name to the OSM name at the same street number", () => {
+    expect(sameBusiness(b, { name: "Wu Chow", city: null, address: "500 West 5th Street, 78701" })).toBe(true);
+  });
+  it("does not match another branch or a missing address", () => {
+    expect(sameBusiness(b, { name: "Wu Chow", city: null, address: "9700 Stonelake Blvd" })).toBe(false);
+    expect(sameBusiness(b, { name: "Wu Chow", city: null, address: null })).toBe(false);
+    expect(sameBusiness(b, { name: "Wu Chow - Downtown", city: "Dallas", address: null })).toBe(false);
+  });
+  it("still matches identical names", () => {
+    expect(sameBusiness(b, { name: "Wu Chow - Downtown", city: "Austin", address: null })).toBe(true);
   });
 });
