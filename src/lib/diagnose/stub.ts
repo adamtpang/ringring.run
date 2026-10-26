@@ -1,5 +1,5 @@
 import { listingFacts } from "../listing";
-import type { Business, FindingKind, Review } from "../types";
+import type { Business, FindingKind, Review, WebPage } from "../types";
 
 // DEMO MODE ONLY. Deterministic keyword diagnoser used when no LLM key is set.
 // It produces output in the exact LLM schema, quoting real sentences from the
@@ -8,7 +8,7 @@ import type { Business, FindingKind, Review } from "../types";
 //   fail_diagnosis: always throws (simulates an LLM outage for one business)
 //   hallucinate: adds a finding with a fabricated quote that the citation check must drop
 
-const RULES: { kind: FindingKind; re: RegExp; title: string; detail: string; severity: number }[] = [
+const RULES: { kind: FindingKind; re: RegExp; site?: RegExp; title: string; detail: string; severity: number }[] = [
   {
     kind: "missed_calls",
     re: /voicemail|nobody answered|no one answered|didn'?t answer|could( not|n'?t) get (through|a hold)|never (got a call|heard) back|never called back/i,
@@ -26,8 +26,10 @@ const RULES: { kind: FindingKind; re: RegExp; title: string; detail: string; sev
   {
     kind: "booking_friction",
     re: /hard to schedule|no online booking|scheduling was|just to book|only take bookings/i,
+    // On the business's own homepage: phone-only booking.
+    site: /to schedule service, call|call (us |our office )?to (schedule|book)/i,
     title: "Booking takes too much effort",
-    detail: "Reviewers describe friction when trying to book a visit.",
+    detail: "Reviews or the business website show friction when trying to book a visit.",
     severity: 3,
   },
 ];
@@ -41,10 +43,16 @@ function sentenceMatching(text: string, re: RegExp): string | null {
   return null;
 }
 
-type StubEvidence = { source: "review" | "listing"; review_id: string | null; quote: string | null; listing_fact: string | null };
+type StubEvidence = { source: "review" | "listing" | "website"; review_id: string | null; quote: string | null; listing_fact: string | null };
 type StubFinding = { kind: string; title: string; detail: string; severity: number; evidence: StubEvidence[] };
 
-export function stubDiagnose(business: Business, reviews: Review[], aliasMap: Record<string, string>) {
+export function stubDiagnose(
+  business: Business,
+  reviews: Review[],
+  aliasMap: Record<string, string>,
+  pages: Pick<WebPage, "status" | "text">[] = [],
+) {
+  const siteText = pages.find((p) => p.status === "ok")?.text ?? "";
   const behavior = (business.raw as { fixtureBehavior?: string })?.fixtureBehavior;
   if (behavior === "fail_diagnosis") {
     throw new Error("Simulated LLM failure (demo fixture): upstream returned 503");
@@ -58,6 +66,10 @@ export function stubDiagnose(business: Business, reviews: Review[], aliasMap: Re
       const s = sentenceMatching(r.text, rule.re);
       if (s) evidence.push({ source: "review", review_id: aliasOf[r.id] ?? null, quote: s, listing_fact: null });
       if (evidence.length >= 2) break;
+    }
+    if (rule.site && siteText) {
+      const line = siteText.split("\n").map((l) => sentenceMatching(l, rule.site as RegExp)).find(Boolean);
+      if (line) evidence.push({ source: "website", review_id: null, quote: line, listing_fact: null });
     }
     if (evidence.length) findings.push({ kind: rule.kind, title: rule.title, detail: rule.detail, severity: rule.severity, evidence });
   }
@@ -103,7 +115,7 @@ export function stubDiagnose(business: Business, reviews: Review[], aliasMap: Re
   }
 
   const summary = findings.length
-    ? `Demo diagnosis from keyword rules. Found ${findings.length === 1 ? "one issue" : "several issues"} backed by review quotes or listing data.`
+    ? `Demo diagnosis from keyword rules. Found ${findings.length === 1 ? "one issue" : "several issues"} backed by review quotes, website text, or listing data.`
     : "Demo diagnosis from keyword rules. No evidence-backed issues found.";
   return { summary, findings: findings.slice(0, 6) };
 }

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Business, Finding, Review, RoiEstimate, Run, RunStep } from "../types";
+import type { Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, WebPage } from "../types";
 import { newId, now, rankBusinesses, type Store } from "./types";
 
 // DEMO / LOCAL store. In-memory tables, optionally persisted to a JSON file
@@ -14,9 +14,20 @@ interface Tables {
   reviews: Review[];
   findings: Finding[];
   roi_estimates: RoiEstimate[];
+  web_pages: WebPage[];
+  knowledge_facts: KnowledgeFact[];
 }
 
-const empty = (): Tables => ({ runs: [], run_steps: [], businesses: [], reviews: [], findings: [], roi_estimates: [] });
+const empty = (): Tables => ({
+  runs: [],
+  run_steps: [],
+  businesses: [],
+  reviews: [],
+  findings: [],
+  roi_estimates: [],
+  web_pages: [],
+  knowledge_facts: [],
+});
 
 export function createLocalStore(opts: { file?: string | null } = {}): Store {
   const file = opts.file ?? null;
@@ -27,9 +38,9 @@ export function createLocalStore(opts: { file?: string | null } = {}): Store {
   function load() {
     if (!file) return;
     try {
-      const st = fs.statSync(file);
+      const st = fs.statSync(/*turbopackIgnore: true*/ file);
       if (st.mtimeMs !== loadedMtime) {
-        db = { ...empty(), ...JSON.parse(fs.readFileSync(file, "utf8")) };
+        db = { ...empty(), ...JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ file, "utf8")) };
         loadedMtime = st.mtimeMs;
       }
     } catch {
@@ -40,11 +51,11 @@ export function createLocalStore(opts: { file?: string | null } = {}): Store {
   function persist(): Promise<void> {
     if (!file) return Promise.resolve();
     writeChain = writeChain.then(() => {
-      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.mkdirSync(/*turbopackIgnore: true*/ path.dirname(file), { recursive: true });
       const tmp = `${file}.${process.pid}.tmp`;
-      fs.writeFileSync(tmp, JSON.stringify(db));
-      fs.renameSync(tmp, file);
-      loadedMtime = fs.statSync(file).mtimeMs;
+      fs.writeFileSync(/*turbopackIgnore: true*/ tmp, JSON.stringify(db));
+      fs.renameSync(/*turbopackIgnore: true*/ tmp, file);
+      loadedMtime = fs.statSync(/*turbopackIgnore: true*/ file).mtimeMs;
     });
     return writeChain;
   }
@@ -88,6 +99,10 @@ export function createLocalStore(opts: { file?: string | null } = {}): Store {
       read(() => db.run_steps.filter((s) => s.run_id === runId && (!businessId || s.business_id === businessId))),
 
     insertBusiness: (b) => mutate(() => {
+      // Same constraint as Postgres: unique (run_id, place_id).
+      if (db.businesses.some((x) => x.run_id === b.run_id && x.place_id === b.place_id)) {
+        throw new Error(`duplicate place_id ${b.place_id} in run`);
+      }
       const row: Business = { ...b, id: newId(), created_at: now() };
       db.businesses.push(row);
       return row;
@@ -121,5 +136,19 @@ export function createLocalStore(opts: { file?: string | null } = {}): Store {
     updateRoi: (id, patch) => mutate(() => patchRow(db.roi_estimates, id, { ...patch, updated_at: now() })),
     getRoi: (id) => read(() => db.roi_estimates.find((r) => r.id === id) ?? null),
     listRoi: (businessId) => read(() => db.roi_estimates.filter((r) => r.business_id === businessId)),
+
+    insertWebPage: (p) => mutate(() => {
+      const row: WebPage = { ...p, id: newId(), fetched_at: now() };
+      db.web_pages.push(row);
+      return row;
+    }),
+    listWebPages: (businessId) => read(() => db.web_pages.filter((p) => p.business_id === businessId)),
+
+    insertKnowledgeFacts: (rows) => mutate(() => {
+      const out = rows.map((r) => ({ ...r, id: newId(), created_at: now() }));
+      db.knowledge_facts.push(...out);
+      return out;
+    }),
+    listKnowledgeFacts: (businessId) => read(() => db.knowledge_facts.filter((k) => k.business_id === businessId)),
   };
 }

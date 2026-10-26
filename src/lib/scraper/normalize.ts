@@ -35,6 +35,7 @@ export function normalizePlace(item: ApifyPlaceItem): NormalizedPlace | null {
   if (isFixture) {
     raw.fixture = true;
     if (item.__fixtureBehavior) raw.fixtureBehavior = item.__fixtureBehavior;
+    if (item.__fixtureWebsite) raw.fixtureWebsite = item.__fixtureWebsite;
   }
 
   return {

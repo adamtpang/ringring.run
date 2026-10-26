@@ -21,8 +21,13 @@ export interface RunMode {
   llm_model: string | null;
 }
 
+export type SearchKind = "category" | "name";
+
 export interface Run {
   id: string;
+  /** "category": category + city, many businesses. "name": one business looked up by name + city. */
+  search_kind: SearchKind;
+  /** The search text: a category like "plumbers", or a business name when search_kind is "name". */
   category: string;
   city: string;
   max_count: number;
@@ -123,7 +128,42 @@ export type SolutionId = (typeof SOLUTION_IDS)[number];
 
 export type Evidence =
   | { source: "review"; review_id: string; quote: string; rating: number | null }
-  | { source: "listing"; fact: ListingFact; value: string };
+  | { source: "listing"; fact: ListingFact; value: string }
+  | { source: "website"; page_id: string; url: string; quote: string };
+
+/** Text read from a business's own website. Stored as raw evidence that findings can cite. */
+export interface WebPage {
+  id: string;
+  business_id: string;
+  url: string;
+  final_url: string | null;
+  status: "ok" | "failed" | "skipped";
+  http_status: number | null;
+  title: string | null;
+  text: string;
+  error: string | null;
+  fetched_at: string;
+}
+
+// Knowledge facts: per-business facts with a citation, stored so a later
+// voice agent knowledge pack (hours, services, prices, FAQs) can be generated
+// from stored data only. Phase 1 fills contact and hours facts from the listing.
+export const KNOWLEDGE_KINDS = ["contact", "hours", "service", "price", "faq", "policy", "service_area"] as const;
+export type KnowledgeKind = (typeof KNOWLEDGE_KINDS)[number];
+
+export interface KnowledgeFact {
+  id: string;
+  business_id: string;
+  kind: KnowledgeKind;
+  label: string;
+  value: string;
+  source_type: "listing" | "website" | "review" | "owner";
+  /** Where the value came from: a listing field name, a web_pages id, or a reviews id. */
+  source_ref: string;
+  /** Verbatim supporting text when the source is a page or review. */
+  quote: string | null;
+  created_at: string;
+}
 
 export interface Finding {
   id: string;
@@ -161,6 +201,9 @@ export interface RoiEstimate {
 }
 
 export interface ScanInput {
+  /** Defaults to "category". */
+  kind?: SearchKind;
+  /** Category text, or the business name when kind is "name". */
   category: string;
   city: string;
   maxCount: number;

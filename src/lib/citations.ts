@@ -1,11 +1,12 @@
 import { listingFacts, LISTING_FACT_LABELS } from "./listing";
 import type { Diagnosis, LlmFinding } from "./schema";
 import { KIND_TO_SOLUTION } from "./solutions";
-import type { Business, Evidence, FindingKind, Review } from "./types";
+import type { Evidence, FindingKind, Review, WebPage } from "./types";
 
 // Post-validation of LLM findings. A finding survives only if every citation
 // checks out against stored data:
 //  - review quotes must be a real substring of a stored review for this business
+//  - website quotes must be a real substring of the stored homepage text
 //  - listing facts must actually hold for this listing
 //  - any number in the title or detail must appear in the cited evidence
 
@@ -28,6 +29,13 @@ function trimQuote(q: string): string {
 }
 
 /** Returns the review that contains the quote, preferring the cited id. */
+/** Returns the successfully read page that contains the quote. */
+export function findPageSource(quote: string, pages: Pick<WebPage, "id" | "url" | "status" | "text">[]) {
+  const q = trimQuote(quote);
+  if (q.length < 12) return null;
+  return pages.find((p) => p.status === "ok" && normalizeText(p.text).includes(q)) ?? null;
+}
+
 export function findQuoteSource(quote: string, reviews: Review[], citedId?: string | null): Review | null {
   const q = trimQuote(quote);
   if (q.length < 12) return null;
@@ -68,6 +76,7 @@ export function validateFindings(
   business: BusinessFacts,
   reviews: Review[],
   aliasMap: Record<string, string> = {},
+  pages: Pick<WebPage, "id" | "url" | "status" | "text">[] = [],
 ): CitationResult {
   const facts = listingFacts(business);
   const kept: ValidatedFinding[] = [];
@@ -75,7 +84,7 @@ export function validateFindings(
   const seenKinds = new Set<string>();
 
   for (const f of diagnosis.findings) {
-    const result = validateOne(f, facts, reviews, aliasMap);
+    const result = validateOne(f, facts, reviews, aliasMap, pages);
     if ("reason" in result) {
       dropped.push({ kind: f.kind, title: f.title, reason: result.reason });
       continue;
@@ -95,6 +104,7 @@ function validateOne(
   facts: ReturnType<typeof listingFacts>,
   reviews: Review[],
   aliasMap: Record<string, string>,
+  pages: Pick<WebPage, "id" | "url" | "status" | "text">[],
 ): ValidatedFinding | { reason: string } {
   const evidence: Evidence[] = [];
   for (const e of f.evidence) {
@@ -105,6 +115,12 @@ function validateOne(
         return { reason: `quote not found in any stored review: "${truncate(e.quote ?? "", 80)}"` };
       }
       evidence.push({ source: "review", review_id: src.id, quote: trimQuote(e.quote), rating: src.rating });
+    } else if (e.source === "website") {
+      const page = e.quote ? findPageSource(e.quote, pages) : null;
+      if (!page || !e.quote) {
+        return { reason: `quote not found on the business website: "${truncate(e.quote ?? "", 80)}"` };
+      }
+      evidence.push({ source: "website", page_id: page.id, url: page.url, quote: trimQuote(e.quote) });
     } else {
       const fact = e.listing_fact;
       if (!fact) return { reason: "listing evidence without a fact" };
@@ -116,7 +132,7 @@ function validateOne(
   }
   if (evidence.length === 0) return { reason: "no evidence" };
 
-  const evidenceText = evidence.map((e) => (e.source === "review" ? e.quote : e.value)).join(" ");
+  const evidenceText = evidence.map((e) => (e.source === "listing" ? e.value : e.quote)).join(" ");
   const unsupported = unsupportedNumbers(`${f.title} ${f.detail}`, evidenceText);
   if (unsupported.length > 0) {
     return { reason: `numbers not supported by evidence: ${unsupported.join(", ")}` };

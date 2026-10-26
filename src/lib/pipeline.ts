@@ -3,13 +3,15 @@ import { configured, llmConfig, runtimeMode } from "./env";
 import { llmDiagnoser, stubDiagnoser, type Diagnoser } from "./diagnose";
 import { errorMessage, withRetry, type RetryOptions } from "./retry";
 import { computeMonthlyValue, defaultAssumptions, formulaFor, opportunityScore } from "./roi";
-import { apifyScraper, fixtureScraper, type Scraper } from "./scraper";
+import { apifyScraper, findFixtureByName, fixtureScraper, type Scraper } from "./scraper";
 import { dedupePlaces, normalizePlace } from "./scraper/normalize";
 import { getStore, type Store } from "./store";
-import type { Business, Run, RunMode, RunStep, ScanInput, StepStatus } from "./types";
+import { listingKnowledge, websiteKnowledge } from "./knowledge";
+import { readWebsite, type WebsiteReadResult } from "./website";
+import type { Business, Run, RunMode, RunStep, ScanInput, StepStatus, WebPage } from "./types";
 
-// The scan pipeline. One run = scrape, store, then per business:
-// diagnose -> validate citations -> ROI. A failing business is marked failed
+// The scan pipeline. One run = scrape, dedupe, store, then per business:
+// read website -> diagnose -> validate citations -> ROI. A failing business is marked failed
 // and logged; it never stops the run.
 
 export interface PipelineDeps {
@@ -20,6 +22,22 @@ export interface PipelineDeps {
   concurrency?: number;
   retry?: RetryOptions;
   log?: (line: string) => void;
+  /** Reads a business homepage. Defaults to fixture text for demo businesses and a real fetch otherwise. */
+  readSite?: (b: Business) => Promise<WebsiteReadResult>;
+}
+
+/** Demo businesses never touch the network: their "homepage" is fictional fixture text. */
+export async function fixtureSiteReader(b: Business): Promise<WebsiteReadResult> {
+  const site = (b.raw as { fixtureWebsite?: { title: string; text: string } | { error: string } }).fixtureWebsite;
+  const base = { url: b.website ?? "", final_url: b.website, http_status: null, title: null, text: "" };
+  if (!b.website) return { ...base, final_url: null, status: "skipped", error: "No website on the listing" };
+  if (!site) return { ...base, status: "skipped", error: "Demo mode: no fixture page for this business" };
+  if ("error" in site) return { ...base, status: "failed", error: site.error };
+  return { ...base, status: "ok", http_status: 200, title: site.title, text: site.text, error: null };
+}
+
+export function defaultSiteReader(b: Business): Promise<WebsiteReadResult> {
+  return b.is_fixture ? fixtureSiteReader(b) : readWebsite(b.website, { timeoutMs: 8000 });
 }
 
 export function defaultDeps(): PipelineDeps {
@@ -35,6 +53,7 @@ export function defaultDeps(): PipelineDeps {
 
 export async function createRun(input: ScanInput, deps: Pick<PipelineDeps, "store" | "mode">): Promise<Run> {
   return deps.store.createRun({
+    search_kind: input.kind ?? "category",
     category: input.category,
     city: input.city,
     max_count: input.maxCount,
@@ -67,7 +86,7 @@ function stepLogger(store: Store, runId: string, log?: (l: string) => void) {
       );
       return {
         async update(status: StepStatus, msg: string, attempt?: number) {
-          log?.(`  ${step.padEnd(9)} ${status.padEnd(5)} ${msg}`);
+          log?.(`  ${step.padEnd(9)} ${status.padEnd(7)} ${msg}`);
           if (row) {
             await safe(() =>
               store.updateStep(row.id, {
@@ -82,7 +101,7 @@ function stepLogger(store: Store, runId: string, log?: (l: string) => void) {
       };
     },
     async event(step: string, status: StepStatus, message: string, businessId: string | null = null) {
-      log?.(`  ${step.padEnd(9)} ${status.padEnd(5)} ${message}`);
+      log?.(`  ${step.padEnd(9)} ${status.padEnd(7)} ${message}`);
       await safe(() =>
         store.addStep({ run_id: runId, business_id: businessId, step, status, message, attempt: 1, duration_ms: 0 }),
       );
@@ -90,7 +109,7 @@ function stepLogger(store: Store, runId: string, log?: (l: string) => void) {
   };
 }
 
-const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : /s$/.test(word) ? "es" : "s"}`;
 
 async function mapLimit<T>(items: T[], limit: number, fn: (item: T, i: number) => Promise<void>) {
   let next = 0;
@@ -114,7 +133,7 @@ export interface RunSummary {
 }
 
 export async function executeRun(runId: string, deps: PipelineDeps): Promise<RunSummary> {
-  const { store, scraper, diagnoser, log } = deps;
+  const { store, scraper, log } = deps;
   const steps = stepLogger(store, runId, log);
   const retry: RetryOptions = { retries: 2, baseDelayMs: 800, ...(deps.retry ?? {}) };
   const summary: RunSummary = {
@@ -129,7 +148,8 @@ export async function executeRun(runId: string, deps: PipelineDeps): Promise<Run
 
   const run = await store.getRun(runId);
   if (!run) throw new Error(`Run ${runId} not found`);
-  const input: ScanInput = { category: run.category, city: run.city, maxCount: run.max_count };
+  const input: ScanInput = { kind: run.search_kind ?? "category", category: run.category, city: run.city, maxCount: run.max_count };
+  const byName = input.kind === "name";
   await store.updateRun(runId, { status: "running", started_at: new Date().toISOString() });
 
   try {
@@ -137,8 +157,12 @@ export async function executeRun(runId: string, deps: PipelineDeps): Promise<Run
     const scrapeStep = await steps.start(
       "scrape",
       scraper.mode === "apify"
-        ? `Starting Apify Google Maps scrape: "${input.category}" in ${input.city}, up to ${input.maxCount}`
-        : `Demo mode: loading fictional fixture places for "${input.category}" in ${input.city}`,
+        ? byName
+          ? `Looking up "${input.category}" in ${input.city} on Google Maps via Apify`
+          : `Starting Apify Google Maps scrape: "${input.category}" in ${input.city}, up to ${input.maxCount}`
+        : byName
+          ? `Demo mode: looking up "${input.category}" in ${input.city} among fictional fixtures`
+          : `Demo mode: loading fictional fixture places for "${input.category}" in ${input.city}`,
     );
     let items;
     try {
@@ -156,8 +180,23 @@ export async function executeRun(runId: string, deps: PipelineDeps): Promise<Run
       await scrapeStep.update("error", `Scrape failed: ${errorMessage(e)}`);
       throw e;
     }
+    if (byName && scraper.mode === "fixture" && !findFixtureByName(input.category)) {
+      await steps.event(
+        "scrape",
+        "warn",
+        `Demo mode cannot look up real businesses. No fictional fixture matches "${input.category}", so this run shows a fictional sample instead.`,
+      );
+    }
     const unique = dedupePlaces(items).slice(0, input.maxCount);
-    await scrapeStep.update("ok", `Scraped ${unique.length} places`);
+    const dupes = items.length - dedupePlaces(items).length;
+    await scrapeStep.update(
+      unique.length ? "ok" : "warn",
+      unique.length
+        ? `Scraped ${plural(unique.length, "place")}${dupes ? `, removed ${plural(dupes, "duplicate")} by Google place id` : ""}`
+        : byName
+          ? `No Google Maps match for "${input.category}" in ${input.city}`
+          : "No places found",
+    );
 
     // 2. Store
     const storeStep = await steps.start("store", `Saving ${unique.length} businesses and their reviews`);
@@ -171,6 +210,7 @@ export async function executeRun(runId: string, deps: PipelineDeps): Promise<Run
         }
         const b = await store.insertBusiness({ ...norm.business, run_id: runId });
         await store.insertReviews(norm.reviews.map((r) => ({ ...r, business_id: b.id })));
+        await store.insertKnowledgeFacts(listingKnowledge(b).map((k) => ({ ...k, business_id: b.id })));
         businesses.push(b);
       } catch (e) {
         await steps.event("store", "warn", `Could not save "${item.title ?? "unknown"}": ${errorMessage(e)}`);
@@ -178,7 +218,7 @@ export async function executeRun(runId: string, deps: PipelineDeps): Promise<Run
     }
     summary.businessCount = businesses.length;
     await store.updateRun(runId, { business_count: businesses.length });
-    await storeStep.update("ok", `Saved ${businesses.length} businesses`);
+    await storeStep.update("ok", `Saved ${plural(businesses.length, "business")}`);
 
     // 3. Per business: diagnose, validate, ROI
     await mapLimit(businesses, deps.concurrency ?? 3, async (b) => {
@@ -197,15 +237,15 @@ export async function executeRun(runId: string, deps: PipelineDeps): Promise<Run
       "rank",
       "ok",
       top && top.est_monthly_value > 0
-        ? `Ranked ${ranked.length} businesses. Top: ${top.name} (est. $${top.est_monthly_value.toLocaleString("en-US")}/mo)`
-        : `Ranked ${ranked.length} businesses`,
+        ? `Ranked ${plural(ranked.length, "business")}. Top: ${top.name} (est. $${top.est_monthly_value.toLocaleString("en-US")}/mo)`
+        : `Ranked ${plural(ranked.length, "business")}`,
     );
 
     summary.status = summary.failedCount > 0 ? "completed_with_errors" : "completed";
     await store.updateRun(runId, {
       status: summary.status,
       finished_at: new Date().toISOString(),
-      error: summary.failedCount > 0 ? `${summary.failedCount} business(es) failed diagnosis` : null,
+      error: summary.failedCount > 0 ? `${plural(summary.failedCount, "business")} failed diagnosis` : null,
     });
   } catch (e) {
     summary.status = "failed";
@@ -228,17 +268,18 @@ async function processBusiness(
   try {
     await store.updateBusiness(b.id, { diagnosis_status: "running" });
     const reviews = await store.listReviews(b.id);
+    const pages = await readSiteStep(b, deps, steps);
 
     const dStep = await steps.start(
       "diagnose",
       diagnoser.mode === "llm"
-        ? `${b.name}: asking ${diagnoser.model} with ${reviews.length} reviews`
-        : `${b.name}: demo keyword diagnoser on ${reviews.length} reviews`,
+        ? `${b.name}: asking ${diagnoser.model} with ${plural(reviews.length, "review")}${pages.some((p) => p.status === "ok") ? " and website text" : ""}`
+        : `${b.name}: demo keyword diagnoser on ${plural(reviews.length, "review")}${pages.some((p) => p.status === "ok") ? " and website text" : ""}`,
       b.id,
     );
     let result;
     try {
-      result = await withRetry(() => diagnoser.diagnose(b, reviews), {
+      result = await withRetry(() => diagnoser.diagnose(b, reviews, pages), {
         ...retry,
         onRetry: ({ attempt, error, delayMs }) =>
           dStep.update("retry", `${b.name}: attempt ${attempt} failed (${errorMessage(error)}). Retrying in ${delayMs} ms`, attempt + 1),
@@ -251,7 +292,7 @@ async function processBusiness(
     }
     await dStep.update("ok", `${b.name}: ${plural(result.diagnosis.findings.length, "candidate finding")}`);
 
-    const { kept, dropped } = validateFindings(result.diagnosis, b, reviews, result.aliasMap);
+    const { kept, dropped } = validateFindings(result.diagnosis, b, reviews, result.aliasMap, pages);
     for (const d of dropped) {
       await steps.event("validate", "warn", `${b.name}: dropped "${d.title}" (${d.kind}): ${d.reason}`, b.id);
     }
@@ -266,7 +307,7 @@ async function processBusiness(
     let total = 0;
     for (const f of kept) {
       const finding = await store.insertFinding({ ...f, business_id: b.id, run_id: run.id });
-      const assumptions = defaultAssumptions(f.kind, { ...b, searchCategory: run.category });
+      const assumptions = defaultAssumptions(f.kind, { ...b, searchCategory: byNameRun(run) ? undefined : run.category });
       const monthly = computeMonthlyValue(assumptions);
       total += monthly;
       await store.insertRoi({
@@ -298,6 +339,42 @@ async function processBusiness(
     await steps.event("diagnose", "error", `${b.name}: unexpected error: ${msg}`, b.id);
     await store.updateBusiness(b.id, { diagnosis_status: "failed", diagnosis_error: msg }).catch(() => undefined);
     return false;
+  }
+}
+
+const byNameRun = (run: Run) => run.search_kind === "name";
+
+/** Read website step. Never throws: a failed read is logged and the business continues with reviews and listing data. */
+async function readSiteStep(b: Business, deps: PipelineDeps, steps: ReturnType<typeof stepLogger>): Promise<WebPage[]> {
+  const { store } = deps;
+  if (!b.website) {
+    await steps.event("website", "skipped", `${b.name}: no website on the listing`, b.id);
+    return [];
+  }
+  const step = await steps.start("website", `${b.name}: reading ${b.website}`, b.id);
+  try {
+    const r = await (deps.readSite ?? defaultSiteReader)(b);
+    const page = await store.insertWebPage({
+      business_id: b.id,
+      url: r.url || b.website,
+      final_url: r.final_url,
+      status: r.status,
+      http_status: r.http_status,
+      title: r.title,
+      text: r.text,
+      error: r.error,
+    });
+    if (r.status === "ok") {
+      const facts = websiteKnowledge(page);
+      if (facts.length) await store.insertKnowledgeFacts(facts.map((k) => ({ ...k, business_id: b.id })));
+      await step.update("ok", `${b.name}: read ${r.text.length.toLocaleString("en-US")} characters of homepage text`);
+    } else {
+      await step.update(r.status === "skipped" ? "skipped" : "warn", `${b.name}: website not read (${r.error}). Continuing with reviews and listing`);
+    }
+    return [page];
+  } catch (e) {
+    await step.update("warn", `${b.name}: website not read (${errorMessage(e)}). Continuing with reviews and listing`);
+    return [];
   }
 }
 

@@ -1,4 +1,4 @@
-import type { Business, Finding, Review, RoiEstimate, Run, RunStep } from "../types";
+import type { Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, WebPage } from "../types";
 
 export type NewRun = Omit<Run, "id" | "created_at">;
 export type NewStep = Omit<RunStep, "id" | "created_at" | "updated_at">;
@@ -6,6 +6,8 @@ export type NewBusinessRow = Omit<Business, "id" | "created_at">;
 export type NewReviewRow = Omit<Review, "id">;
 export type NewFinding = Omit<Finding, "id" | "created_at">;
 export type NewRoi = Omit<RoiEstimate, "id" | "updated_at">;
+export type NewWebPage = Omit<WebPage, "id" | "fetched_at">;
+export type NewKnowledgeFact = Omit<KnowledgeFact, "id" | "created_at">;
 
 export interface Store {
   kind: "supabase" | "local";
@@ -33,6 +35,12 @@ export interface Store {
   updateRoi(id: string, patch: Partial<RoiEstimate>): Promise<void>;
   getRoi(id: string): Promise<RoiEstimate | null>;
   listRoi(businessId: string): Promise<RoiEstimate[]>;
+
+  insertWebPage(p: NewWebPage): Promise<WebPage>;
+  listWebPages(businessId: string): Promise<WebPage[]>;
+
+  insertKnowledgeFacts(rows: NewKnowledgeFact[]): Promise<KnowledgeFact[]>;
+  listKnowledgeFacts(businessId: string): Promise<KnowledgeFact[]>;
 }
 
 export const now = () => new Date().toISOString();

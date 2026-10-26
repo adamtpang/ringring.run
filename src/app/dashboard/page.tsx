@@ -1,3 +1,8 @@
-export default function Dashboard() {
-  return <main className="p-10">Dashboard</main>;
+import type { Metadata } from "next";
+import { DashboardClient } from "./DashboardClient";
+
+export const metadata: Metadata = { title: "Dashboard | ringring.run" };
+
+export default function DashboardPage() {
+  return <DashboardClient />;
 }

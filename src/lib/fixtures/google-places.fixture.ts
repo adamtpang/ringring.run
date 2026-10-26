@@ -21,6 +21,8 @@ function place(
     hours?: boolean;
     reviews: R[];
     behavior?: "fail_diagnosis" | "hallucinate";
+    /** Fictional homepage text served by the demo website reader. */
+    site?: { title: string; text: string } | { error: string };
   },
 ): ApifyPlaceItem {
   const id = `fixture-${String(n).padStart(3, "0")}`;
@@ -57,11 +59,13 @@ function place(
     })),
     __fixture: true,
     __fixtureBehavior: opts.behavior,
+    __fixtureWebsite: opts.site,
   };
 }
 
 export const FIXTURE_PLACES: ApifyPlaceItem[] = [
   place(1, "Example Plumbing Co", {
+    site: { title: "Example Plumbing Co", text: "Example Plumbing Co.\nLicensed plumbers for homes and small businesses.\nServices: drain cleaning, water heater repair, slab leak repair.\nTo schedule service, call our office during business hours.\nHours: Monday to Friday, 8 AM to 5 PM." },
     rating: 3.6,
     reviewsCount: 48,
     reviews: [
@@ -84,6 +88,7 @@ export const FIXTURE_PLACES: ApifyPlaceItem[] = [
     ],
   }),
   place(3, "Demo Rooter Services", {
+    site: { error: "Simulated timeout (demo fixture): the site did not respond in time" },
     rating: 3.2,
     reviewsCount: 61,
     reviews: [
@@ -95,6 +100,7 @@ export const FIXTURE_PLACES: ApifyPlaceItem[] = [
     ],
   }),
   place(4, "Placeholder Pipe Works", {
+    site: { title: "Placeholder Pipe Works", text: "Placeholder Pipe Works.\nBook online any time.\nEmergency burst pipe repair on nights and weekends.\nServices: repiping, leak detection, fixture installs." },
     rating: 4.6,
     reviewsCount: 120,
     reviews: [
@@ -105,6 +111,7 @@ export const FIXTURE_PLACES: ApifyPlaceItem[] = [
     ],
   }),
   place(5, "Example Water Heater Pros", {
+    site: { title: "Example Water Heater Pros", text: "Example Water Heater Pros.\nTankless and tank water heater installation and repair.\nRequest a quote by email and we will reply as soon as we can." },
     rating: 4.0,
     reviewsCount: 33,
     reviews: [
@@ -127,6 +134,7 @@ export const FIXTURE_PLACES: ApifyPlaceItem[] = [
     ],
   }),
   place(7, "Example Flaky Diagnosis LLC", {
+    site: { title: "Example Flaky Diagnosis LLC", text: "Example Flaky Diagnosis LLC.\nKitchen and bath plumbing." },
     rating: 3.9,
     reviewsCount: 27,
     behavior: "fail_diagnosis",
@@ -136,6 +144,7 @@ export const FIXTURE_PLACES: ApifyPlaceItem[] = [
     ],
   }),
   place(8, "Example Hallucination Check Co", {
+    site: { title: "Example Hallucination Check Co", text: "Example Hallucination Check Co.\nGas line and water line repair.\nCall us to book an appointment." },
     rating: 3.4,
     reviewsCount: 40,
     behavior: "hallucinate",
@@ -146,6 +155,7 @@ export const FIXTURE_PLACES: ApifyPlaceItem[] = [
     ],
   }),
   place(9, "Example Emergency Plumbers", {
+    site: { title: "Example Emergency Plumbers", text: "Example Emergency Plumbers.\nEmergency plumbing, day or night.\nCall now." },
     rating: 3.8,
     reviewsCount: 74,
     reviews: [
@@ -156,6 +166,7 @@ export const FIXTURE_PLACES: ApifyPlaceItem[] = [
     ],
   }),
   place(10, "Sample Family Plumbing", {
+    site: { title: "Sample Family Plumbing", text: "Sample Family Plumbing.\nFamily owned plumbing service.\nServices: shower valves, toilets, faucets.\nFree estimates.\nCall to book a visit." },
     rating: 4.4,
     reviewsCount: 52,
     reviews: [
@@ -166,6 +177,7 @@ export const FIXTURE_PLACES: ApifyPlaceItem[] = [
     ],
   }),
   place(11, "Demo Pipe and Valve", {
+    site: { title: "Demo Pipe and Valve", text: "Demo Pipe and Valve.\nLeak repair and valve replacement." },
     rating: 3.7,
     reviewsCount: 18,
     reviews: [
@@ -175,6 +187,7 @@ export const FIXTURE_PLACES: ApifyPlaceItem[] = [
     ],
   }),
   place(12, "Example Quiet Plumbing", {
+    site: { title: "Example Quiet Plumbing", text: "Example Quiet Plumbing.\nBook online in under a minute.\nServices: drains, water heaters, remodels." },
     rating: 4.9,
     reviewsCount: 210,
     reviews: [

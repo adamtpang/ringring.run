@@ -1,5 +1,5 @@
 import { parseDiagnosis, DIAGNOSIS_JSON_SCHEMA, type Diagnosis } from "../schema";
-import type { Business, Review } from "../types";
+import type { Business, Review, WebPage } from "../types";
 import { createLlmClient, type LlmClient } from "./llm-client";
 import { buildUserPrompt, SYSTEM_PROMPT } from "./prompt";
 import { stubDiagnose } from "./stub";
@@ -12,7 +12,7 @@ export interface DiagnoseResult {
 export interface Diagnoser {
   mode: "llm" | "stub";
   model: string | null;
-  diagnose(business: Business, reviews: Review[]): Promise<DiagnoseResult>;
+  diagnose(business: Business, reviews: Review[], pages?: WebPage[]): Promise<DiagnoseResult>;
 }
 
 export class SchemaError extends Error {
@@ -26,8 +26,8 @@ export function llmDiagnoser(client: LlmClient = createLlmClient()): Diagnoser {
   return {
     mode: "llm",
     model: client.model,
-    async diagnose(business, reviews) {
-      const { prompt, aliasMap } = buildUserPrompt(business, reviews);
+    async diagnose(business, reviews, pages = []) {
+      const { prompt, aliasMap } = buildUserPrompt(business, reviews, pages);
       const raw = await client.completeJson({
         system: SYSTEM_PROMPT,
         user: prompt,
@@ -46,9 +46,9 @@ export function stubDiagnoser(): Diagnoser {
   return {
     mode: "stub",
     model: null,
-    async diagnose(business, reviews) {
-      const { aliasMap } = buildUserPrompt(business, reviews);
-      const raw = stubDiagnose(business, reviews, aliasMap);
+    async diagnose(business, reviews, pages = []) {
+      const { aliasMap } = buildUserPrompt(business, reviews, pages);
+      const raw = stubDiagnose(business, reviews, aliasMap, pages);
       // Validate stub output with the same schema the LLM must satisfy.
       const parsed = parseDiagnosis(raw);
       if (!parsed.ok) throw new SchemaError(parsed.error);

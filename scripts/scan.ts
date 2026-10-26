@@ -1,4 +1,7 @@
-// CLI: pnpm scan "plumbers" "Austin TX" 10
+// CLI:
+//   pnpm scan "plumbers" "Austin TX" 10              category + city
+//   pnpm scan --name "Joe's Plumbing, Austin TX"      one business by name
+//   pnpm scan --name "Joe's Plumbing" "Austin TX"
 // Loads .env.local if present (values are never printed). Without keys it runs
 // in demo mode on fictional fixture data and the local JSON store.
 
@@ -13,17 +16,25 @@ async function main() {
   const { defaultDeps, createRun, executeRun } = await import("../src/lib/pipeline");
   const { isDemo } = await import("../src/lib/env");
 
-  const [category, city, max] = process.argv.slice(2);
-  const parsed = ScanInputSchema.safeParse({ category, city, maxCount: Number(max ?? 10) });
+  const args = process.argv.slice(2).filter((a) => a !== "--");
+  const byName = args[0] === "--name";
+  const parsed = byName
+    ? ScanInputSchema.safeParse({ name: args[1], city: args[2] })
+    : ScanInputSchema.safeParse({ category: args[0], city: args[1], maxCount: Number(args[2] ?? 10) });
   if (!parsed.success) {
     console.error('Usage: pnpm scan "<category>" "<city>" [maxCount 1-50]');
+    console.error('       pnpm scan --name "<business name>, <city>"');
     console.error(parsed.error.issues.map((i) => `  ${i.path.join(".")}: ${i.message}`).join("\n"));
     process.exit(1);
   }
 
   const deps = defaultDeps();
   const m = deps.mode;
-  console.log(`ringring.run scan: "${parsed.data.category}" in ${parsed.data.city}, max ${parsed.data.maxCount}`);
+  console.log(
+    parsed.data.kind === "name"
+      ? `ringring.run lookup: "${parsed.data.category}" in ${parsed.data.city}`
+      : `ringring.run scan: "${parsed.data.category}" in ${parsed.data.city}, max ${parsed.data.maxCount}`,
+  );
   console.log(
     `mode: scraper=${m.scraper} diagnoser=${m.diagnoser}${m.llm_model ? ` (${m.llm_model})` : ""} store=${m.store}` +
       (isDemo(m) ? "  [DEMO DATA: fictional fixtures or stub components in use]" : ""),

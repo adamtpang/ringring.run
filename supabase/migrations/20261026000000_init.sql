@@ -6,6 +6,8 @@ create extension if not exists pgcrypto;
 
 create table if not exists public.runs (
   id uuid primary key default gen_random_uuid(),
+  -- 'category': category + city scan. 'name': one business looked up by name (category holds the name).
+  search_kind text not null default 'category' check (search_kind in ('category', 'name')),
   category text not null,
   city text not null,
   max_count integer not null check (max_count between 1 and 50),
@@ -50,6 +52,9 @@ create table if not exists public.businesses (
   unique (run_id, place_id)
 );
 create index if not exists businesses_run_rank_idx on public.businesses (run_id, est_monthly_value desc);
+-- Each run keeps its own snapshot; (run_id, place_id) dedupes within a run.
+-- This index finds every snapshot of one Google place across runs.
+create index if not exists businesses_place_idx on public.businesses (place_id, created_at desc);
 
 create table if not exists public.run_steps (
   id uuid primary key default gen_random_uuid(),
@@ -89,8 +94,9 @@ create table if not exists public.findings (
   severity smallint not null check (severity between 1 and 5),
   solution text not null
     check (solution in ('ai_receptionist', 'review_responder', 'landing_page', 'booking_followup')),
-  -- Array of {source:'review', review_id, quote, rating} or {source:'listing', fact, value}.
-  -- Review quotes are verified as substrings of stored reviews before insert.
+  -- Array of {source:'review', review_id, quote, rating}, {source:'website', page_id, url, quote},
+  -- or {source:'listing', fact, value}. Review and website quotes are verified as substrings
+  -- of the stored review or page text before insert.
   evidence jsonb not null check (jsonb_typeof(evidence) = 'array' and jsonb_array_length(evidence) > 0),
   created_at timestamptz not null default now()
 );
@@ -109,9 +115,44 @@ create table if not exists public.roi_estimates (
 );
 create index if not exists roi_business_idx on public.roi_estimates (business_id);
 
+-- Homepage text read by the "read website" step. Findings cite it by page id.
+create table if not exists public.web_pages (
+  id uuid primary key default gen_random_uuid(),
+  business_id uuid not null references public.businesses (id) on delete cascade,
+  url text not null,
+  final_url text,
+  status text not null check (status in ('ok', 'failed', 'skipped')),
+  http_status integer,
+  title text,
+  text text not null default '',
+  error text,
+  fetched_at timestamptz not null default now()
+);
+create index if not exists web_pages_business_idx on public.web_pages (business_id);
+
+-- Per-business facts with sources. Raw material for a later voice agent
+-- knowledge pack (hours, services, prices, FAQs). Phase 1 fills listing facts
+-- and labeled homepage lines; nothing here calls anyone.
+create table if not exists public.knowledge_facts (
+  id uuid primary key default gen_random_uuid(),
+  business_id uuid not null references public.businesses (id) on delete cascade,
+  kind text not null check (kind in ('contact', 'hours', 'service', 'price', 'faq', 'policy', 'service_area')),
+  label text not null,
+  value text not null,
+  source_type text not null check (source_type in ('listing', 'website', 'review', 'owner')),
+  -- Listing field name, web_pages.id, or reviews.id.
+  source_ref text not null,
+  -- Verbatim supporting text for website and review sources.
+  quote text,
+  created_at timestamptz not null default now()
+);
+create index if not exists knowledge_facts_business_idx on public.knowledge_facts (business_id, kind);
+
 alter table public.runs enable row level security;
 alter table public.run_steps enable row level security;
 alter table public.businesses enable row level security;
 alter table public.reviews enable row level security;
 alter table public.findings enable row level security;
 alter table public.roi_estimates enable row level security;
+alter table public.web_pages enable row level security;
+alter table public.knowledge_facts enable row level security;

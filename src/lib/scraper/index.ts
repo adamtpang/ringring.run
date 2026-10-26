@@ -20,17 +20,38 @@ export function fixtureScraper(): Scraper {
   return {
     mode: "fixture",
     async scrape(input, hooks) {
+      if (input.kind === "name") {
+        const match = findFixtureByName(input.category);
+        if (match) {
+          await hooks?.onProgress?.(`Demo mode: found fictional fixture "${match.title}"`);
+          return [structuredClone(match)];
+        }
+        await hooks?.onProgress?.(
+          `Demo mode cannot look up real businesses. No fictional fixture matches "${input.category}", so this shows a fictional sample. Add APIFY_TOKEN for live lookups.`,
+        );
+        return [structuredClone(FIXTURE_PLACES[0])];
+      }
       await hooks?.onProgress?.(`Demo mode: loading ${FIXTURE_PLACES.length} fictional fixture places`);
       return FIXTURE_PLACES.slice(0, input.maxCount).map((p) => structuredClone(p));
     },
   };
 }
 
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+export function findFixtureByName(name: string): ApifyPlaceItem | null {
+  const q = norm(name);
+  if (!q) return null;
+  return FIXTURE_PLACES.find((p) => norm(p.title ?? "").includes(q) || q.includes(norm(p.title ?? ""))) ?? null;
+}
+
 export function apifyInput(input: ScanInput) {
+  const byName = input.kind === "name";
   return {
+    // By name: the business name is the search string and we keep the top match.
     searchStringsArray: [input.category],
     locationQuery: input.city,
-    maxCrawledPlacesPerSearch: input.maxCount,
+    maxCrawledPlacesPerSearch: byName ? 1 : input.maxCount,
     language: "en",
     maxReviews: Number(process.env.APIFY_MAX_REVIEWS || 20),
     reviewsSort: "newest",

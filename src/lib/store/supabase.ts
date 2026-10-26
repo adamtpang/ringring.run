@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Business, Finding, Review, RoiEstimate, Run, RunStep } from "../types";
+import type { Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, WebPage } from "../types";
 import { newId, now, type Store } from "./types";
 
 // Supabase (Postgres) store. Server side only: uses the service role key,
@@ -98,6 +98,28 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): Store 
       const { data, error } = await sb.from("roi_estimates").select("*").eq("business_id", businessId);
       if (error) throw new Error(error.message);
       return data as RoiEstimate[];
+    },
+
+    insertWebPage: (p) => insert<WebPage>("web_pages", { ...p, id: newId() }),
+    async listWebPages(businessId) {
+      const { data, error } = await sb.from("web_pages").select("*").eq("business_id", businessId).order("fetched_at");
+      if (error) throw new Error(error.message);
+      return data as WebPage[];
+    },
+
+    async insertKnowledgeFacts(rows) {
+      if (rows.length === 0) return [];
+      const { data, error } = await sb
+        .from("knowledge_facts")
+        .insert(rows.map((r) => ({ ...r, id: newId() })))
+        .select();
+      if (error) throw new Error(`Supabase insert knowledge_facts: ${error.message}`);
+      return data as KnowledgeFact[];
+    },
+    async listKnowledgeFacts(businessId) {
+      const { data, error } = await sb.from("knowledge_facts").select("*").eq("business_id", businessId).order("kind");
+      if (error) throw new Error(error.message);
+      return data as KnowledgeFact[];
     },
   };
 }

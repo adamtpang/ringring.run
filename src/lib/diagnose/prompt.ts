@@ -1,5 +1,7 @@
 import { listingFacts } from "../listing";
-import type { Business, Review } from "../types";
+import type { Business, Review, WebPage } from "../types";
+
+export const WEBSITE_EXCERPT_CHARS = 6000;
 
 export const SYSTEM_PROMPT = `You are a forward deployed engineer auditing a small local business from its public Google Maps listing and reviews.
 Find operational problems that cost the business customers and that AI or simple automation could fix.
@@ -12,13 +14,17 @@ Allowed finding kinds:
 - no_website: the listing has no website or customers cannot find the business online
 
 Hard rules:
-1. Every finding needs evidence. Review evidence: set source "review", review_id to the id shown (like "r3"), and quote copied VERBATIM from that review (a contiguous span, at least 12 characters, no edits, no ellipses). Listing evidence: set source "listing" and listing_fact to one of the facts listed as TRUE in the input.
+1. Every finding needs evidence. Review evidence: set source "review", review_id to the id shown (like "r3"), and quote copied VERBATIM from that review (a contiguous span, at least 12 characters, no edits, no ellipses). Website evidence: set source "website" and quote copied VERBATIM from the website text (same rules as review quotes). Listing evidence: set source "listing" and listing_fact to one of the facts listed as TRUE in the input.
 2. Never invent facts. If there is no evidence for a kind, do not include it. Returning zero findings is fine.
 3. Do not write any numbers in title, detail, or summary unless that exact number appears in your quoted evidence. Do not estimate money, volumes, or percentages. ROI is computed elsewhere.
 4. At most one finding per kind. Severity 1 to 5 reflects how strongly the evidence shows lost customers.
 5. Set unused evidence fields to null.`;
 
-export function buildUserPrompt(business: Business, reviews: Review[]): { prompt: string; aliasMap: Record<string, string> } {
+export function buildUserPrompt(
+  business: Business,
+  reviews: Review[],
+  pages: Pick<WebPage, "status" | "text" | "url">[] = [],
+): { prompt: string; aliasMap: Record<string, string> } {
   const facts = listingFacts(business);
   const aliasMap: Record<string, string> = {};
   const reviewLines = reviews.map((r, i) => {
@@ -28,6 +34,10 @@ export function buildUserPrompt(business: Business, reviews: Review[]): { prompt
     return `[${alias}] (${r.rating ?? "?"} stars, ${reply}) ${r.text.replace(/\s+/g, " ")}`;
   });
   const factLines = Object.entries(facts).map(([k, v]) => `- ${k}: ${v.holds ? "TRUE" : "false"} (${v.value})`);
+  const page = pages.find((p) => p.status === "ok" && p.text.trim());
+  const websiteBlock = page
+    ? `Website text (homepage ${page.url}, may be truncated):\n${page.text.slice(0, WEBSITE_EXCERPT_CHARS)}`
+    : "Website text: (not available)";
   const prompt = `Business: ${business.name}
 Category: ${business.category ?? "unknown"}
 Address: ${business.address ?? "unknown"}
@@ -37,6 +47,8 @@ ${factLines.join("\n")}
 
 Reviews (${reviews.length}):
 ${reviewLines.join("\n") || "(no reviews scraped)"}
+
+${websiteBlock}
 
 Return the diagnosis JSON.`;
   return { prompt, aliasMap };

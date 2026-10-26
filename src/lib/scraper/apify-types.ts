@@ -28,5 +28,6 @@ export interface ApifyPlaceItem {
   // Present only on demo fixture items.
   __fixture?: boolean;
   __fixtureBehavior?: "fail_diagnosis" | "hallucinate";
+  __fixtureWebsite?: { title: string; text: string } | { error: string };
   [key: string]: unknown;
 }

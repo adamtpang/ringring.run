@@ -6,7 +6,7 @@ import { FINDING_KINDS, LISTING_FACTS } from "./types";
 
 export const EvidenceSchema = z
   .object({
-    source: z.enum(["review", "listing"]),
+    source: z.enum(["review", "listing", "website"]),
     review_id: z.string().nullable(),
     quote: z.string().nullable(),
     listing_fact: z.enum(LISTING_FACTS).nullable(),
@@ -17,6 +17,9 @@ export const EvidenceSchema = z
       if (!e.review_id) ctx.addIssue({ code: "custom", message: "review evidence needs review_id" });
       if (!e.quote || e.quote.trim().length < 12)
         ctx.addIssue({ code: "custom", message: "review evidence needs a quote of at least 12 characters" });
+    } else if (e.source === "website") {
+      if (!e.quote || e.quote.trim().length < 12)
+        ctx.addIssue({ code: "custom", message: "website evidence needs a quote of at least 12 characters" });
     } else if (!e.listing_fact) {
       ctx.addIssue({ code: "custom", message: "listing evidence needs listing_fact" });
     }
@@ -71,9 +74,9 @@ export const DIAGNOSIS_JSON_SCHEMA = {
               additionalProperties: false,
               required: ["source", "review_id", "quote", "listing_fact"],
               properties: {
-                source: { type: "string", enum: ["review", "listing"] },
+                source: { type: "string", enum: ["review", "listing", "website"] },
                 review_id: { type: ["string", "null"] },
-                quote: { type: ["string", "null"], description: "Copied verbatim from the review text." },
+                quote: { type: ["string", "null"], description: "Copied verbatim from the review or website text." },
                 listing_fact: { type: ["string", "null"], enum: [...LISTING_FACTS, null] },
               },
             },
@@ -112,12 +115,40 @@ function stripFences(s: string): string {
   return m ? m[1] : t;
 }
 
-/** Scan request from the dashboard form, API, or CLI. */
-export const ScanInputSchema = z.object({
-  category: z.string().trim().min(2).max(80),
-  city: z.string().trim().min(2).max(80),
-  maxCount: z.coerce.number().int().min(1).max(50),
-});
+/**
+ * Scan request from the dashboard form, API, or CLI. Either
+ *   { category, city, maxCount }  many businesses in a category, or
+ *   { name, city }                one business looked up by name.
+ * A name may carry the city after a comma ("Joe's Plumbing, Austin TX").
+ */
+export const ScanInputSchema = z
+  .object({
+    category: z.string().trim().min(2).max(80).optional(),
+    name: z.string().trim().min(2).max(120).optional(),
+    city: z.string().trim().max(80).optional(),
+    maxCount: z.coerce.number().int().min(1).max(50).optional(),
+  })
+  .transform((v, ctx) => {
+    if (v.name) {
+      let name = v.name;
+      let city = v.city ?? "";
+      if (!city && name.includes(",")) {
+        const i = name.indexOf(",");
+        city = name.slice(i + 1).trim();
+        name = name.slice(0, i).trim();
+      }
+      if (name.length < 2 || city.length < 2) {
+        ctx.addIssue({ code: "custom", message: 'Name search needs a business name and a city, like "Joe\'s Plumbing, Austin TX"' });
+        return z.NEVER;
+      }
+      return { kind: "name" as const, category: name, city, maxCount: 1 };
+    }
+    if (!v.category || !v.city || v.city.length < 2) {
+      ctx.addIssue({ code: "custom", message: "Provide category and city, or a business name and city" });
+      return z.NEVER;
+    }
+    return { kind: "category" as const, category: v.category, city: v.city, maxCount: v.maxCount ?? 10 };
+  });
 
 /** PATCH /api/roi/[id] body: assumption key -> new value. */
 export const RoiEditSchema = z.object({
