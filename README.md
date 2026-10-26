@@ -135,7 +135,7 @@ Apply the migration to your Supabase project, either in the SQL editor or with t
 supabase db push   # or paste each file in supabase/migrations/ into the SQL editor, in order
 ```
 
-Tables: `runs`, `run_steps`, `businesses`, `reviews`, `web_pages`, `findings`, `roi_estimates`, `knowledge_facts`, `agents`. RLS is enabled on all of them, and the server uses the service role key.
+Tables: `runs`, `run_steps`, `businesses`, `reviews`, `web_pages`, `findings`, `roi_estimates`, `knowledge_facts`, `agents`. RLS is enabled on all of them, and the server uses the service role key. `20261028000000_harden_rls.sql` adds a restrictive deny policy for `anon` and `authenticated` on every table and revokes their table grants, so the publishable (anon) key cannot read or write anything; only the server, with `SUPABASE_SERVICE_ROLE_KEY`, can.
 
 ## Scanning
 
