@@ -16,7 +16,7 @@ export function MarketingHeader() {
           <Link href="/#pricing" className="pressable hidden rounded-pill px-3 py-1.5 text-muted hover:text-foreground sm:block">
             Pricing
           </Link>
-          <ButtonLink href="/dashboard" size="sm" variant="inverse" className="ml-2">
+          <ButtonLink href="/find" size="sm" variant="inverse" className="ml-2">
             Try the demo
           </ButtonLink>
         </div>
@@ -31,7 +31,7 @@ export function MarketingFooter() {
       <div className="mx-auto flex max-w-5xl flex-col gap-3 px-[var(--space-gutter)] py-8 text-footnote text-muted sm:flex-row sm:items-center sm:justify-between">
         <Wordmark />
         <span className="flex flex-wrap gap-x-5 gap-y-1">
-          <Link href="/dashboard" className="hover:text-foreground">Demo</Link>
+          <Link href="/find" className="hover:text-foreground">Demo</Link>
           <Link href="/design" className="hover:text-foreground">Design</Link>
           <Link href="/health" className="hover:text-foreground">Health</Link>
           <span>Built at AITX × MLOps World, Austin</span>

@@ -134,7 +134,7 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <ButtonLink href="/dashboard" size="lg" className="mt-8 w-full">
+              <ButtonLink href="/find" size="lg" className="mt-8 w-full">
                 Try the demo
               </ButtonLink>
             </Card>
@@ -145,10 +145,15 @@ export default function Home() {
         <section className="border-t border-hairline">
           <div className="mx-auto flex max-w-5xl flex-col items-center px-[var(--space-gutter)] py-[var(--space-section)] text-center">
             <h2 className="text-title-1 text-balance">See it work.</h2>
-            <p className="mt-3 max-w-md text-callout text-muted">Run a scan and watch the agent work, step by step.</p>
-            <ButtonLink href="/dashboard" size="lg" className="mt-8">
-              Try the demo
-            </ButtonLink>
+            <p className="mt-3 max-w-md text-callout text-muted">Find a business nearby and chat with its AI. Owners can scan their own.</p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <ButtonLink href="/find" size="lg">
+                Try the demo
+              </ButtonLink>
+              <ButtonLink href="/owners" size="lg" variant="secondary">
+                For business owners
+              </ButtonLink>
+            </div>
           </div>
         </section>
       </main>
