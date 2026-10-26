@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import type { LlmClient } from "@/lib/diagnose/llm-client";
 import {
   CASES,
+  canonicalTime,
   findHallucinations,
+  timesIn,
   fixtureAgent,
   fixtureResponder,
   llmResponder,
@@ -86,6 +88,53 @@ describe("simulated caller evals", () => {
     expect(seen[0]).toBe(agent.config.system_prompt);
     expect(r.cases[0]!.status).toBe("pass");
     expect(voiceResponder.status()).toEqual({ available: false, reason: expect.stringMatching(/^Next/) });
+  });
+});
+
+describe("hallucination check: time formats", () => {
+  // On-file hours as Google Maps writes them, with a narrow no-break space before AM/PM.
+  async function hoursAgent() {
+    const agent = await fixtureAgent();
+    const base = agent.config.knowledge[0]!;
+    const knowledge = [
+      ...agent.config.knowledge.filter((k) => !/\d\s*[ap]\.?\s*m/i.test(`${k.label} ${k.value}`)),
+      { ...base, id: "h1", kind: "hours" as typeof base.kind, label: "Monday", value: "9\u202fAM to 5\u202fPM" },
+      { ...base, id: "h2", kind: "hours" as typeof base.kind, label: "Wednesday", value: "9:30\u202fAM to 5\u202fPM" },
+    ];
+    return { ...agent.config, knowledge, hours: [] };
+  }
+  const agentSays = (text: string) => [{ role: "agent" as const, text }];
+
+  it("canonicalizes am/pm spellings", () => {
+    expect(canonicalTime("9", undefined, "A")).toBe("9:00am");
+    expect(timesIn("9AM, 9 am, 9:00 AM, 9 a.m., 09:00am, 9\u202fAM")).toEqual(Array(6).fill("9:00am"));
+    expect(timesIn("9:30am\u20135 p.m.")).toEqual(["9:30am", "5:00pm"]);
+    expect(timesIn("Suite 13359 N, 24/7, 9 amazing techs")).toEqual([]);
+  });
+
+  it.each([
+    "We're open Monday 9AM to 5PM.",
+    "Monday 9 am to 5 pm.",
+    "Monday 9:00 AM to 5:00 PM.",
+    "Monday 9 a.m. to 5 p.m.",
+    "Monday 9AM\u20135PM, Wednesday 9:30am\u20135pm.",
+    "Wednesday from 9:30 A.M. until 5 PM.",
+  ])("accepts on-file hours written as %j", async (reply) => {
+    expect(findHallucinations(await hoursAgent(), agentSays(reply))).toEqual([]);
+  });
+
+  it.each([
+    ["Monday 8AM to 5PM.", "time 8AM"],
+    ["Wednesday 9:45 a.m. to 5 p.m.", "time 9:45 a.m."],
+    ["Monday 9 AM to 6 PM.", "time 6 PM"],
+    ["We open at 9 PM.", "time 9 PM"],
+  ])("still rejects a wrong time: %j", async (reply, flag) => {
+    expect(findHallucinations(await hoursAgent(), agentSays(reply))).toEqual([flag]);
+  });
+
+  it("accepts a time the caller said first, in any spelling", async () => {
+    const config = await hoursAgent();
+    expect(findHallucinations(config, [{ role: "caller", text: "Can you come at 2pm?" }, ...agentSays("You asked about 2 PM.")])).toEqual([]);
   });
 });
 

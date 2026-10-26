@@ -12,23 +12,39 @@ const SERVICE_TERMS = [
 ];
 
 const MONEY = /\$\s?\d{1,3}(?:,\d{3})*(?:\.\d+)?(?!\d)|\$\s?\d+(?:\.\d+)?/g;
-const TIME = /\b\d{1,2}(?::\d{2})?\s?(?:AM|PM)\b/gi;
+// A clock time with am/pm in any common spelling: "9AM", "9 am", "9:30am",
+// "9 a.m.", "9\u202fAM" (Google's narrow no-break space). \s covers Unicode spaces.
+const TIME = /\b(\d{1,2})(?::(\d{2}))?\s*([ap])(?:\.\s*m\.?|\s*m)(?![a-z])/gi;
 const PHONE = /\(?\b\d{3}\)?[\s.-]?\d{3}[\s.-]\d{4}\b/g;
 
 const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").replace(/:00/g, "").replace(/\$\s+/g, "$");
 const digits = (s: string) => s.replace(/\D/g, "");
 
+/** Canonical form of one time match: "9 AM", "9:00am" and "9 a.m." all become "9:00am". */
+export function canonicalTime(hour: string, minutes: string | undefined, half: string): string {
+  return `${Number(hour)}:${minutes ?? "00"}${half.toLowerCase()}m`;
+}
+
+/** Every am/pm time in the text, canonicalized. */
+export function timesIn(text: string): string[] {
+  return [...text.matchAll(TIME)].map((m) => canonicalTime(m[1]!, m[2], m[3]!));
+}
+
 /** Claims in agent replies that are not supported by the KB or the caller's own words. */
 export function findHallucinations(config: AgentConfig, transcript: Turn[]): string[] {
-  const kb = norm(config.knowledge.map((k) => `${k.label} ${k.value}`).join(" \n ") + " " + config.hours.map((h) => `${h.day} ${h.hours}`).join(" "));
+  const kbRaw = config.knowledge.map((k) => `${k.label} ${k.value}`).join(" \n ") + " " + config.hours.map((h) => `${h.day} ${h.hours}`).join(" ");
+  const kb = norm(kbRaw);
   const kbDigits = config.knowledge.filter((k) => k.kind === "contact").map((k) => digits(k.value));
-  const callerText = norm(transcript.filter((t) => t.role === "caller").map((t) => t.text).join(" "));
+  const rawCaller = transcript.filter((t) => t.role === "caller").map((t) => t.text).join(" ");
+  const callerText = norm(rawCaller);
+  // Times are compared in canonical form on both sides, so "9AM" in a reply matches "9 AM" on file.
+  const knownTimes = new Set([...timesIn(kbRaw), ...timesIn(rawCaller)]);
   const flags = new Set<string>();
   for (const turn of transcript) {
     if (turn.role !== "agent") continue;
     const text = turn.text;
     for (const m of text.match(MONEY) ?? []) if (!kb.includes(norm(m)) && !callerText.includes(norm(m))) flags.add(`price ${m}`);
-    for (const m of text.match(TIME) ?? []) if (!kb.includes(norm(m)) && !callerText.includes(norm(m))) flags.add(`time ${m}`);
+    for (const m of text.matchAll(TIME)) if (!knownTimes.has(canonicalTime(m[1]!, m[2], m[3]!))) flags.add(`time ${m[0].trim()}`);
     for (const m of text.match(PHONE) ?? []) if (!kbDigits.includes(digits(m)) && !digits(callerText).includes(digits(m))) flags.add(`phone ${m}`);
     const low = norm(text);
     for (const term of SERVICE_TERMS) if (low.includes(term) && !kb.includes(term) && !callerText.includes(term)) flags.add(`claim "${term}"`);
