@@ -1,0 +1,35 @@
+{
+  "missed_calls": [
+    "About how many calls do you think go unanswered in a normal week?",
+    "Who picks up the phone today when you are on a job, and after you close?",
+    "What happens to a call nobody answers: voicemail, a forward, or nothing?",
+    "When someone leaves a voicemail, how long until they hear back?",
+    "What is a typical job worth to you, and how often does a new caller turn into a job?"
+  ],
+  "slow_response": [
+    "After a tech visit or a quote, who is in charge of following up?",
+    "How do customers reach you after the first visit: call, text, or email?",
+    "How long does a follow-up usually take on a busy week?",
+    "Have you lost a job because someone did not hear back in time?",
+    "What would you want a customer to hear within the first hour?"
+  ],
+  "booking_friction": [
+    "How does a new customer book with you today, step by step?",
+    "Can someone book after hours, or do they have to call back the next day?",
+    "How far out is your first open slot on a normal week?",
+    "Do you hear from people who gave up and went to someone else?",
+    "What calendar or software do you use to schedule jobs?"
+  ],
+  "unanswered_reviews": [
+    "Do you see your Google reviews when they come in?",
+    "Who would reply to reviews if you had the time?",
+    "Is there a bad review you wish you had answered?",
+    "How do new customers say they found you?"
+  ],
+  "no_website": [
+    "Where do new customers find you today?",
+    "Have you had a website before? What happened to it?",
+    "What would you want a website to do: show services, take requests, or both?",
+    "Who would keep it up to date?"
+  ]
+}

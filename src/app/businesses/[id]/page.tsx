@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Badge, Button, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
@@ -160,7 +161,14 @@ export default function BusinessPage() {
 
   return (
     <PageShell width="narrow">
-      <BackLink href={`/runs/${b.run_id}`}>Run</BackLink>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <BackLink href={`/runs/${b.run_id}`}>Run</BackLink>
+        {ok && data.findings.length > 0 && (
+          <Link href={`/businesses/${b.id}/diagnosis`} className="text-footnote font-medium text-accent hover:underline">
+            Ringy&apos;s diagnosis and prescription
+          </Link>
+        )}
+      </div>
 
       <div className="space-y-5">
         {b.is_fixture && (
