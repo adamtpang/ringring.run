@@ -10,6 +10,8 @@ function has(name: string): boolean {
 }
 
 export const DEFAULT_LLM_MODEL = "grok-4.7";
+/** Fast non-reasoning model for live conversation turns (chat, simulated calls). Reasoning models miss the 3 s turn budget. */
+export const DEFAULT_LLM_CHAT_MODEL = "grok-4.20-0309-non-reasoning";
 export const DEFAULT_LLM_BASE_URL = "https://api.x.ai/v1";
 
 export function forceDemo(): boolean {
@@ -21,6 +23,7 @@ export const ENV_KEYS = [
   { name: "APIFY_TOKEN", required: true, purpose: "Live Google Maps scraping" },
   { name: "XAI_API_KEY", required: true, purpose: "Live LLM diagnosis" },
   { name: "LLM_MODEL", required: false, purpose: "LLM model id (default grok-4.7)" },
+  { name: "LLM_CHAT_MODEL", required: false, purpose: "Model for chat and simulated call turns (default grok-4.20-0309-non-reasoning)" },
   { name: "LLM_BASE_URL", required: false, purpose: "OpenAI-compatible endpoint (default https://api.x.ai/v1)" },
   { name: "LLM_API_STYLE", required: false, purpose: "responses or chat" },
   { name: "LLM_API_KEY", required: false, purpose: "Key for a non-xAI endpoint (overrides XAI_API_KEY)" },
@@ -56,6 +59,7 @@ export function llmConfig() {
   return {
     baseUrl: (process.env.LLM_BASE_URL || DEFAULT_LLM_BASE_URL).replace(/\/$/, ""),
     model: process.env.LLM_MODEL || DEFAULT_LLM_MODEL,
+    chatModel: process.env.LLM_CHAT_MODEL || DEFAULT_LLM_CHAT_MODEL,
     apiKey: process.env.LLM_API_KEY || process.env.XAI_API_KEY || "",
     // "responses" (xAI and OpenAI Responses API) or "chat" (any OpenAI-compatible chat/completions endpoint)
     apiStyle: (process.env.LLM_API_STYLE === "chat" ? "chat" : "responses") as "chat" | "responses",

@@ -1,5 +1,5 @@
 import type { AgentConfig, KnowledgeItem } from "../agent/schema";
-import { createLlmClient, type LlmClient } from "../diagnose/llm-client";
+import { createChatLlmClient, type LlmClient } from "../diagnose/llm-client";
 import { configured, forceDemo } from "../env";
 import { isSuspicious } from "../untrusted";
 import type { Responder, RespondInput } from "./types";
@@ -102,7 +102,7 @@ export function llmResponder(client?: LlmClient): Responder {
       return configured().llm ? { available: true, reason: null } : { available: false, reason: "Set XAI_API_KEY or LLM_API_KEY to run the LLM responder." };
     },
     async respond({ config, history, callerText }: RespondInput) {
-      const c = client ?? createLlmClient();
+      const c = client ?? createChatLlmClient();
       const transcript = history.map((h) => `${h.role === "agent" ? "Agent" : "Caller"}: ${h.text}`).join("\n");
       const raw = await c.completeJson({
         system: config.system_prompt,

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { json } from "@/lib/api";
 import { routeRequest, routeWithLlm } from "@/lib/chat/concierge";
-import { createLlmClient } from "@/lib/diagnose/llm-client";
+import { createChatLlmClient } from "@/lib/diagnose/llm-client";
 import { configured, forceDemo } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
@@ -17,5 +17,5 @@ export async function POST(req: Request) {
   const parsed = z.object({ text: z.string().max(200) }).safeParse(body);
   if (!parsed.success) return json({ error: "Invalid input" }, 400);
   const useLlm = configured().llm && !forceDemo();
-  return json(useLlm ? await routeWithLlm(parsed.data.text, createLlmClient()) : routeRequest(parsed.data.text));
+  return json(useLlm ? await routeWithLlm(parsed.data.text, createChatLlmClient()) : routeRequest(parsed.data.text));
 }

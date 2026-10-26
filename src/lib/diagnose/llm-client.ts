@@ -88,3 +88,9 @@ export function createLlmClient(overrides: Partial<ReturnType<typeof llmConfig>>
     },
   };
 }
+
+/** Client for live conversation turns (chat, simulated calls): the fast chat model, no reasoning effort. */
+export function createChatLlmClient(): LlmClient {
+  const cfg = llmConfig();
+  return createLlmClient({ model: cfg.chatModel, reasoningEffort: null });
+}

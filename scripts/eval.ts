@@ -12,6 +12,7 @@ try {
   // no .env.local: fixture responder only
 }
 
+import { llmConfig } from "../src/lib/env";
 import { fixtureAgent, fixtureResponder, llmResponder, runEvals } from "../src/lib/evals";
 
 function arg(name: string, fallback: string) {
@@ -32,7 +33,7 @@ async function main() {
   if (process.argv.includes("--json")) {
     console.log(JSON.stringify(r, null, 2));
   } else {
-    console.log(`Simulated calls: ${r.business_name}, ${r.responder.name} responder, ${agent.config.knowledge.length} KB facts (demo data)\n`);
+    console.log(`Simulated calls: ${r.business_name}, ${r.responder.name} responder${which === "llm" ? ` (${llmConfig().chatModel})` : ""}, ${agent.config.knowledge.length} KB facts (demo data)\n`);
     for (const c of r.cases) {
       const mark = c.status === "pass" ? "PASS" : c.status === "fail" ? "FAIL" : "SKIP";
       console.log(`${mark}  ${c.title.padEnd(18)} ${c.status === "skipped" ? c.skip_reason : `${c.latency_ms.max.toFixed(1)} ms`}`);

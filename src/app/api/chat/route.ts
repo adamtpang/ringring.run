@@ -2,7 +2,7 @@ import { z } from "zod";
 import { json } from "@/lib/api";
 import { chatFirstMessage, chatReply } from "@/lib/chat/chat";
 import { resolveChatAgent } from "@/lib/chat/resolve";
-import { createLlmClient } from "@/lib/diagnose/llm-client";
+import { createChatLlmClient } from "@/lib/diagnose/llm-client";
 import { configured, forceDemo } from "@/lib/env";
 import { PlaceSchema } from "@/lib/places/schema";
 import { isSuspicious } from "@/lib/untrusted";
@@ -34,6 +34,6 @@ export async function POST(req: Request) {
   const useLlm = configured().llm && !forceDemo();
   const meta = { agent_source: agent.source, business_id: agent.business_id, responder: useLlm ? "llm" : "demo", facts: agent.config.knowledge.length };
   if (!message?.trim()) return json({ ...meta, reply: chatFirstMessage(agent.config), sources: [] });
-  const out = await chatReply({ config: agent.config, history, message, llm: useLlm ? createLlmClient() : null });
+  const out = await chatReply({ config: agent.config, history, message, llm: useLlm ? createChatLlmClient() : null });
   return json({ ...meta, ...out });
 }
