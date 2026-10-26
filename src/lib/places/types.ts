@@ -42,5 +42,8 @@ export interface SearchResult {
   source: "osm";
   endpoint: string | null;
   cached: boolean;
+  /** When the data was fetched from OpenStreetMap. For a snapshot, when the snapshot was taken. */
   fetched_at: string;
+  /** True when served from the bundled saved snapshot because no mirror answered. */
+  snapshot: boolean;
 }

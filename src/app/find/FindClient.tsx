@@ -8,6 +8,7 @@ import { useStartScan } from "@/components/useStartScan";
 import { CATEGORIES } from "@/lib/places/categories";
 import { AUSTIN, formatDistance, roundCoord } from "@/lib/places/geo";
 import { DAY_NAMES, parseOsmHours } from "@/lib/places/hours";
+import { telHref } from "@/lib/places/phone";
 import type { Place } from "@/lib/places/types";
 import { BusinessChat } from "./BusinessChat";
 
@@ -62,6 +63,8 @@ export function FindClient() {
   const [radius, setRadius] = useState(2000);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  /** When results came from the saved snapshot, the time it was taken. */
+  const [savedAt, setSavedAt] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
@@ -92,11 +95,13 @@ export function FindClient() {
         if (!r.ok) throw new Error(b.error ?? "Search failed");
         setPlaces(b.places);
         setRadius(b.radius_m ?? 2000);
+        setSavedAt(b.snapshot ? b.fetched_at : null);
         setError(null);
       })
       .catch((e) => {
         if (ctrl.signal.aborted) return;
         setPlaces([]);
+        setSavedAt(null);
         setError(e instanceof Error ? e.message : String(e));
       })
       .finally(() => {
@@ -357,19 +362,26 @@ export function FindClient() {
                   )}
                 </div>
                 {loc.note && <p className="text-caption text-warning">{loc.note}</p>}
+                {savedAt && !loading && (
+                  <p className="flex flex-wrap items-center gap-2 text-caption text-muted">
+                    <Badge tone="warning" title="Live map search isn't answering, so these are OpenStreetMap results saved earlier for central Austin.">
+                      Saved map data
+                    </Badge>
+                    <span>{formatSavedAt(savedAt)}</span>
+                  </p>
+                )}
               </div>
 
               <div className="min-h-0 flex-1 overflow-y-auto border-t border-hairline">
-                {error && (
-                  <div className="space-y-2 p-4" role="alert">
-                    <p className="text-footnote text-danger">{error}</p>
-                    <Button size="sm" variant="secondary" onClick={() => (setLoading(true), setRetryKey((k) => k + 1))}>
-                      Try again
-                    </Button>
-                  </div>
-                )}
-                {!loading && !error && places.length === 0 && (
-                  <p className="p-4 text-footnote text-muted">Nothing on OpenStreetMap matches here. Try another category or a nearby city.</p>
+                {!loading && (error || places.length === 0) && (
+                  <GoogleMapsSearch
+                    key={`${loc.label}|${search.q ?? search.category ?? ""}`}
+                    message={error ?? "Nothing on OpenStreetMap matches here."}
+                    defaultName={search.q ?? ""}
+                    defaultCity={loc.kind === "device" && loc.label === "Your location" ? "" : loc.label}
+                    onRetry={error ? () => (setLoading(true), setRetryKey((k) => k + 1)) : undefined}
+                    scan={scan}
+                  />
                 )}
                 <ul ref={listRef} className={cx("divide-y divide-hairline", loading && "opacity-50")}>
                   {places.map((p) => (
@@ -443,7 +455,7 @@ function PlaceRow({
             {p.address && <Row label="Address">{p.address}</Row>}
             {p.phone && (
               <Row label="Phone">
-                <a href={`tel:${p.phone.replace(/[^\d+]/g, "")}`} className="text-accent hover:underline">
+                <a href={telHref(p.phone)} className="text-accent hover:underline">
                   {p.phone}
                 </a>
               </Row>
@@ -496,6 +508,69 @@ function PlaceRow({
         </div>
       )}
     </li>
+  );
+}
+
+/** "Saved Oct 26, 12:52 PM CDT" in the viewer's time zone. */
+function formatSavedAt(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return `Saved ${d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" })}`;
+}
+
+/** When the map has nothing to show, look the business up by name through the Google Maps scanner instead. */
+function GoogleMapsSearch({
+  message,
+  defaultName,
+  defaultCity,
+  onRetry,
+  scan,
+}: {
+  message: string;
+  defaultName: string;
+  defaultCity: string;
+  onRetry?: () => void;
+  scan: ReturnType<typeof useStartScan>;
+}) {
+  const [name, setName] = useState(defaultName);
+  const [city, setCity] = useState(defaultCity);
+  const ready = name.trim().length > 0 && city.trim().length > 0;
+  return (
+    <form
+      className="space-y-3 p-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (ready) scan.start({ name: name.trim(), city: city.trim() });
+      }}
+    >
+      <div className="space-y-1" role="status">
+        <p className="text-footnote font-medium">{message}</p>
+        <p className="text-footnote text-muted">Know the business? Look it up on Google Maps instead.</p>
+      </div>
+      <label htmlFor="gm-name" className="sr-only">
+        Business name
+      </label>
+      <input id="gm-name" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} placeholder="Business name" maxLength={120} autoComplete="off" />
+      <label htmlFor="gm-city" className="sr-only">
+        City
+      </label>
+      <input id="gm-city" className={inputClass} value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" maxLength={80} autoComplete="address-level2" />
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" size="sm" disabled={!ready || scan.submitting}>
+          {scan.submitting ? "Starting…" : "Search Google Maps"}
+        </Button>
+        {onRetry && (
+          <Button type="button" size="sm" variant="plain" onClick={onRetry}>
+            Try again
+          </Button>
+        )}
+      </div>
+      {scan.error && (
+        <p role="alert" className="text-caption text-danger">
+          {scan.error}
+        </p>
+      )}
+    </form>
   );
 }
 

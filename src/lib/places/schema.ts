@@ -18,7 +18,7 @@ export const PlaceSchema = z.object({
   address: str(200).nullable(),
   city: str(80).nullable(),
   opening_hours: str(200).nullable(),
-  phone: str(40).nullable(),
+  phone: str(120).nullable(),
   website: str(300).nullable(),
   cuisine: str(120).nullable(),
   extras: z.array(z.object({ key: str(30), label: str(40), value: str(20) })).max(10),
