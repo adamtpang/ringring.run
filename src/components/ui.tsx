@@ -91,6 +91,7 @@ export function runTitle(r: Pick<Run, "category" | "city" | "search_kind">) {
 
 const NAV = [
   { href: "/dashboard", label: "Scans" },
+  { href: "/evals", label: "Evals" },
   { href: "/health", label: "Health" },
 ];
 
