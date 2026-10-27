@@ -134,7 +134,12 @@ function Evals() {
       {r && data && (
         <>
           <StatGrid>
-            <Stat label="Pass rate" value={`${Math.round(r.pass_rate * 100)}%`} hint={`${r.passed} of ${r.passed + r.failed} cases`} emphasis />
+            <Stat
+              label="Pass rate"
+              value={r.passed + r.failed ? `${Math.round((100 * r.passed) / (r.passed + r.failed))}%` : "No cases"}
+              hint={`${r.passed} passed ÷ ${r.passed + r.failed} cases, this run`}
+              emphasis
+            />
             <Stat label="Failed" value={r.failed} hint={r.skipped ? `${r.skipped} skipped` : undefined} />
             <Stat
               label="Slowest turn"

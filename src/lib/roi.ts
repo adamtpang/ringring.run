@@ -249,3 +249,75 @@ export function traceLine(t: FigureTrace): string {
   const parts = t.inputs.map((i) => `${i.display} ${i.label.toLowerCase()} (${i.status === "calendar" ? i.source : i.status === "sourced" ? `from ${i.source}` : "assumed"})`);
   return `${parts.join(" × ")} = $${t.result.toLocaleString("en-US")}/mo`;
 }
+
+// ---------- per-business money, for lists and totals ----------
+
+export const SCORE_FORMULA = "100 × (1 − e^(−monthly ÷ 8,000))";
+
+const usd0 = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
+
+/** A business's monthly figure, rebuilt from each estimate's own inputs with the overlap rule. */
+export interface BusinessMoney {
+  /** Null when no estimate has inputs on file: show "not estimated". */
+  total: number | null;
+  score: number | null;
+  kept: { kind: string; title: string; trace: FigureTrace }[];
+  dropped: { kind: string; title: string; monthly: number; keptTitle: string }[];
+  /** Problems found that have no dollar inputs on file. */
+  missing: string[];
+  rule: string | null;
+}
+
+export function businessMoney(findings: { id: string; kind: string; title: string }[], roi: { finding_id: string; assumptions: Assumption[] }[]): BusinessMoney {
+  const byFinding = new Map(roi.map((r) => [r.finding_id, r]));
+  const rows = findings.map((f) => {
+    let trace: FigureTrace | null = null;
+    try {
+      const r = byFinding.get(f.id);
+      trace = r ? moneyTrace(r.assumptions) : null;
+    } catch {
+      trace = null; // invalid inputs: not estimated
+    }
+    return { f, trace };
+  });
+  const priced = rows.filter((r): r is { f: (typeof findings)[number]; trace: FigureTrace } => !!r.trace && r.trace.result > 0);
+  const missing = rows.filter((r) => !r.trace).map((r) => r.f.title);
+  if (!priced.length) return { total: null, score: null, kept: [], dropped: [], missing, rule: null };
+  const d = dedupMonthly(priced.map((r) => ({ kind: r.f.kind, monthly: r.trace.result })));
+  const titleOf = (k: string) => priced.find((r) => r.f.kind === k)?.f.title ?? k;
+  return {
+    total: d.total,
+    score: opportunityScore(d.total),
+    kept: priced.filter((r) => !d.dropped.some((x) => x.kind === r.f.kind)).map((r) => ({ kind: r.f.kind, title: r.f.title, trace: r.trace })),
+    dropped: d.dropped.map((x) => ({ kind: x.kind, title: titleOf(x.kind), monthly: x.monthly, keptTitle: titleOf(x.keptKind) })),
+    missing,
+    rule: d.dropped.length ? OVERLAP_RULE : null,
+  };
+}
+
+/** Compact "How we got this" for a business total, e.g. for a tooltip. */
+export function businessMoneyHow(m: BusinessMoney): string {
+  if (m.total == null) return m.missing.length ? `Not estimated: no dollar inputs on file for ${m.missing.join(", ")}.` : "Not estimated: no problems with dollar inputs.";
+  const kept = m.kept.map((k) => `${k.title}: ${k.trace.math}`).join("; ");
+  const dropped = m.dropped.length ? ` Not added (same customers): ${m.dropped.map((d) => `${d.title} ${usd0(d.monthly)}`).join(", ")}.` : "";
+  const missing = m.missing.length ? ` Not estimated: ${m.missing.join(", ")}.` : "";
+  return `How we got ${usd0(m.total)}/mo: ${kept}.${dropped}${missing} Inputs are default assumptions unless marked sourced; open the business to see each one.`;
+}
+
+export function scoreHow(m: BusinessMoney): string {
+  return m.total == null || m.score == null
+    ? "Not estimated: the score comes from the monthly estimate, which has no inputs on file."
+    : `Opportunity score = ${SCORE_FORMULA} = 100 × (1 − e^(−${Math.round(m.total).toLocaleString("en-US")} ÷ 8,000)) = ${m.score}.`;
+}
+
+/** Sum across different businesses (no overlap between businesses; each total already counts its own overlaps once). */
+export function runMoney(list: { name: string; money: BusinessMoney | null }[]): { total: number | null; parts: { name: string; total: number }[]; notEstimated: string[] } {
+  const parts = list.filter((x) => x.money?.total != null).map((x) => ({ name: x.name, total: x.money!.total! }));
+  const notEstimated = list.filter((x) => x.money?.total == null).map((x) => x.name);
+  return { total: parts.length ? parts.reduce((s, p) => s + p.total, 0) : null, parts, notEstimated };
+}
+
+export function runMoneyHow(r: ReturnType<typeof runMoney>): string {
+  if (r.total == null) return "Not estimated: no business here has dollar inputs on file.";
+  return `How we got ${usd0(r.total)}/mo: ${r.parts.map((p) => `${p.name} ${usd0(p.total)}`).join(" + ")}. Each business counts its own overlapping problems once.${r.notEstimated.length ? ` Not estimated: ${r.notEstimated.join(", ")}.` : ""}`;
+}

@@ -5,12 +5,14 @@ import { BusinessTable } from "@/components/BusinessTable";
 import { ButtonLink, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
 import { Stopwatch } from "@/components/Stopwatch";
 import { BackLink, dateTime12, money, PageShell, RunStatusPill, runTitle, StepTimeline, usePoll } from "@/components/ui";
-import type { Business, Run, RunStep } from "@/lib/types";
+import { stepsWithCurrentFigures, type BusinessWithMoney } from "@/lib/business-money";
+import { runMoney, runMoneyHow } from "@/lib/roi";
+import type { Run, RunStep } from "@/lib/types";
 
 interface RunData {
   run: Run;
   steps: RunStep[];
-  businesses: Business[];
+  businesses: BusinessWithMoney[];
   agents?: { id: string; business_id: string; status: string; ready_ms: number | null }[];
 }
 
@@ -24,7 +26,7 @@ function elapsed(run: Run) {
 export default function RunPage() {
   const { id } = useParams<{ id: string }>();
   const { data, error } = usePoll<RunData>(`/api/runs/${id}`, (d) => d.run.status === "queued" || d.run.status === "running");
-  const total = data?.businesses.filter((b) => b.diagnosis_status === "ok").reduce((s, b) => s + b.est_monthly_value, 0) ?? 0;
+  const rm = runMoney((data?.businesses ?? []).filter((b) => b.diagnosis_status === "ok").map((b) => ({ name: b.name, money: b.money })));
 
   return (
     <PageShell>
@@ -66,13 +68,23 @@ export default function RunPage() {
           <StatGrid>
             <Stat label="Businesses" value={data.run.business_count} />
             <Stat label="Diagnosed" value={data.run.diagnosed_count} hint={data.run.failed_count ? `${data.run.failed_count} failed` : undefined} />
-            <Stat label="Est. / month" value={money(total)} hint="Sum of estimates" emphasis />
+            <Stat
+              label="Est. / month"
+              value={rm.total == null ? "Not estimated" : money(rm.total)}
+              hint={rm.total == null ? "No dollar inputs on file" : `Sum of ${rm.parts.length} business estimates`}
+              emphasis
+            />
             <Stat
               label="Agents ready"
               value={data.agents?.length ?? 0}
               hint={`Run total ${elapsed(data.run)}`}
             />
           </StatGrid>
+          <details className="-mt-2 rounded-md px-1 text-caption text-muted">
+            <summary className="cursor-pointer select-none text-footnote text-subtle">How we got this</summary>
+            <p className="mt-1">{runMoneyHow(rm)}</p>
+            <p className="mt-1">Each business figure is rebuilt from its own inputs (mostly default assumptions to confirm with the owner). Hover a figure in the list for its math.</p>
+          </details>
           <div className="grid items-start gap-6 lg:grid-cols-[1.4fr_1fr]">
             <Card padding="lg" className="space-y-4">
               <SectionHeader
@@ -94,7 +106,7 @@ export default function RunPage() {
                 size="sm"
                 description={data.run.status === "running" || data.run.status === "queued" ? "Updating live." : `${data.steps.length} steps.`}
               />
-              <StepTimeline steps={data.steps} />
+              <StepTimeline steps={stepsWithCurrentFigures(data.steps, data.businesses)} />
             </Card>
           </div>
         </>

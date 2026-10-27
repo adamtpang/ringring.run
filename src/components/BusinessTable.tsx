@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import type { Business } from "@/lib/types";
+import type { BusinessWithMoney } from "@/lib/business-money";
+import { businessMoneyHow, SCORE_FORMULA, scoreHow } from "@/lib/roi";
 import { Badge } from "./ds";
 import { money } from "./ui";
 
-function ScoreBar({ score }: { score: number }) {
+function ScoreBar({ score, how }: { score: number; how: string }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2" title={how}>
       <div className="h-1.5 w-14 overflow-hidden rounded-pill bg-surface-2 ring-1 ring-inset ring-hairline" aria-hidden="true">
         <div className="h-full rounded-pill bg-accent transition-[width] duration-[var(--duration-spring)] ease-spring" style={{ width: `${score}%` }} />
       </div>
@@ -17,7 +18,7 @@ function ScoreBar({ score }: { score: number }) {
 }
 
 /** Businesses ranked by opportunity. Rows are full-width tap targets that open the report. */
-export function BusinessTable({ businesses }: { businesses: Business[] }) {
+export function BusinessTable({ businesses }: { businesses: BusinessWithMoney[] }) {
   if (businesses.length === 0) return <p className="text-footnote text-muted">No businesses yet.</p>;
   return (
     <div>
@@ -31,6 +32,8 @@ export function BusinessTable({ businesses }: { businesses: Business[] }) {
       <ol className="-mx-1 space-y-0.5">
         {businesses.map((b, i) => {
           const ok = b.diagnosis_status === "ok";
+          const m = b.money;
+          const estimated = ok && m?.total != null;
           return (
             <li key={b.id} className="timeline-enter">
               <Link
@@ -50,23 +53,34 @@ export function BusinessTable({ businesses }: { businesses: Business[] }) {
                   <span className="text-caption text-subtle"> ({b.review_count ?? 0})</span>
                 </span>
                 <span className="hidden sm:block">
-                  {ok ? (
-                    <ScoreBar score={b.opportunity_score} />
+                  {estimated ? (
+                    <ScoreBar score={m!.score!} how={scoreHow(m!)} />
+                  ) : ok ? (
+                    <span className="text-caption text-muted" title={m ? scoreHow(m) : undefined}>Not estimated</span>
                   ) : (
                     <span className={`text-caption ${b.diagnosis_status === "failed" ? "text-danger" : "text-muted"}`} title={b.diagnosis_error ?? undefined}>
                       {b.diagnosis_status === "failed" ? "Diagnosis failed" : b.diagnosis_status}
                     </span>
                   )}
                 </span>
-                <span className="text-right text-callout font-semibold tabular-nums">
-                  {ok ? money(b.est_monthly_value) : <span className="text-caption font-normal text-muted">{b.diagnosis_status === "failed" ? "Failed" : "n/a"}</span>}
+                <span className="text-right text-callout font-semibold tabular-nums" title={m ? businessMoneyHow(m) : undefined}>
+                  {estimated ? (
+                    <>
+                      {money(m!.total!)}
+                      <span className="block text-[0.6875rem] font-normal text-subtle">How we got this ⓘ</span>
+                    </>
+                  ) : ok ? (
+                    <span className="text-caption font-normal text-muted">Not estimated</span>
+                  ) : (
+                    <span className="text-caption font-normal text-muted">{b.diagnosis_status === "failed" ? "Failed" : "n/a"}</span>
+                  )}
                 </span>
               </Link>
             </li>
           );
         })}
       </ol>
-      <p className="mt-3 px-2 text-caption text-subtle">Estimates. Open a business to see and edit the assumptions.</p>
+      <p className="mt-3 px-2 text-caption text-subtle">Estimates rebuilt from each problem’s inputs; overlapping problems (the same customers) count once. Hover a figure for how we got it, or open a business to see and edit the assumptions. Score = {SCORE_FORMULA}.</p>
     </div>
   );
 }

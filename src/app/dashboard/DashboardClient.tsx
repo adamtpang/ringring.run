@@ -6,7 +6,8 @@ import { BusinessTable } from "@/components/BusinessTable";
 import { Button, ButtonLink, Card, Field, SectionHeader } from "@/components/ds";
 import { dateTime12, PageShell, RunStatusPill, runTitle, usePoll } from "@/components/ui";
 import { useStartScan } from "@/components/useStartScan";
-import type { Business, Run } from "@/lib/types";
+import type { BusinessWithMoney } from "@/lib/business-money";
+import type { Run } from "@/lib/types";
 
 const isActive = (r: Run) => r.status === "queued" || r.status === "running";
 
@@ -20,7 +21,7 @@ export function DashboardClient() {
 
   const runs = usePoll<{ runs: Run[] }>("/api/runs", (d) => d.runs.some(isActive));
   const latest = runs.data?.runs[0];
-  const latestBiz = usePoll<{ businesses: Business[] }>(
+  const latestBiz = usePoll<{ businesses: BusinessWithMoney[] }>(
     latest ? `/api/businesses?runId=${latest.id}&status=${latest.status}` : null,
     () => (latest ? isActive(latest) : false),
   );

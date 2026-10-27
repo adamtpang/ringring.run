@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { Badge, Card, SectionHeader } from "@/components/ds";
-import { weeklyView, type Change } from "@/lib/checkin/logic";
+import { changeSource, weeklyView, type Change } from "@/lib/checkin/logic";
 import type { Checkin, CheckinReview, CheckinSnapshot } from "@/lib/types";
 
 export interface CheckinData {
@@ -54,6 +54,7 @@ export function WhatChanged({ data, planStep }: { data: CheckinData; planStep: s
                   {v.changes.map((c) => (
                     <li key={c.field}>
                       {c.label}: {fmt(c, c.before)} → {fmt(c, c.after)}
+                      <span className="block text-caption text-subtle">Source: {changeSource(c.field)}</span>
                     </li>
                   ))}
                 </ul>

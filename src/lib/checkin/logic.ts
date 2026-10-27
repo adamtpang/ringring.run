@@ -265,9 +265,17 @@ export type WeeklyView =
 const usd = (n: number) => `$${n.toFixed(n < 0.01 && n > 0 ? 4 : 2)}`;
 
 /** One plain line for what a logged check-in did. */
+/** Where a check-in change figure comes from. */
+export function changeSource(field: Change["field"]): string {
+  if (field === "reply_rate" || field === "neg_reply_rate")
+    return "Ringy's sample: share of the reviews read at each check-in that have an owner reply (5+ reviews needed; not a Google figure).";
+  if (field === "rating" || field === "review_count") return "Google listing, read at each check-in.";
+  return "Count of reviews Ringy read at each check-in.";
+}
+
 export function describeCheckin(c: Pick<Checkin, "kind" | "status" | "est_cost_usd" | "actual_cost_usd">): string {
   const cost = c.actual_cost_usd ?? c.est_cost_usd;
-  const paid = c.status === "skipped_budget" ? "" : ` (${c.actual_cost_usd != null ? "" : "est. "}${usd(cost)})`;
+  const paid = c.status === "skipped_budget" ? "" : c.actual_cost_usd != null ? ` (Apify charge ${usd(cost)})` : ` (est. ${usd(cost)}, the planned cost; Apify's charge not settled yet)`;
   if (c.status === "skipped_budget") return `Skipped the ${c.kind.replace("_", " ")} check: the monthly budget cap would have been exceeded.`;
   if (c.status === "error") return `Tried a ${c.kind.replace("_", " ")} check; it failed and will retry next week${paid}.`;
   switch (c.kind) {
