@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { AgentRecord, Business, Checkin, CheckinReview, CheckinSnapshot, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, TrackedBusiness, WebPage } from "../types";
+import type { AgentRecord, Business, ChannelOptin, Checkin, CheckinReview, CheckinSnapshot, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, TrackedBusiness, WebPage } from "../types";
 import { newId, now, rankBusinesses, type Store } from "./types";
 
 // DEMO / LOCAL store. In-memory tables, optionally persisted to a JSON file
@@ -21,6 +21,7 @@ interface Tables {
   checkins: Checkin[];
   checkin_snapshots: CheckinSnapshot[];
   checkin_reviews: CheckinReview[];
+  channel_optins: ChannelOptin[];
 }
 
 const empty = (): Tables => ({
@@ -37,6 +38,7 @@ const empty = (): Tables => ({
   checkins: [],
   checkin_snapshots: [],
   checkin_reviews: [],
+  channel_optins: [],
 });
 
 export function createLocalStore(opts: { file?: string | null } = {}): Store {
@@ -222,5 +224,12 @@ export function createLocalStore(opts: { file?: string | null } = {}): Store {
     }),
     listCheckinReviews: (placeId) =>
       read(() => db.checkin_reviews.filter((x) => x.place_id === placeId).sort((a, b) => (b.published_at ?? "").localeCompare(a.published_at ?? ""))),
+    addChannelOptin: (row) => mutate(() => {
+      const r: ChannelOptin = { ...row, id: newId(), created_at: now() };
+      db.channel_optins.push(r);
+      return r;
+    }),
+    listChannelOptins: (businessId) =>
+      read(() => db.channel_optins.filter((x) => x.business_id === businessId).sort((a, b) => b.consented_at.localeCompare(a.consented_at))),
   };
 }

@@ -104,6 +104,9 @@ Reduced motion: loops stop, movement becomes opacity. Reduced transparency: the 
 - **SectionHeader**: eyebrow, title, one-line description, optional action.
 - **TimelineStep**: status node on a rail, mono timestamp, live ping while running.
 - **Field**: label above input, optional hint.
+- **FixPathsView**: three sunken columns (Do it yourself, Ringy does it, Hire it out), stacked on mobile. DIY money always says "Estimate"; vendor links only with a pricing page.
+- **CaseStudies**: claim, the exact quote in italics, publisher link, "Vendor-reported" warning badge when it applies.
+- **TalkToRingy**: channel tiles as a radio group (Live = success badge, Coming soon = neutral), consent checkbox with the stored wording, one primary action.
 
 ## Brand assets
 
@@ -115,6 +118,6 @@ Reduced motion: loops stop, movement becomes opacity. Reduced transparency: the 
 ## Copy rules
 
 - Say only what the code does. Future work is labeled **Next**. Pricing is labeled **Illustrative**.
-- Do not claim SMS, Spanish, or live voice calls work.
+- Do not claim SMS, Spanish, or live voice calls work. Channels that are not built say **Coming soon**.
 - Sample data is always labeled **Demo data**; fictional businesses say **Fictional**.
 - Short: one line per idea, sentence case, no exclamation marks.

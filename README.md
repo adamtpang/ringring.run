@@ -19,6 +19,11 @@ Each line names how it was checked. "Live" means it ran against the real service
 | Diagnosis where every finding cites a real review, listing fact or website quote; a code check drops any quote that is not found word for word | `/businesses/[id]/diagnosis` | Live with xAI `grok-4.7`, 2026-10-26. Citation tests; eval "Diagnosis cites real reviews" |
 | Your peers: anonymized Austin tier list and leaderboard, with the tier formula shown | diagnosis page | `src/data/peers.json`: 111 anonymized Austin businesses in 6 industries, scanned 2026-10-26. Eval "Peers stay anonymized" |
 | Game plan: scorecard, the one binding constraint, tiered steps labeled "Ringy does this", "Ringy does this after your OK" or "You do this" | diagnosis page | Tests; eval "Overlap rule" |
+| Adjustable ROI calculator: every input shows where it came from (listing, vendor pricing page, or labeled assumption); edits stay on screen and are never saved | diagnosis page, business page, 1-pager | `src/data/calculator.json`; tests `calculator.test.ts`, `figures-traceable.test.ts` |
+| 30-day game plan: up to 3 focus fixes, weeks 1 to 4 split into "Ringy does this" and "You do this", each with a starting number and its source | diagnosis page (`#thirty-day`), 1-pager page 2 | Tests `thirtyday.test.ts` on the real Aire Serv snapshot |
+| Published studies per recommendation: 6 sourced case studies, each with its URL and the exact quote; vendor sources labeled "Vendor-reported"; problems with no source show none | diagnosis page, game plan items | `src/data/case-studies.json` (checked 2026-10-27); `scripts/verify-case-studies.mjs` re-fetches each page and finds the quote; tests `case-studies.test.ts` |
+| Three ways to get each fix done: do it yourself (time cost, labeled estimate), Ringy does it (after your OK, price not set), or hire it out (a category; vendors and prices named only with a public pricing page, no affiliation) | game plan items | `src/data/fix-paths.json` + `solutions.json`; tests `fixpaths.test.ts`, `figures-traceable.test.ts` |
+| Talk to Ringy: the owner picks a channel and ticks a consent box; the exact consent text and time are stored (append-only, withdraw any time, contacts masked on read). Browser voice is live; email, phone, SMS and WhatsApp are a waitlist and nothing is sent | diagnosis page (`#talk`), `POST /api/businesses/[id]/channels` | Migration `20261030000000_channel_optins.sql` (RLS on, no client access); tests `channels.test.ts` against the local store |
 | Printable 1-pager (no price, no money-back promise) | `/businesses/[id]/one-pager` | Tests; screenshots |
 | Owner interview: Ringy asks the questions from `src/data/interview.json` (and the game plan's open questions), the owner answers by voice in the browser or by typing, and answers are saved to the business profile | `/businesses/[id]/interview` | Tested end to end in a real browser (headless Chrome) against a real ElevenLabs Conversational AI session with a **scripted microphone** (recorded answers played into the mic input), 2026-10-26: all 5 questions asked in order, all 5 answers transcribed, mapped, saved and shown after reload (`scripts/e2e/interview-voice.mjs`). Not yet tried by a person on a real microphone. 18 unit and route tests |
 | Weekly check-in: light rating and review-count check, new reviews only when the count went up, a deeper refresh monthly, under a monthly cap (default $1.00) | Vercel Cron `/api/cron/checkin`, Mondays 15:00 UTC | Tests with mocked Apify (no spend). Needs `CRON_SECRET` in the deploy env; not set here, so not run live |
@@ -32,6 +37,7 @@ Each line names how it was checked. "Live" means it ran against the real service
 - **No phone calls.** Nothing in this codebase answers or places a call. The phone-deploy adapter exists, is off without `ELEVENLABS_PHONE_NUMBER_ID`, and has not been tested against the live API.
 - **No SMS, no Spanish, no calendar booking, no payments, no outreach of any kind.** The evals fail any owner-facing copy that claims phone answering, texting, Spanish, "every call" or 24/7.
 - Interview answers are stored as owner-provided facts. They do not yet change the diagnosis or dollar figures, and they are deliberately kept out of the phone agent's knowledge base.
+- **Talk to Ringy** stores a choice and consent only. Email, phone, SMS and WhatsApp are a waitlist; no code sends on them.
 
 ## How to run
 
@@ -148,7 +154,7 @@ Apply the migration to your Supabase project, either in the SQL editor or with t
 supabase db push   # or paste each file in supabase/migrations/ into the SQL editor, in order
 ```
 
-Tables: `runs`, `run_steps`, `businesses`, `reviews`, `web_pages`, `findings`, `roi_estimates`, `knowledge_facts`, `agents`. RLS is enabled on all of them, and the server uses the service role key. `20261028000000_harden_rls.sql` adds a restrictive deny policy for `anon` and `authenticated` on every table and revokes their table grants, so the publishable (anon) key cannot read or write anything; only the server, with `SUPABASE_SERVICE_ROLE_KEY`, can.
+Tables: `runs`, `run_steps`, `businesses`, `reviews`, `web_pages`, `findings`, `roi_estimates`, `knowledge_facts`, `agents`, the check-in tables, and `channel_optins` (owner consent log). RLS is enabled on all of them, and the server uses the service role key. `20261028000000_harden_rls.sql` adds a restrictive deny policy for `anon` and `authenticated` on every table and revokes their table grants, so the publishable (anon) key cannot read or write anything; only the server, with `SUPABASE_SERVICE_ROLE_KEY`, can.
 
 
 ## API
@@ -159,6 +165,8 @@ curl localhost:3000/api/runs/<runId>                 # status, steps, ranked bus
 curl localhost:3000/api/businesses/<id>              # report, including saved interview answers
 curl -X POST localhost:3000/api/businesses/<id>/interview -H 'content-type: application/json' \
   -d '{"mode":"text","answers":[{"question":"About how many calls do you think go unanswered in a normal week?","answer":"About 8"}]}'
+curl -X POST localhost:3000/api/businesses/<id>/channels -H 'content-type: application/json' \
+  -d '{"channel":"browser_voice","consent":true,"consent_version":"2026-10-27"}'   # owner opt-in; sends nothing
 curl localhost:3000/api/evals/product                # rule checks on saved reports
 curl localhost:3000/api/health                       # mode and key presence (true/false)
 ```

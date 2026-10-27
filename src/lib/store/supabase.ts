@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { AgentRecord, Business, Checkin, CheckinReview, CheckinSnapshot, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, TrackedBusiness, WebPage } from "../types";
+import type { AgentRecord, Business, ChannelOptin, Checkin, CheckinReview, CheckinSnapshot, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, TrackedBusiness, WebPage } from "../types";
 import { newId, now, type Store } from "./types";
 
 // Supabase (Postgres) store. Server side only: uses the service role key,
@@ -193,6 +193,12 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): Store 
       const { data, error } = await sb.from("checkin_reviews").select("*").eq("place_id", placeId).order("published_at", { ascending: false });
       if (error) throw new Error(error.message);
       return data as CheckinReview[];
+    },
+    addChannelOptin: (row) => insert<ChannelOptin>("channel_optins", { ...row, id: newId() }),
+    async listChannelOptins(businessId) {
+      const { data, error } = await sb.from("channel_optins").select("*").eq("business_id", businessId).order("consented_at", { ascending: false }).limit(200);
+      if (error) throw new Error(error.message);
+      return data as ChannelOptin[];
     },
   };
 }

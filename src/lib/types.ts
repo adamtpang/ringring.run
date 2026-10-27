@@ -301,3 +301,21 @@ export interface CheckinReview {
   classified_by: "llm" | "rules";
   created_at: string;
 }
+
+export const CHANNEL_IDS = ["browser_voice", "email", "phone", "sms", "whatsapp"] as const;
+export type ChannelId = (typeof CHANNEL_IDS)[number];
+export type OptinStatus = "opted_in" | "waitlist" | "withdrawn";
+
+/** One consent event from "Talk to Ringy". Append-only; latest per channel wins. */
+export interface ChannelOptin {
+  id: string;
+  business_id: string;
+  channel: ChannelId;
+  status: OptinStatus;
+  contact: string | null;
+  consent_text: string;
+  consent_version: string;
+  consented_at: string;
+  source: string;
+  created_at: string;
+}

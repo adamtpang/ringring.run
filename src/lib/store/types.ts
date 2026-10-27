@@ -1,4 +1,4 @@
-import type { AgentRecord, Business, Checkin, CheckinReview, CheckinSnapshot, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, TrackedBusiness, WebPage } from "../types";
+import type { AgentRecord, Business, ChannelOptin, Checkin, CheckinReview, CheckinSnapshot, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, TrackedBusiness, WebPage } from "../types";
 
 export type NewRun = Omit<Run, "id" | "created_at">;
 export type NewStep = Omit<RunStep, "id" | "created_at" | "updated_at">;
@@ -67,6 +67,11 @@ export interface Store {
   /** Inserts reviews not stored yet (unique place_id + external_id); returns only the new rows. */
   insertCheckinReviews(rows: NewCheckinReview[]): Promise<CheckinReview[]>;
   listCheckinReviews(placeId: string): Promise<CheckinReview[]>;
+
+  /** Append one consent event. */
+  addChannelOptin(row: Omit<ChannelOptin, "id" | "created_at">): Promise<ChannelOptin>;
+  /** Newest first. */
+  listChannelOptins(businessId: string): Promise<ChannelOptin[]>;
 }
 
 export const now = () => new Date().toISOString();

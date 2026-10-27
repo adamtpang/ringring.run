@@ -7,6 +7,7 @@ import { Badge, ButtonLink, Card, SectionHeader, Stat, StatGrid } from "@/compon
 import { GamePlanSection, useGamePlan } from "@/components/GamePlan";
 import { ThirtyDayCard, useThirtyDay } from "@/components/ThirtyDayPlan";
 import { buildFixPaths } from "@/lib/fixpaths";
+import { TalkToRingy } from "@/components/TalkToRingy";
 import { ROI_INTRO, RoiRow, RoiTotals, useCalcBase, useRoiState, type CalcBase } from "@/components/RoiCalculator";
 import type { CalcField } from "@/lib/calculator";
 import { WhatChanged, type CheckinData } from "@/components/WhatChanged";
@@ -295,6 +296,7 @@ export default function DiagnosisPage() {
       {plan && <GamePlanSection plan={plan} paths={fixPaths} onePagerHref={`/businesses/${b.id}/one-pager`} interviewHref={`/businesses/${b.id}/interview${snapQs(data.snapshot)}`} />}
 
       {plan && thirty && <ThirtyDayCard plan={thirty} printHref={`/businesses/${b.id}/one-pager${snapQs(data.snapshot)}#thirty-day-print`} />}
+      <TalkToRingy businessId={b.id} businessName={b.name} interviewHref={`/businesses/${b.id}/interview${snapQs(data.snapshot)}`} readOnly={!!data.snapshot} />
 
       {data.checkin && <WhatChanged data={data.checkin} planStep={plan?.items.find((i) => i.recommended)?.you[0] ?? null} />}
 
