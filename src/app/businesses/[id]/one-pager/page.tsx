@@ -11,6 +11,7 @@ import { usePoll } from "@/components/ui";
 import { SnapshotBanner, snapQs, useReportUrl } from "@/components/Snapshot";
 import type { SnapshotMeta } from "@/lib/snapshot";
 import { ASSUMPTION_LABEL } from "@/lib/roi";
+import { ONE_PAGER_CONTACT, ONE_PAGER_FOOTER } from "@/lib/copy";
 import {
   ACTOR_LABEL,
   fmtDate,
@@ -38,7 +39,6 @@ interface Report {
 
 /** Public home of the shareable diagnosis page. Matches metadataBase in the root layout. */
 const SITE = "https://ringring.run";
-const PHONE_LINE = "512 number coming soon";
 const ACTOR_TEXT = {
   ringy: "text-accent",
   ringy_after_ok: "text-accent",
@@ -337,11 +337,10 @@ export default function OnePagerPage() {
               </span>
               <div className="min-w-0">
                 <p className="text-headline leading-tight">
-                  Text or call Ringy
+                  {ONE_PAGER_CONTACT.title}
                 </p>
-                <p className="text-footnote text-muted">{PHONE_LINE}</p>
                 <p className="mt-1 text-caption text-subtle">
-                  Scan or visit for your full diagnosis, with every source:
+                  {ONE_PAGER_CONTACT.body}
                 </p>
                 <a
                   href={url}
@@ -356,11 +355,7 @@ export default function OnePagerPage() {
           <footer className="mt-auto border-t border-hairline pt-2 text-[0.625rem] leading-snug text-subtle">
             Built from public Google reviews, the Google listing
             {b.website ? " and your website" : ""}, read on{" "}
-            {scanned ?? "the scan date"}. Dollar figures and tiers are estimates
-            from default assumptions (tell us your real numbers) and an
-            anonymized peer benchmark, not promises. Overlapping problems are
-            counted once in any total. Ringy never posts, sends or changes
-            anything without your OK.
+            {scanned ?? "the scan date"}. {ONE_PAGER_FOOTER}
           </footer>
         </article>
       </div>

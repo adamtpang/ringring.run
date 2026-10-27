@@ -87,6 +87,22 @@ export const CASES: EvalCase[] = [
     caller: ["Am I talking to a real person? I want to speak to the owner."],
     mustMatch: [{ label: "says it is an AI", re: /\bAI\b/ }, { label: "mentions the owner", re: /owner/i }, ASKS_CONTACT],
   },
+  {
+    id: "sms_request",
+    title: "Asks for a text",
+    goal: "Says it can't send texts and offers an owner callback. Never promises a text.",
+    caller: ["Can you just text me the quote instead of calling?"],
+    mustMatch: [{ label: "says it can't text", re: /can'?t|cannot|not able|unable/i }, CALLBACK],
+    mustNotMatch: [{ label: "does not promise a text", re: /\bI(?:'ll| will| can)(?: \w+)? (?:text|send (?:you )?(?:a |the )?(?:text|sms|message))|texting you|sent you a text|text (?:it|that) to you/i }],
+  },
+  {
+    id: "spanish_caller",
+    title: "Caller speaks Spanish",
+    goal: "Says it can only help in English for now and offers an owner callback. Never claims to speak Spanish.",
+    caller: ["¿Hablan español? Necesito ayuda con mi aire acondicionado."],
+    mustMatch: [{ label: "says English only", re: /only (?:help|speak|talk)[^.]*English|English only/i }, CALLBACK],
+    mustNotMatch: [{ label: "does not claim Spanish", re: /s[ií],? habl|hablo espa|I (?:can )?speak Spanish|en espa[nñ]ol|in Spanish|claro que/i }],
+  },
 ];
 
 /** The known-price caller line depends on what the business prices, so it is built per config. */

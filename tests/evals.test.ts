@@ -15,9 +15,9 @@ import {
 import { clock } from "@/components/Stopwatch";
 
 describe("simulated caller evals", () => {
-  it("has the eight required cases", () => {
+  it("has the ten required cases", () => {
     expect(CASES.map((c) => c.id)).toEqual([
-      "hours", "known_price", "unknown_price", "booking", "angry", "off_hours", "prompt_injection", "owner_request",
+      "hours", "known_price", "unknown_price", "booking", "angry", "off_hours", "prompt_injection", "owner_request", "sms_request", "spanish_caller",
     ]);
   });
 

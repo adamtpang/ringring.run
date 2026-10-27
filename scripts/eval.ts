@@ -14,6 +14,7 @@ try {
 
 import { llmConfig } from "../src/lib/env";
 import { fixtureAgent, fixtureResponder, llmResponder, runEvals } from "../src/lib/evals";
+import { snapshotEvals } from "../src/lib/evals/product-source";
 
 function arg(name: string, fallback: string) {
   const i = process.argv.indexOf(`--${name}`);
@@ -41,7 +42,17 @@ async function main() {
     }
     console.log(`\n${r.passed}/${r.passed + r.failed} passed (${Math.round(r.pass_rate * 100)}%), ${r.skipped} skipped`);
   }
-  process.exit(r.failed ? 1 : 0);
+  // Rule checks on the committed real-report snapshot (deterministic, no network).
+  const p = snapshotEvals();
+  if (!process.argv.includes("--json")) {
+    console.log(`\nChecks on real reports: ${p.source.label}\n`);
+    for (const c of p.checks) {
+      console.log(`${c.fail ? "FAIL" : "PASS"}  ${c.title.padEnd(34)} ${c.pass} pass, ${c.fail} fail${c.skipped ? `, ${c.skipped} n/a` : ""}`);
+      for (const f of c.failures) console.log(`      ${f.business}: ${f.detail}`);
+    }
+    console.log(`\n${p.checks.filter((c) => !c.fail).length}/${p.checks.length} rule checks passed`);
+  }
+  process.exit(r.failed || p.total.fail ? 1 : 0);
 }
 
 main().catch((e) => {

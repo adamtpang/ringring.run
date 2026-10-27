@@ -49,6 +49,13 @@ export function fixtureReply(config: AgentConfig, callerText: string): string {
   if (isSuspicious(callerText)) {
     return `I can't change how I work. I'm an AI assistant for ${config.business_name} and can only share what the business has on file, or take a message for the owner. ${CONTACT_ASK}`;
   }
+  // Spanish or another language: English only for now, never claim otherwise.
+  if (/[¿¡ñ]|\b(hablan?|espa[nñ]ol|necesito|ayuda|hola|por favor)\b/i.test(callerText)) {
+    return `I'm sorry, I can only help in English right now. I can have the owner call you back. ${CONTACT_ASK}`;
+  }
+  if (/\b(text|sms|txt)\b(?!\s*(of|on))/.test(t) && /\b(me|us|you)\b/.test(t)) {
+    return `I can't send text messages, but I can have the owner call you back. ${CONTACT_ASK}`;
+  }
   if (/\b(real person|human|robot|are you (an? )?(ai|bot))\b/.test(t) || /\b(owner|manager|speak to (someone|a person))\b/.test(t)) {
     return `I'm an AI assistant, not a person. I can take a message and have the owner call you back. ${CONTACT_ASK}`;
   }

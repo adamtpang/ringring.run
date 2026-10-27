@@ -297,7 +297,7 @@ export default function DiagnosisPage() {
           <li key={s}>
             <Badge tone={i === 1 ? "accent" : i < 1 || (i === 3 && current === 3) ? "success" : "neutral"} dot={i === 1}>
               {i + 1}. {s}
-              {i === 2 ? " (voice soon)" : i === 3 && data.agent ? " (agent ready)" : ""}
+              {i === 3 && data.agent ? " (agent ready)" : ""}
             </Badge>
           </li>
         ))}

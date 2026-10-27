@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Badge, Button, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
 import { BackLink, dateTime12, PageShell, usePoll } from "@/components/ui";
+import { ProductChecks } from "@/components/ProductChecks";
 import type { CaseResult, EvalReport } from "@/lib/evals/types";
 
 interface EvalData {
@@ -94,6 +95,14 @@ function Evals() {
       <SectionHeader
         level={1}
         size="lg"
+        eyebrow="Evals"
+        title="What Ringy gets checked on"
+        description="Two kinds of checks, both computed when you open this page: rules run on real saved reports, and scripted calls to the phone agent in text."
+      />
+      <ProductChecks />
+      <SectionHeader
+        level={2}
+        size="md"
         eyebrow="Simulated calls"
         title={r ? `${r.business_name} phone agent` : "Phone agent evals"}
         description="Scripted callers talk to the generated agent in text. Each reply is graded for AI disclosure, facts against the knowledge base, the task, invented claims, and turn latency."

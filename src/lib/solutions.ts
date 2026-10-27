@@ -12,11 +12,11 @@ export const SOLUTIONS: Record<SolutionId, SolutionTemplate> = {
   ai_receptionist: {
     id: "ai_receptionist",
     name: "AI receptionist",
-    oneLiner: "Answers every call and text 24/7 in the business's voice, books jobs, and routes emergencies.",
+    oneLiner: "A phone agent setup built from the business's hours, services and website. It answers from what is on file and takes messages and booking requests for an owner callback. Connecting it to a real phone line is not live yet.",
     includes: [
-      "Trained on the business's hours, services, and service area",
-      "Books or captures the lead, then texts a summary to the owner",
-      "Discloses that it is an AI assistant on every call",
+      "Built from the business's hours, services, and website",
+      "Takes a message or booking request; the owner calls back to confirm",
+      "Says it is an AI assistant on every call",
     ],
   },
   review_responder: {
@@ -42,11 +42,11 @@ export const SOLUTIONS: Record<SolutionId, SolutionTemplate> = {
   booking_followup: {
     id: "booking_followup",
     name: "Booking and follow-up automation",
-    oneLiner: "Online booking plus automatic text follow-ups so quotes and callbacks never slip.",
+    oneLiner: "Online booking plus follow-up reminders so quotes and callbacks don't slip. Ringy helps pick and set up a booking tool after your OK; it does not send messages itself.",
     includes: [
       "Self-serve booking link",
-      "Automatic reminders and quote follow-ups by text",
-      "Owner dashboard of open leads",
+      "Reminders and quote follow-ups from the booking tool you choose",
+      "Owner list of open leads",
     ],
   },
 };
