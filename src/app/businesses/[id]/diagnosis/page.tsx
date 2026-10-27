@@ -2,18 +2,20 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Badge, ButtonLink, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
 import { GamePlanSection, useGamePlan } from "@/components/GamePlan";
+import { ROI_INTRO, RoiRow, RoiTotals, useCalcBase, useRoiState, type CalcBase } from "@/components/RoiCalculator";
+import type { CalcField } from "@/lib/calculator";
 import { WhatChanged, type CheckinData } from "@/components/WhatChanged";
 import { PEER_TIER_TONE, PeersSection, usePeerBoard, usePeerSubject } from "@/components/PeersSection";
 import { BackLink, money, PageShell, usePoll } from "@/components/ui";
 import { SnapshotBanner, snapQs, useReportUrl } from "@/components/Snapshot";
 import type { SnapshotMeta } from "@/lib/snapshot";
 import { callsPerMonth, CATALOG, INTERVIEW, prescribe, rankProblems, verticalFor, type MenuOption, type RankedProblem, type Vertical } from "@/lib/prescription";
-import { ASSUMPTION_LABEL, computeMonthlyValue, dedupMonthly, moneyTrace, traceLine } from "@/lib/roi";
+import { ASSUMPTION_LABEL, computeMonthlyValue, dedupMonthly, moneyTrace } from "@/lib/roi";
 import { KIND_LABELS } from "@/lib/solutions";
-import type { AgentRecord, Assumption, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run } from "@/lib/types";
+import type { AgentRecord, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run } from "@/lib/types";
 
 interface Report {
   business: Business;
@@ -30,12 +32,6 @@ interface Report {
 
 const VERTICAL_LABEL: Record<Vertical, string> = { home_services: "home services", dental: "dental", any: "local business" };
 const CHECKED = new Date(`${CATALOG.checked_on}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-
-function fmtValue(a: Assumption) {
-  if (a.unit === "usd") return money(a.value);
-  if (a.unit === "ratio") return `${Math.round(a.value * 1000) / 10}%`;
-  return String(a.value);
-}
 
 function severityTone(s: number) {
   return s >= 5 ? "danger" : s >= 4 ? "warning" : "neutral";
@@ -60,41 +56,6 @@ function Quotes({ finding, reviews }: { finding: Finding; reviews: Review[] }) {
                 ? `Their website: ${e.url}`
                 : "Google listing"}
           </p>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function CostEditor({ assumptions, edits, setEdits }: { assumptions: Assumption[]; edits: Record<string, string>; setEdits: (e: Record<string, string>) => void }) {
-  return (
-    <ul className="divide-y divide-hairline">
-      {assumptions.map((a, i) => (
-        <li key={a.key} className="grid grid-cols-[1rem_1fr_auto] items-center gap-3 py-2">
-          <span className="text-footnote text-subtle" aria-hidden="true">{i > 0 ? "×" : ""}</span>
-          <span className="min-w-0 text-footnote">
-            <span className="mr-2">{a.label}</span>
-            {a.source === "listing" ? (
-              <Badge tone="success" className="h-5 px-2">From listing</Badge>
-            ) : a.key === "weeks_per_month" ? (
-              <Badge className="h-5 px-2">Calendar: 52 weeks / 12 months</Badge>
-            ) : (
-              <Badge tone="warning" className="h-5 px-2">Default assumption, ask the owner</Badge>
-            )}
-          </span>
-          <span className="text-right">
-            <input
-              aria-label={`${a.label} (${a.source === "listing" ? "from listing" : "assumption"})`}
-              type="number"
-              step={a.unit === "ratio" || a.unit === "multiplier" ? 0.01 : 1}
-              min={0}
-              max={a.unit === "ratio" ? 1 : undefined}
-              value={edits[a.key] ?? String(a.value)}
-              onChange={(e) => setEdits({ ...edits, [a.key]: e.target.value })}
-              className="h-8 w-24 rounded-sm bg-surface px-2 text-right text-footnote tabular-nums ring-1 ring-inset ring-hairline outline-none focus:ring-2 focus:ring-accent"
-            />
-            <span className="block text-[0.6875rem] text-subtle">{a.unit === "ratio" ? fmtValue({ ...a, value: Number(edits[a.key] ?? a.value) }) : a.unit === "usd" ? "dollars" : a.unit}</span>
-          </span>
         </li>
       ))}
     </ul>
@@ -134,18 +95,16 @@ function OptionCard({ o, picked, calls }: { o: MenuOption; picked: boolean; call
   );
 }
 
-function ProblemCard({ rank, rp, b, reviews, agent }: { rank: number; rp: RankedProblem; b: Business; reviews: Review[]; agent: AgentRecord | null }) {
-  const [edits, setEdits] = useState<Record<string, string>>({});
+function ProblemCard({ rank, rp, b, reviews, agent, calc, edits, setEdits, fields }: { rank: number; rp: RankedProblem; b: Business; reviews: Review[]; agent: AgentRecord | null; calc: CalcBase | undefined; edits: Record<string, string>; setEdits: (e: Record<string, string>) => void; fields: CalcField[] | null }) {
   const f = rp.finding;
   const base = rp.roi?.assumptions ?? [];
-  const current = base.map((a) => (a.key in edits ? { ...a, value: Number(edits[a.key]) } : a));
+  // The loss inputs as edited in the calculator (never saved), for sizing the prescription.
+  const current = fields ? base.map((a) => ({ ...a, value: fields.find((x) => x.key === a.key)?.value ?? a.value })) : base;
   let monthly: number | null = rp.monthly;
-  let err: string | null = null;
   try {
     monthly = base.length ? computeMonthlyValue(current) : rp.monthly;
-  } catch (e) {
-    monthly = null;
-    err = e instanceof Error ? e.message : String(e);
+  } catch {
+    monthly = rp.monthly;
   }
   const vertical = verticalFor(b.category);
   const calls = f.kind === "missed_calls" ? callsPerMonth(current) : null;
@@ -170,28 +129,14 @@ function ProblemCard({ rank, rp, b, reviews, agent }: { rank: number; rp: Ranked
         <div className="mt-2"><Quotes finding={f} reviews={reviews} /></div>
       </section>
 
-      <section className="rounded-md bg-surface-2 p-4 sm:p-5">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
+      {calc ? (
+        <RoiRow base={calc} edits={edits} setEdits={setEdits} heading={false} />
+      ) : (
+        <section className="rounded-md bg-surface-2 p-4 sm:p-5">
           <h3 className="text-eyebrow uppercase text-muted">What it may cost</h3>
-          <span className="text-title-2 tabular-nums text-warning">{monthly == null ? "Check inputs" : `${money(monthly)}/mo`}</span>
-        </div>
-        <p className="mt-1 text-caption text-muted">
-          An estimate, not a fact. It multiplies the numbers below. Most are assumptions; change any of them to match what you know. Edits stay on this page and are not saved.
-        </p>
-        {base.length > 0 ? (
-          <CostEditor assumptions={base} edits={edits} setEdits={setEdits} />
-        ) : (
           <p className="mt-2 text-footnote text-muted">No estimate on file for this problem.</p>
-        )}
-        {!err && base.length > 0 && (() => {
-          const t = moneyTrace(current);
-          return t ? <p className="mt-2 text-caption text-subtle">How we got this: {traceLine(t)}.</p> : null;
-        })()}
-        {err && <p className="mt-2 text-caption text-danger">{err}</p>}
-        {Object.keys(edits).length > 0 && (
-          <button type="button" onClick={() => setEdits({})} className="mt-2 text-caption font-medium text-accent hover:underline">Reset to defaults</button>
-        )}
-      </section>
+        </section>
+      )}
 
       <section className="space-y-3">
         <div>
@@ -270,6 +215,8 @@ export default function DiagnosisPage() {
     [data, board, subject],
   );
   const plan = useGamePlan(planInput);
+  const calcRows = useCalcBase(data?.business ?? null, data ? ranked.map((r) => r.finding) : null, data?.roi ?? null);
+  const roiState = useRoiState(calcRows);
 
   if (error) return <PageShell width="narrow"><p className="rounded-md bg-danger-soft px-4 py-3 text-footnote text-danger">{error}</p></PageShell>;
   if (!data) return <PageShell width="narrow"><p className="text-footnote text-muted">Loading diagnosis…</p></PageShell>;
@@ -345,9 +292,37 @@ export default function DiagnosisPage() {
 
       {data.checkin && <WhatChanged data={data.checkin} planStep={plan?.items.find((i) => i.recommended)?.you[0] ?? null} />}
 
-      {ranked.length > 0 && <SectionHeader eyebrow="Prescriptions" title="Each problem in detail" description="The evidence, the cost assumptions you can edit, and the tools that fix it." />}
+      {calcRows.length > 0 && (
+        <Card padding="lg" className="space-y-4" id="roi" aria-labelledby="roi-title">
+          <SectionHeader eyebrow="ROI calculator" title={<span id="roi-title">Is fixing it worth it?</span>} description={`${ROI_INTRO} Change the inputs inside each problem below.`} />
+          <RoiTotals total={roiState.total} />
+          <ul className="flex flex-wrap gap-2">
+            {roiState.computed.map((r) => (
+              <li key={r.kind}>
+                <a href={`#problem-${r.kind}`} className="inline-flex items-center gap-1.5 rounded-pill bg-surface-2 px-3 py-1 text-caption font-medium text-foreground ring-1 ring-inset ring-hairline hover:ring-accent">
+                  {r.label}
+                  <span className={r.result.net > 0 ? "text-success" : "text-danger"}>{r.result.net < 0 ? "−" : ""}{money(Math.abs(r.result.net))}/mo net</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {ranked.length > 0 && <SectionHeader eyebrow="Prescriptions" title="Each problem in detail" description="The evidence, an ROI calculator you can edit, and the tools that fix it." />}
       {ranked.map((rp, i) => (
-        <ProblemCard key={rp.finding.id} rank={i + 1} rp={rp} b={b} reviews={data.reviews} agent={data.agent} />
+        <ProblemCard
+          key={rp.finding.id}
+          rank={i + 1}
+          rp={rp}
+          b={b}
+          reviews={data.reviews}
+          agent={data.agent}
+          calc={calcRows.find((c) => c.kind === rp.finding.kind)}
+          edits={roiState.edits[rp.finding.kind] ?? {}}
+          setEdits={(e) => roiState.setRow(rp.finding.kind, e)}
+          fields={roiState.fieldsFor(rp.finding.kind)}
+        />
       ))}
 
       {board && <PeersSection business={b} board={board} fixes={ranked.map((r) => r.finding.kind)} />}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Badge, Button, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
+import { RoiCalculatorCard, useCalcBase } from "@/components/RoiCalculator";
 import { AgentPanel, type VoiceStatus } from "@/components/AgentPanel";
 import { BackLink, money, PageShell, StepTimeline, usePoll } from "@/components/ui";
 import { SnapshotBanner, snapQs, useReportUrl } from "@/components/Snapshot";
@@ -165,6 +166,7 @@ export default function BusinessPage() {
   const roiByFinding = useMemo(() => new Map((data?.roi ?? []).map((r) => [r.finding_id, r])), [data]);
   const solutionIds = useMemo(() => [...new Set((data?.findings ?? []).map((f) => f.solution))] as SolutionId[], [data]);
 
+  const calcRows = useCalcBase(data?.business ?? null, data?.findings ?? null, data?.roi ?? null);
   if (error) return <PageShell width="narrow"><p className="rounded-md bg-danger-soft px-4 py-3 text-footnote text-danger">{error}</p></PageShell>;
   if (!data) return <PageShell width="narrow"><p className="text-footnote text-muted">Loading report…</p></PageShell>;
 
@@ -281,6 +283,8 @@ export default function BusinessPage() {
           </Card>
         );
       })}
+
+      {ok && calcRows.length > 0 && <RoiCalculatorCard rows={calcRows} />}
 
       {solutionIds.length > 0 && (
         <Card padding="lg" className="space-y-4">

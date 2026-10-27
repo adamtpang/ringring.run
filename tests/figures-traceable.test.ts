@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { combineRoi, computeRoi, defaultFields } from "@/lib/calculator";
 import { buildGamePlan, type GamePlan, type PlanInput } from "@/lib/gameplan";
 import { buildBoard, toSubjectInput } from "@/lib/peers";
 import { rankByMoney, stepsWithCurrentFigures } from "@/lib/business-money";
@@ -228,5 +229,39 @@ describe("run timeline shows the rebuilt figures", () => {
     expect(out[2]!.message).toBe(`Ranked 2 businesses. Top: Test Air (est. $${m.total!.toLocaleString("en-US")}/mo, rebuilt from its inputs)`);
     expect(out[3]).toBe(steps[3]);
     for (const s of out) for (const d of dollars(s.message)) expect(d).toBe(m.total);
+  });
+});
+
+// ---------- ROI calculator (business page, diagnosis, one-pager page 2) ----------
+
+
+describe("ROI calculator figures trace to their inputs", () => {
+  const b = biz();
+  const kinds: FindingKind[] = ["missed_calls", "slow_response", "booking_friction", "unanswered_reviews", "no_website"];
+  const rows = kinds.map((k) => ({ kind: k, label: k, fields: defaultFields(k, "home_services", defaultAssumptions(k, b)) }));
+  const computed = rows.map((r) => ({ kind: r.kind, label: r.label, result: computeRoi(r.fields) }));
+  const total = combineRoi(computed);
+
+  it("every input is sourced, assumed or calendar, with a source line; sourced tool prices carry a URL", () => {
+    for (const r of rows) for (const f of r.fields) {
+      expect(["sourced", "assumed", "calendar"]).toContain(f.status);
+      expect(f.source).toBeTruthy();
+      if (f.group === "fix" && f.status === "sourced") expect(f.url).toMatch(/^https:\/\//);
+      for (const d of dollars(f.source)) expect(false, `untraced $${d} in source "${f.source}"`).toBe(true);
+    }
+  });
+
+  it("every $ in the math and the total is computed or an input", () => {
+    const allowed = new Set<number>();
+    for (const [i, c] of computed.entries()) {
+      const r = c.result;
+      [r.atRisk, r.gain, r.toolCost, r.monthlyCost, Math.abs(r.net), r.setupCost].forEach((v) => allowed.add(v));
+      rows[i]!.fields.filter((f) => f.unit === "usd").forEach((f) => allowed.add(Math.round(f.value)));
+    }
+    [Math.abs(total.net), total.gain, total.monthlyCost, total.setupCost].forEach((v) => allowed.add(v));
+    total.dropped.forEach((d) => allowed.add(d.gain));
+    const texts = [...computed.flatMap((c) => c.result.math), total.math];
+    for (const t of texts) for (const d of dollars(t)) expect(allowed.has(d), `$${d} in "${t}"`).toBe(true);
+    expect(total.math).not.toMatch(/^Nothing/);
   });
 });

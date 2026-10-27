@@ -1,0 +1,12 @@
+{
+  "note": "Owner-time defaults for the ROI calculator. Every value is an assumption the owner should correct; each cites the coaching estimate it was read from, or says it has none.",
+  "win_back_share": 0.5,
+  "hourly_value_usd": 50,
+  "kinds": {
+    "missed_calls": { "setup_hours": 0.5, "owner_hours_month": 2, "basis": "Coaching estimate: about 30 minutes to set up, then a few minutes a day for callbacks." },
+    "slow_response": { "setup_hours": 0.33, "owner_hours_month": 2, "basis": "Coaching estimate: about 20 minutes to agree the texts, then a few minutes a day." },
+    "booking_friction": { "setup_hours": 1, "owner_hours_month": 1, "basis": "No coaching estimate on file; a rough guess." },
+    "unanswered_reviews": { "setup_hours": 0, "owner_hours_month": 1, "basis": "Coaching estimate: about 10 minutes per reply to read and approve a draft; about 6 replies a month assumed." },
+    "no_website": { "setup_hours": 2, "owner_hours_month": 0.5, "basis": "No coaching estimate on file; a rough guess for reviewing a one-page site." }
+  }
+}
