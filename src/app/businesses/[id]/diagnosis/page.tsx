@@ -8,6 +8,8 @@ import { GamePlanSection, useGamePlan } from "@/components/GamePlan";
 import { WhatChanged, type CheckinData } from "@/components/WhatChanged";
 import { PeersSection, usePeerBoard, usePeerSubject } from "@/components/PeersSection";
 import { BackLink, money, PageShell, usePoll } from "@/components/ui";
+import { SnapshotBanner, snapQs, useReportUrl } from "@/components/Snapshot";
+import type { SnapshotMeta } from "@/lib/snapshot";
 import { callsPerMonth, CATALOG, INTERVIEW, prescribe, rankProblems, verticalFor, type MenuOption, type RankedProblem, type Vertical } from "@/lib/prescription";
 import { ASSUMPTION_LABEL, computeMonthlyValue, dedupMonthly, moneyTrace, traceLine } from "@/lib/roi";
 import { KIND_LABELS } from "@/lib/solutions";
@@ -23,6 +25,7 @@ interface Report {
   knowledge?: KnowledgeFact[];
   agent: AgentRecord | null;
   checkin?: CheckinData | null;
+  snapshot?: SnapshotMeta;
 }
 
 const VERTICAL_LABEL: Record<Vertical, string> = { home_services: "home services", dental: "dental", any: "local business" };
@@ -254,7 +257,8 @@ const STEPS = ["Market map", "Diagnosis", "Owner interview", "Fix ships"] as con
 
 export default function DiagnosisPage() {
   const { id } = useParams<{ id: string }>();
-  const { data, error } = usePoll<Report>(`/api/businesses/${id}`, (d) => d.business.diagnosis_status === "running" || d.business.diagnosis_status === "pending");
+  const url = useReportUrl(id);
+  const { data, error } = usePoll<Report>(url, (d) => !d.snapshot && d.business.diagnosis_status === "running" || d.business.diagnosis_status === "pending");
   const ranked = useMemo(() => (data ? rankProblems(data.findings, data.roi) : []), [data]);
   const subject = usePeerSubject(data?.business ?? null, data?.reviews ?? null);
   const board = usePeerBoard(subject);
@@ -283,9 +287,10 @@ export default function DiagnosisPage() {
   return (
     <PageShell width="narrow">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-        <BackLink href={`/runs/${b.run_id}`}>Market map</BackLink>
-        <Link href={`/businesses/${b.id}`} className="text-footnote font-medium text-accent hover:underline">Full report</Link>
+        <BackLink href={data.snapshot ? "/owners" : `/runs/${b.run_id}`}>{data.snapshot ? "Owners" : "Market map"}</BackLink>
+        <Link href={`/businesses/${b.id}${snapQs(data.snapshot)}`} className="text-footnote font-medium text-accent hover:underline">Full report</Link>
       </div>
+      <SnapshotBanner snapshot={data.snapshot} />
 
       <ol className="flex flex-wrap gap-2" aria-label="Steps">
         {STEPS.map((s, i) => (

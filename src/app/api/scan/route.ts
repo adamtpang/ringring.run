@@ -2,6 +2,8 @@ import { after } from "next/server";
 import { fail, json } from "@/lib/api";
 import { createRun, defaultDeps, executeRun } from "@/lib/pipeline";
 import { ScanInputSchema } from "@/lib/schema";
+import { scanFallback } from "@/lib/snapshot";
+import { errorMessage } from "@/lib/retry";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -31,6 +33,10 @@ export async function POST(req: Request) {
     });
     return json({ run }, 202);
   } catch (e) {
+    // The store (Supabase) could not create the run: for a saved business, open its snapshot instead.
+    const d = parsed.data;
+    const fb = d.kind === "name" ? scanFallback({ name: d.category }, `Could not start a live scan (${errorMessage(e)}).`) : null;
+    if (fb) return json({ fallback: fb }, 200);
     return fail(e);
   }
 }

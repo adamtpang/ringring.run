@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Wordmark } from "./Logo";
 import { ModeSwitch } from "./ModeSwitch";
+import { useShowingSnapshot } from "./Snapshot";
 import { Badge, Timeline, TimelineStep, type BadgeTone } from "./ds";
 import type { Run, RunMode, RunStatus, RunStep } from "@/lib/types";
 
@@ -65,6 +66,14 @@ export function usePoll<T>(url: string | null, shouldPoll: (d: T) => boolean, in
 
 export function ModeBadge() {
   const { data } = usePoll<{ demo: boolean; mode: RunMode }>("/api/health", () => false);
+  const snapshot = useShowingSnapshot();
+  if (snapshot) {
+    return (
+      <Badge tone="warning" dot title="This page shows a saved copy of a real report, not live data.">
+        Saved snapshot
+      </Badge>
+    );
+  }
   if (!data) return null;
   if (!data.demo) {
     return (

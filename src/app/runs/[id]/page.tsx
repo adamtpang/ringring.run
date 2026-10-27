@@ -13,6 +13,7 @@ interface RunData {
   run: Run;
   steps: RunStep[];
   businesses: BusinessWithMoney[];
+  fallback?: { url: string; label: string; reason: string } | null;
   agents?: { id: string; business_id: string; status: string; ready_ms: number | null }[];
 }
 
@@ -47,6 +48,15 @@ export default function RunPage() {
             }
             action={<RunStatusPill status={data.run.status} />}
           />
+          {data.fallback && (
+            <p role="status" className="rounded-md bg-warning-soft px-4 py-3 text-footnote text-warning">
+              {data.fallback.reason}{" "}
+              <a href={data.fallback.url} className="font-semibold underline">
+                Open the {data.fallback.label}
+              </a>
+              , a saved copy of a real report.
+            </p>
+          )}
           {data.run.error && (
             <p
               className={`rounded-md px-4 py-3 text-footnote ${data.run.status === "failed" ? "bg-danger-soft text-danger" : "bg-warning-soft text-warning"}`}

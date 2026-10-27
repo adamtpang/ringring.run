@@ -239,5 +239,8 @@
   .op-toolbar { display: none !important; }
   .op-sheet { width: 8.5in; height: 11in; min-height: 0; max-width: none; overflow: hidden; margin: 0; box-shadow: none; }
   .op-avoid { break-inside: avoid; }
+  /* The money math lines made the sheet ~110px too tall for Letter; tighten print spacing so the footer always fits. */
+  .op-sheet { padding: 0.3in 0.4in !important; gap: 0.5rem !important; }
+  .op-sheet > * { zoom: 0.92; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

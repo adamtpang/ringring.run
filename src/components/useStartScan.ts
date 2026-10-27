@@ -23,7 +23,8 @@ export function useStartScan() {
         });
         const body = await res.json();
         if (!res.ok) throw new Error(body.issues?.join("; ") || body.error || "Scan failed to start");
-        router.push(`/runs/${body.run.id}`);
+        if (body.fallback?.url) router.push(body.fallback.url);
+        else router.push(`/runs/${body.run.id}`);
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
         setSubmitting(false);

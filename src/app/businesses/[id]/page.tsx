@@ -6,6 +6,8 @@ import { useMemo, useState } from "react";
 import { Badge, Button, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
 import { AgentPanel, type VoiceStatus } from "@/components/AgentPanel";
 import { BackLink, money, PageShell, StepTimeline, usePoll } from "@/components/ui";
+import { SnapshotBanner, snapQs, useReportUrl } from "@/components/Snapshot";
+import type { SnapshotMeta } from "@/lib/snapshot";
 import { ASSUMPTION_LABEL, computeMonthlyValue, dedupMonthly, moneyTrace, opportunityScore, traceLine } from "@/lib/roi";
 import { KIND_LABELS, SOLUTIONS } from "@/lib/solutions";
 import { isSuspicious } from "@/lib/untrusted";
@@ -22,6 +24,7 @@ interface Report {
   knowledge: KnowledgeFact[];
   agent: AgentRecord | null;
   voice: VoiceStatus | null;
+  snapshot?: SnapshotMeta;
 }
 
 const KNOWLEDGE_ORDER = ["contact", "hours", "service", "price", "policy", "faq", "service_area"];
@@ -51,7 +54,7 @@ function Quote({ children, source }: { children: React.ReactNode; source: React.
   );
 }
 
-function RoiEditor({ roi, onSaved }: { roi: RoiEstimate; onSaved: () => void }) {
+function RoiEditor({ roi, onSaved, readOnly = false }: { roi: RoiEstimate; onSaved: () => void; readOnly?: boolean }) {
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -108,6 +111,7 @@ function RoiEditor({ roi, onSaved }: { roi: RoiEstimate; onSaved: () => void }) 
               <input
                 aria-label={a.label}
                 type="number"
+                readOnly={readOnly}
                 step={a.unit === "ratio" ? 0.01 : a.unit === "multiplier" ? 0.01 : 1}
                 min={0}
                 max={a.unit === "ratio" ? 1 : undefined}
@@ -125,7 +129,7 @@ function RoiEditor({ roi, onSaved }: { roi: RoiEstimate; onSaved: () => void }) 
         return t ? <p className="mt-2 text-caption text-subtle">How we got this: {traceLine(t)}.</p> : null;
       })()}
       {(live.error || err) && <p className="mt-2 text-caption text-danger">{live.error ?? err}</p>}
-      <div className="mt-3 flex gap-2">
+      {readOnly ? <p className="mt-3 text-caption text-subtle">Editing is off in the saved snapshot.</p> : <div className="mt-3 flex gap-2">
         <Button
           size="sm"
           disabled={!dirty || saving || live.value == null}
@@ -141,16 +145,18 @@ function RoiEditor({ roi, onSaved }: { roi: RoiEstimate; onSaved: () => void }) 
         >
           Reset
         </Button>
-      </div>
+      </div>}
     </div>
   );
 }
 
 export default function BusinessPage() {
   const { id } = useParams<{ id: string }>();
+  const url = useReportUrl(id);
   const { data, error, reload } = usePoll<Report>(
-    `/api/businesses/${id}`,
+    url,
     (d) =>
+      !d.snapshot &&
       d.business.diagnosis_status === "running" ||
       d.business.diagnosis_status === "pending" ||
       (!d.agent && (d.run?.status === "running" || d.run?.status === "queued")),
@@ -177,14 +183,15 @@ export default function BusinessPage() {
   return (
     <PageShell width="narrow">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-        <BackLink href={`/runs/${b.run_id}`}>Run</BackLink>
+        <BackLink href={data.snapshot ? "/owners" : `/runs/${b.run_id}`}>{data.snapshot ? "Owners" : "Run"}</BackLink>
         {ok && data.findings.length > 0 && (
-          <Link href={`/businesses/${b.id}/diagnosis`} className="text-footnote font-medium text-accent hover:underline">
+          <Link href={`/businesses/${b.id}/diagnosis${snapQs(data.snapshot)}`} className="text-footnote font-medium text-accent hover:underline">
             Ringy&apos;s diagnosis and prescription
           </Link>
         )}
       </div>
 
+      <SnapshotBanner snapshot={data.snapshot} />
       <div className="space-y-5">
         {b.is_fixture && (
           <Badge tone="warning" dot>
@@ -267,7 +274,7 @@ export default function BusinessPage() {
               </ul>
             </div>
 
-            {roi && <RoiEditor roi={roi} onSaved={() => reload()} />}
+            {roi && <RoiEditor roi={roi} readOnly={!!data.snapshot} onSaved={() => reload()} />}
             <p className="text-footnote text-muted">
               Suggested fix: <span className="font-medium text-foreground">{SOLUTIONS[f.solution].name}</span>
             </p>
@@ -315,7 +322,7 @@ export default function BusinessPage() {
         )}
       </Card>
 
-      {data.agent && <AgentPanel agent={data.agent} voice={data.voice} isFixture={b.is_fixture} onDeployed={() => reload()} />}
+      {data.agent && !data.snapshot && <AgentPanel agent={data.agent} voice={data.voice} isFixture={b.is_fixture} onDeployed={() => reload()} />}
 
       {!data.agent && (
       <Card padding="lg" className="space-y-3">

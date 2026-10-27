@@ -1,6 +1,7 @@
 import { fail, json } from "@/lib/api";
 import { getStore } from "@/lib/store";
 import { withMoney } from "@/lib/business-money";
+import { runFallback } from "@/lib/snapshot";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
       store.listBusinesses({ runId: id }),
       store.listAgents({ runId: id }).catch(() => []),
     ]);
-    return json({ run, steps, businesses: await withMoney(store, businesses), agents: agents.map((a) => ({ id: a.id, business_id: a.business_id, status: a.status, ready_ms: a.ready_ms })) });
+    return json({ run, steps, fallback: runFallback(run, businesses), businesses: await withMoney(store, businesses), agents: agents.map((a) => ({ id: a.id, business_id: a.business_id, status: a.status, ready_ms: a.ready_ms })) });
   } catch (e) {
     return fail(e);
   }
