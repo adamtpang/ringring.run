@@ -1,0 +1,17 @@
+{
+  "note": "Three ways to handle each fix: do it yourself, let Ringy do it, or hire it out. Categories are generic on purpose. A product or price is named only from src/data/solutions.json, where each one has a public pricing page. DIY hours here are rough guesses for the owner to correct; the five diagnosed problems take their hours from calculator.json.",
+  "kinds": {
+    "missed_calls": { "category": "AI receptionist or live answering service" },
+    "slow_response": { "category": "Field service software with follow-up texts" },
+    "booking_friction": { "category": "Online booking or field service software" },
+    "unanswered_reviews": { "category": "Review management software" },
+    "no_website": { "category": "Website builder or a local web designer" },
+    "few_reviews": { "category": "Review request software", "diy": { "setup_hours": 0.5, "owner_hours_month": 1, "basis": "Rough guess: write one request text, then send it after each job." } },
+    "no_phone": { "category": "None needed: you add it in your Google Business Profile", "diy": { "setup_hours": 0.25, "owner_hours_month": 0, "basis": "Rough guess: one edit to your listing." } },
+    "no_hours": { "category": "None needed: you add them in your Google Business Profile", "diy": { "setup_hours": 0.25, "owner_hours_month": 0, "basis": "Rough guess: one edit to your listing." } },
+    "work_quality": { "category": "No software fixes this. Outside help would be a trainer or consultant you choose." },
+    "staff_attitude": { "category": "No software fixes this. Outside help would be a trainer or consultant you choose." },
+    "pricing": { "category": "No software fixes this. You decide how you quote and explain prices." },
+    "refunds": { "category": "No software fixes this. You decide your refund and make-good policy." }
+  }
+}

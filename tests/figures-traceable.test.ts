@@ -293,3 +293,25 @@ describe("case study figures link to the page that states them", () => {
     }
   });
 });
+
+describe("in-house vs outsourced prices are sourced or labeled", () => {
+  it("every vendor price links to its public pricing page; DIY money is labeled an estimate", async () => {
+    const { buildFixPaths } = await import("@/lib/fixpaths");
+    const { buildGamePlan } = await import("@/lib/gameplan");
+    const { buildBoard, toSubjectInput } = await import("@/lib/peers");
+    const snapMod = await import("@/data/snapshots/aire-serv.json");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const r: any = (snapMod.default ?? snapMod).report;
+    const s = toSubjectInput(r.business, r.reviews, null);
+    const gp = buildGamePlan({ business: r.business, findings: r.findings, roi: r.roi, reviews: r.reviews, knowledge: r.knowledge ?? [], board: buildBoard(s), subject: s, scanDate: r.run.created_at });
+    const paths = Object.values(buildFixPaths(gp.items, r.business, r.roi));
+    expect(paths.length).toBeGreaterThan(0);
+    for (const p of paths) {
+      for (const v of p.thirdParty.vendors) {
+        expect(v.pricingUrl, v.name).toMatch(/^https:\/\//);
+        expect(v.checkedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      }
+      if (p.diy.usdMonth != null) expect(p.diy.basis).toMatch(/estimate|guess/i);
+    }
+  });
+});

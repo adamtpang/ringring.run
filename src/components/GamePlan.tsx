@@ -1,6 +1,8 @@
 "use client";
 
 import { CaseStudies } from "@/components/CaseStudies";
+import { FixPathsView } from "@/components/FixPaths";
+import type { FixPaths } from "@/lib/fixpaths";
 import { useMemo } from "react";
 import { Badge, ButtonLink, Card, SectionHeader, type BadgeTone } from "@/components/ds";
 import { ACTOR_LABEL, buildGamePlan, type Actor, type Check, type CheckStatus, type EvidenceLine, type GamePlan, type PlanInput, type PlanItem, type PlanTier } from "@/lib/gameplan";
@@ -96,7 +98,7 @@ function EffectRow({ label, value, basis, source }: { label: string; value: stri
   );
 }
 
-function Item({ item, n }: { item: PlanItem; n: number }) {
+function Item({ item, n, paths }: { item: PlanItem; n: number; paths?: FixPaths }) {
   const weeks = [1, 2, 3, 4].map((w) => ({ w, steps: item.checklist.filter((c) => c.week === w) })).filter((x) => x.steps.length);
   return (
     <Card as="li" padding="md" className={item.recommended ? "ring-2 ring-accent/40" : undefined} id={`plan-${item.kind}`}>
@@ -165,6 +167,7 @@ function Item({ item, n }: { item: PlanItem; n: number }) {
         </div>
       </div>
 
+      {paths && <FixPathsView paths={paths} />}
       <CaseStudies kind={item.kind} />
 
       <details className="mt-4 rounded-md bg-surface-2 px-3 py-2">
@@ -210,7 +213,7 @@ function Item({ item, n }: { item: PlanItem; n: number }) {
   );
 }
 
-export function GamePlanSection({ plan, onePagerHref, interviewHref }: { plan: GamePlan; onePagerHref: string; interviewHref?: string }) {
+export function GamePlanSection({ plan, onePagerHref, interviewHref, paths }: { plan: GamePlan; onePagerHref: string; interviewHref?: string; paths?: Record<string, FixPaths> }) {
   const { binding, prognosis: pg } = plan;
   return (
     <section id="game-plan" className="space-y-5" aria-labelledby="game-plan-title">
@@ -259,7 +262,7 @@ export function GamePlanSection({ plan, onePagerHref, interviewHref }: { plan: G
       {plan.items.length > 0 && (
         <ol className="space-y-4" aria-label="Plan">
           {plan.items.map((it, i) => (
-            <Item key={it.kind} item={it} n={i + 1} />
+            <Item key={it.kind} item={it} n={i + 1} paths={paths?.[it.kind]} />
           ))}
         </ol>
       )}

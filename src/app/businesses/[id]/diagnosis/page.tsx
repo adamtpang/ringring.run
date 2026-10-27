@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { Badge, ButtonLink, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
 import { GamePlanSection, useGamePlan } from "@/components/GamePlan";
 import { ThirtyDayCard, useThirtyDay } from "@/components/ThirtyDayPlan";
+import { buildFixPaths } from "@/lib/fixpaths";
 import { ROI_INTRO, RoiRow, RoiTotals, useCalcBase, useRoiState, type CalcBase } from "@/components/RoiCalculator";
 import type { CalcField } from "@/lib/calculator";
 import { WhatChanged, type CheckinData } from "@/components/WhatChanged";
@@ -218,6 +219,7 @@ export default function DiagnosisPage() {
   const plan = useGamePlan(planInput);
   const calcRows = useCalcBase(data?.business ?? null, data ? ranked.map((r) => r.finding) : null, data?.roi ?? null);
   const roiState = useRoiState(calcRows);
+  const fixPaths = useMemo(() => (plan && data ? buildFixPaths(plan.items, data.business, data.roi) : undefined), [plan, data]);
   const thirty = useThirtyDay(plan?.items ?? null, data?.business ?? null, data?.reviews ?? null);
 
   if (error) return <PageShell width="narrow"><p className="rounded-md bg-danger-soft px-4 py-3 text-footnote text-danger">{error}</p></PageShell>;
@@ -290,7 +292,7 @@ export default function DiagnosisPage() {
         <Card><p className="text-footnote text-muted">No evidence-backed problems found. Nothing to prescribe.</p></Card>
       )}
 
-      {plan && <GamePlanSection plan={plan} onePagerHref={`/businesses/${b.id}/one-pager`} interviewHref={`/businesses/${b.id}/interview${snapQs(data.snapshot)}`} />}
+      {plan && <GamePlanSection plan={plan} paths={fixPaths} onePagerHref={`/businesses/${b.id}/one-pager`} interviewHref={`/businesses/${b.id}/interview${snapQs(data.snapshot)}`} />}
 
       {plan && thirty && <ThirtyDayCard plan={thirty} printHref={`/businesses/${b.id}/one-pager${snapQs(data.snapshot)}#thirty-day-print`} />}
 
