@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { Badge, Button } from "@/components/ds";
 import { TIER_TONE, useGamePlan } from "@/components/GamePlan";
 import { usePeerBoard, usePeerSubject } from "@/components/PeersSection";
+import { ThirtyDayView, THIRTY_INTRO, useThirtyDay } from "@/components/ThirtyDayPlan";
+import type { ThirtyDayPlan } from "@/lib/thirtyday";
 import { RoiCalculator, useCalcBase, type CalcBase } from "@/components/RoiCalculator";
 import { Qr } from "@/components/Qr";
 import { usePoll } from "@/components/ui";
@@ -89,23 +91,44 @@ function Problem({
   );
 }
 
-/** Page 2 of the printout: the numbers behind the plan, editable on screen, printed as typed. */
-function PageTwo({ b, calcRows, scanned }: { b: Business; calcRows: CalcBase[]; scanned: string | null }) {
-  if (!calcRows.length) return null;
+/** A printed sheet after page 1. Tall content may run onto another printed page. */
+function Sheet({ b, n, note, id, children, footer }: { b: Business; n: number; note: string; id?: string; children: ReactNode; footer: ReactNode }) {
   return (
     <article
+      id={id}
       className="op-sheet op-page2 mx-auto mb-10 flex w-full max-w-[8.5in] flex-col gap-3 bg-white px-[0.45in] py-[0.38in] text-foreground shadow-raised print:m-0 print:shadow-none"
-      aria-label={`One-pager for ${b.name}, page 2`}
+      aria-label={`One-pager for ${b.name}, page ${n}`}
     >
       <header className="flex items-baseline justify-between gap-4 border-b border-hairline pb-2">
-        <p className="text-eyebrow uppercase text-accent">Ringy · {b.name} · page 2</p>
-        <p className="text-caption text-subtle">Change any number on screen, then print</p>
+        <p className="text-eyebrow uppercase text-accent">Ringy · {b.name} · page {n}</p>
+        <p className="text-caption text-subtle">{note}</p>
       </header>
-      <RoiCalculator rows={calcRows} dense title="Is each fix worth it? (ROI)" />
-      <footer className="mt-auto border-t border-hairline pt-2 text-[0.625rem] leading-snug text-subtle">
-        Estimates from public data read on {scanned ?? "the scan date"} and the assumptions shown. Tool prices from each vendor&apos;s own pricing page; no affiliation. {ONE_PAGER_FOOTER}
-      </footer>
+      {children}
+      <footer className="mt-auto border-t border-hairline pt-2 text-[0.625rem] leading-snug text-subtle">{footer}</footer>
     </article>
+  );
+}
+
+function PlanPage({ b, plan, scanned }: { b: Business; plan: ThirtyDayPlan | null; scanned: string | null }) {
+  if (!plan || !plan.focus.length) return null;
+  return (
+    <Sheet b={b} n={2} id="thirty-day-print" note="Tick each box as it is done" footer={<>Steps from Ringy&apos;s game plan for the problems found in public data read on {scanned ?? "the scan date"}. {ONE_PAGER_FOOTER}</>}>
+      <div>
+        <h2 className="text-title-3">Your first 30 days</h2>
+        <p className="mt-1 text-caption text-muted">{THIRTY_INTRO}</p>
+      </div>
+      <ThirtyDayView plan={plan} dense />
+    </Sheet>
+  );
+}
+
+/** Page 2 of the printout: the numbers behind the plan, editable on screen, printed as typed. */
+function PageTwo({ b, calcRows, scanned, n }: { b: Business; calcRows: CalcBase[]; scanned: string | null; n: number }) {
+  if (!calcRows.length) return null;
+  return (
+    <Sheet b={b} n={n} note="Change any number on screen, then print" footer={<>Estimates from public data read on {scanned ?? "the scan date"} and the assumptions shown. Tool prices from each vendor&apos;s own pricing page; no affiliation. {ONE_PAGER_FOOTER}</>}>
+      <RoiCalculator rows={calcRows} dense title="Is each fix worth it? (ROI)" />
+    </Sheet>
   );
 }
 
@@ -132,6 +155,7 @@ export default function OnePagerPage() {
   );
   const plan = useGamePlan(planInput);
   const calcRows = useCalcBase(data?.business ?? null, data?.findings ?? null, data?.roi ?? null);
+  const thirty = useThirtyDay(plan?.items ?? null, data?.business ?? null, data?.reviews ?? null);
 
   if (error) return <p className="p-8 text-footnote text-danger">{error}</p>;
   if (!data) return <p className="p-8 text-footnote text-muted">Loading…</p>;
@@ -380,7 +404,8 @@ export default function OnePagerPage() {
             {scanned ?? "the scan date"}. {ONE_PAGER_FOOTER}
           </footer>
         </article>
-        <PageTwo b={b} calcRows={calcRows} scanned={scanned} />
+        <PlanPage b={b} plan={thirty} scanned={scanned} />
+        <PageTwo b={b} calcRows={calcRows} scanned={scanned} n={thirty?.focus.length ? 3 : 2} />
       </div>
     </div>
   );

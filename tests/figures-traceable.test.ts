@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { combineRoi, computeRoi, defaultFields } from "@/lib/calculator";
+import { buildThirtyDay } from "@/lib/thirtyday";
 import { buildGamePlan, type GamePlan, type PlanInput } from "@/lib/gameplan";
 import { buildBoard, toSubjectInput } from "@/lib/peers";
 import { rankByMoney, stepsWithCurrentFigures } from "@/lib/business-money";
@@ -263,5 +264,20 @@ describe("ROI calculator figures trace to their inputs", () => {
     const texts = [...computed.flatMap((c) => c.result.math), total.math];
     for (const t of texts) for (const d of dollars(t)) expect(allowed.has(d), `$${d} in "${t}"`).toBe(true);
     expect(total.math).not.toMatch(/^Nothing/);
+  });
+});
+
+describe("30-day plan starting numbers carry a source or an estimate label", () => {
+  it("every figure shown as 'now' names where it came from", () => {
+    const reviews = [rev(1, "Nobody answered the phone, left a voicemail, no callback", "2026-09-01"), rev(2, "Never heard back after calling twice", "2026-08-01"), rev(5, "Great", "2026-07-01", true)];
+    const gp = plan(biz(), reviews, [["missed_calls", 0], ["unanswered_reviews", 1]]);
+    const t = buildThirtyDay(gp.items, biz(), reviews);
+    expect(t.metrics.length).toBeGreaterThan(0);
+    for (const m of t.metrics) {
+      if (m.now && /\d/.test(m.now)) expect(m.source.length, m.label).toBeGreaterThan(5);
+      if (m.metric === "revenue_estimate") expect(m.estimate).toBe(true);
+      // A dollar figure is never shown without the estimate label.
+      if (m.now && /\$/.test(m.now)) expect(m.estimate).toBe(true);
+    }
   });
 });
