@@ -1,5 +1,6 @@
 "use client";
 
+import { CaseStudies } from "@/components/CaseStudies";
 import { useMemo } from "react";
 import { Badge, ButtonLink, Card, SectionHeader, type BadgeTone } from "@/components/ds";
 import { ACTOR_LABEL, buildGamePlan, type Actor, type Check, type CheckStatus, type EvidenceLine, type GamePlan, type PlanInput, type PlanItem, type PlanTier } from "@/lib/gameplan";
@@ -163,6 +164,8 @@ function Item({ item, n }: { item: PlanItem; n: number }) {
           </ul>
         </div>
       </div>
+
+      <CaseStudies kind={item.kind} />
 
       <details className="mt-4 rounded-md bg-surface-2 px-3 py-2">
         <summary className="cursor-pointer text-footnote font-medium">Estimated effect and 30-day checklist</summary>

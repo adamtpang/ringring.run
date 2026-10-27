@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { combineRoi, computeRoi, defaultFields } from "@/lib/calculator";
 import { buildThirtyDay } from "@/lib/thirtyday";
+import { CASE_STUDIES } from "@/lib/case-studies";
 import { buildGamePlan, type GamePlan, type PlanInput } from "@/lib/gameplan";
 import { buildBoard, toSubjectInput } from "@/lib/peers";
 import { rankByMoney, stepsWithCurrentFigures } from "@/lib/business-money";
@@ -278,6 +279,17 @@ describe("30-day plan starting numbers carry a source or an estimate label", () 
       if (m.metric === "revenue_estimate") expect(m.estimate).toBe(true);
       // A dollar figure is never shown without the estimate label.
       if (m.now && /\$/.test(m.now)) expect(m.estimate).toBe(true);
+    }
+  });
+});
+
+describe("case study figures link to the page that states them", () => {
+  it("every figure in a claim sits next to a source url and the exact quote", () => {
+    for (const c of CASE_STUDIES) {
+      if (FIGURE.test(c.claim) || /\d/.test(c.claim)) {
+        expect(c.url).toMatch(/^https:\/\//);
+        expect(c.quote.length).toBeGreaterThan(10);
+      }
     }
   });
 });

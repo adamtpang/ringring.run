@@ -1,0 +1,90 @@
+{
+  "note": "Real, public sources only. Each quote is copied word for word from the linked page and each claim uses only numbers that quote states. Vendor sources are marked vendor_reported. Kinds with no source we could verify (slow_response, booking_friction, no_website, no_phone, no_hours, pricing, refunds) show none. Re-check with: node scripts/verify-case-studies.mjs",
+  "verified_on": "2026-10-27",
+  "studies": [
+    {
+      "id": "hbr-2018-review-replies",
+      "kinds": ["unanswered_reviews"],
+      "title": "Study: Replying to Customer Reviews Results in Better Ratings",
+      "publisher": "Harvard Business Review",
+      "authors": "Davide Proserpio, Georgios Zervas",
+      "date": "2018-02-14",
+      "url": "https://hbr.org/2018/02/study-replying-to-customer-reviews-results-in-better-ratings",
+      "source_type": "Research summary",
+      "vendor_reported": false,
+      "claim": "Hotels that started replying to reviews got 12% more reviews and ratings 0.12 stars higher on average.",
+      "quote": "When hotels start responding, they receive 12% more reviews and their ratings increase by an average of 0.12 stars (on a 1-to-5 scale).",
+      "caveat": "Hotels on TripAdvisor, not home services."
+    },
+    {
+      "id": "brightlocal-2026-lcrs",
+      "kinds": ["unanswered_reviews"],
+      "title": "Local Consumer Review Survey 2026",
+      "publisher": "BrightLocal",
+      "authors": "Rosie Murphy",
+      "date": "2026-02-11",
+      "url": "https://www.brightlocal.com/research/local-consumer-review-survey/",
+      "source_type": "Survey",
+      "vendor_reported": true,
+      "claim": "42% of consumers surveyed say they are unlikely to use a business that never replies to reviews.",
+      "quote": "42% say they’re unlikely to use a business that never replies.",
+      "caveat": "A survey of what people say they would do. Vendor-reported: read the method on the linked page."
+    },
+    {
+      "id": "mnsc-2024-review-solicitation",
+      "kinds": ["few_reviews"],
+      "title": "The Pitfalls of Review Solicitation: Evidence from a Natural Experiment on TripAdvisor",
+      "publisher": "Management Science (INFORMS)",
+      "authors": "Baojun Gao, Jing Wang, Xiaojie Ding, Yue Guo",
+      "date": "2024-05-16",
+      "url": "https://pubsonline.informs.org/doi/10.1287/mnsc.2023.01006",
+      "source_type": "Peer-reviewed study",
+      "vendor_reported": false,
+      "claim": "Hotels that asked guests for reviews got 34.3% more reviews and a 0.151 higher rating, with shorter reviews.",
+      "quote": "hotels’ participation in the review solicitation program results in a 34.3% increase in review volume, a 0.151 increase in review rating, but a 16.9% decrease in review length.",
+      "caveat": "The same paper finds unprompted reviews fell 15.5% once hotels started asking."
+    },
+    {
+      "id": "arxiv-2016-prompted-reviews",
+      "kinds": ["few_reviews"],
+      "title": "Understanding and Overcoming Biases in Customer Reviews",
+      "publisher": "arXiv",
+      "authors": "Georgios Askalidis, Edward C. Malthouse",
+      "date": "2016-04-01",
+      "url": "https://arxiv.org/abs/1604.00417",
+      "source_type": "Research paper (preprint)",
+      "vendor_reported": false,
+      "claim": "Verified customers asked for a review by email rated up to 0.5 star higher than people who reviewed on their own.",
+      "quote": "verified customers who are prompted (by an email) to write a review, submit, on average, up to 0.5 star higher ratings than self-motivated web reviewers.",
+      "caveat": "Online retail reviews, not local services."
+    },
+    {
+      "id": "servicedirect-2019-calls",
+      "kinds": ["missed_calls"],
+      "title": "2019 Home Service Call Performance Report",
+      "publisher": "Service Direct",
+      "authors": null,
+      "date": "2019",
+      "url": "https://blog.servicedirect.com/home-service-call-performance-report",
+      "source_type": "Industry report",
+      "vendor_reported": true,
+      "claim": "Home service owners thought they answered 97% of calls; on average only 66% were answered.",
+      "quote": "Business owners estimated they had a call answer rate of 97%, when in reality only 66% of calls were answered on average.",
+      "caveat": "Vendor-reported: read the method on the linked page."
+    },
+    {
+      "id": "hbs-2011-yelp-revenue",
+      "kinds": ["work_quality", "staff_attitude"],
+      "title": "Reviews, Reputation, and Revenue: The Case of Yelp.com",
+      "publisher": "Harvard Business School",
+      "authors": "Michael Luca",
+      "date": "2011-09",
+      "url": "https://www.hbs.edu/faculty/Pages/item.aspx?num=41233",
+      "source_type": "Working paper",
+      "vendor_reported": false,
+      "claim": "One more Yelp star went with 5 to 9 percent more revenue for the restaurants studied.",
+      "quote": "a one-star increase in Yelp rating leads to a 5-9 percent increase in revenue",
+      "caveat": "Restaurants on Yelp; the paper says the effect is driven by independent restaurants, not chains. Working Paper 12-016, revised March 2016."
+    }
+  ]
+}
