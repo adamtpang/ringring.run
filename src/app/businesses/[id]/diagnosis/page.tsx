@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Badge, ButtonLink, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
+import { PeersSection, usePeerBoard } from "@/components/PeersSection";
 import { BackLink, money, PageShell, usePoll } from "@/components/ui";
 import { callsPerMonth, CATALOG, INTERVIEW, prescribe, rankProblems, verticalFor, type MenuOption, type RankedProblem, type Vertical } from "@/lib/prescription";
 import { computeMonthlyValue } from "@/lib/roi";
@@ -143,7 +144,7 @@ function ProblemCard({ rank, rp, b, reviews, agent }: { rank: number; rp: Ranked
   const questions = INTERVIEW[f.kind];
 
   return (
-    <Card as="article" padding="lg" className="space-y-6">
+    <Card as="article" padding="lg" id={`problem-${f.kind}`} className="scroll-mt-24 space-y-6">
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-eyebrow uppercase text-accent">Problem {rank}</span>
@@ -245,6 +246,7 @@ export default function DiagnosisPage() {
   const { id } = useParams<{ id: string }>();
   const { data, error } = usePoll<Report>(`/api/businesses/${id}`, (d) => d.business.diagnosis_status === "running" || d.business.diagnosis_status === "pending");
   const ranked = useMemo(() => (data ? rankProblems(data.findings, data.roi) : []), [data]);
+  const board = usePeerBoard(data?.business ?? null, data?.reviews ?? null);
 
   if (error) return <PageShell width="narrow"><p className="rounded-md bg-danger-soft px-4 py-3 text-footnote text-danger">{error}</p></PageShell>;
   if (!data) return <PageShell width="narrow"><p className="text-footnote text-muted">Loading diagnosis…</p></PageShell>;
@@ -287,6 +289,12 @@ export default function DiagnosisPage() {
           <Stat label="Rating" value={b.rating ?? "n/a"} hint={`${b.review_count ?? 0} reviews`} />
           <Stat label="Owner replies" value={b.owner_response_rate != null ? `${Math.round(b.owner_response_rate * 100)}%` : "n/a"} hint="to reviews" />
         </StatGrid>
+        {board?.status === "ok" && (
+          <a href="#peers" className="flex flex-wrap items-center gap-2 text-footnote font-medium text-accent hover:underline">
+            <Badge tone="accent">Tier {board.subject.tier}</Badge>
+            {board.subject.tied ? "Tied " : ""}#{board.subject.rank} of {board.rows.length} {board.meta.plural}. See your peers
+          </a>
+        )}
         {b.diagnosis_summary && <p className="text-body">{b.diagnosis_summary}</p>}
         <p className="text-caption text-subtle">Ranked by how much evidence there is, then by the estimated monthly cost.</p>
       </div>
@@ -301,6 +309,8 @@ export default function DiagnosisPage() {
       {ranked.map((rp, i) => (
         <ProblemCard key={rp.finding.id} rank={i + 1} rp={rp} b={b} reviews={data.reviews} agent={data.agent} />
       ))}
+
+      {board && <PeersSection business={b} board={board} fixes={ranked.map((r) => r.finding.kind)} />}
 
       <p className="text-caption text-subtle">
         Product prices were copied from each vendor&apos;s own pricing page on {CHECKED}. ringring.run has no affiliation, partnership or referral deal with any of them. Prices change; check the vendor page before buying.
