@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { AgentRecord, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, WebPage } from "../types";
+import type { AgentRecord, Business, Checkin, CheckinReview, CheckinSnapshot, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, TrackedBusiness, WebPage } from "../types";
 import { newId, now, type Store } from "./types";
 
 // Supabase (Postgres) store. Server side only: uses the service role key,
@@ -142,5 +142,66 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): Store 
       if (error) throw new Error(error.message);
       return data as AgentRecord[];
     },
+
+    async getTracked(placeId) {
+      const { data, error } = await sb.from("tracked_businesses").select("*").eq("place_id", placeId).maybeSingle();
+      if (error) throw new Error(error.message);
+      return (data as TrackedBusiness) ?? null;
+    },
+    async listTracked(o = {}) {
+      let q = sb.from("tracked_businesses").select("*").order("created_at", { ascending: true });
+      if (o.trackedOnly) q = q.eq("tracked", true);
+      const { data, error } = await q;
+      if (error) throw new Error(error.message);
+      return data as TrackedBusiness[];
+    },
+    async upsertTracked(row) {
+      const { data, error } = await sb
+        .from("tracked_businesses")
+        .upsert({ ...row, updated_at: now() }, { onConflict: "place_id" })
+        .select()
+        .single();
+      if (error) throw new Error(`Supabase upsert tracked_businesses: ${error.message}`);
+      return data as TrackedBusiness;
+    },
+    insertCheckin: async (c) => checkinRow(await insert<Checkin>("checkins", { ...c, id: newId() })),
+    updateCheckin: (id, patch) => update("checkins", id, patch),
+    async listCheckins(o = {}) {
+      let q = sb.from("checkins").select("*").order("started_at", { ascending: false }).limit(o.limit ?? 500);
+      if (o.placeId) q = q.eq("place_id", o.placeId);
+      if (o.since) q = q.gte("started_at", o.since);
+      const { data, error } = await q;
+      if (error) throw new Error(error.message);
+      return (data as Checkin[]).map(checkinRow);
+    },
+    insertSnapshot: async (x) => snapshotRow(await insert<CheckinSnapshot>("checkin_snapshots", { ...x, id: newId() })),
+    async listSnapshots(placeId, limit = 52) {
+      const { data, error } = await sb.from("checkin_snapshots").select("*").eq("place_id", placeId).order("taken_at", { ascending: false }).limit(limit);
+      if (error) throw new Error(error.message);
+      return (data as CheckinSnapshot[]).map(snapshotRow);
+    },
+    async insertCheckinReviews(rows) {
+      if (rows.length === 0) return [];
+      const { data, error } = await sb
+        .from("checkin_reviews")
+        .upsert(rows.map((r) => ({ ...r, id: newId() })), { onConflict: "place_id,external_id", ignoreDuplicates: true })
+        .select();
+      if (error) throw new Error(`Supabase insert checkin_reviews: ${error.message}`);
+      return data as CheckinReview[];
+    },
+    async listCheckinReviews(placeId) {
+      const { data, error } = await sb.from("checkin_reviews").select("*").eq("place_id", placeId).order("published_at", { ascending: false });
+      if (error) throw new Error(error.message);
+      return data as CheckinReview[];
+    },
   };
+}
+
+// Postgres numeric can arrive as a string; normalize to numbers.
+const num = (v: unknown): number | null => (v == null ? null : Number(v));
+function checkinRow(c: Checkin): Checkin {
+  return { ...c, est_cost_usd: Number(c.est_cost_usd), actual_cost_usd: num(c.actual_cost_usd) };
+}
+function snapshotRow(x: CheckinSnapshot): CheckinSnapshot {
+  return { ...x, rating: num(x.rating), reply_rate: num(x.reply_rate), neg_reply_rate: num(x.neg_reply_rate) };
 }

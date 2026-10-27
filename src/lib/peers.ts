@@ -62,7 +62,8 @@ export const METRICS: MetricDef[] = [
 export const MIN_PEERS = 5;
 /** Reviews of weight given to the group's average rating, so 3 five-star reviews don't outrank 300 at 4.9. */
 export const RATING_PRIOR_REVIEWS = 10;
-export const MIN_NEGATIVE_FOR_REPLY = 2;
+/** Below this many 1-2 star reviews the reply share is a small sample and is not scored. */
+export const MIN_NEGATIVE_FOR_REPLY = 5;
 
 export const TIERS = [
   { tier: "S", min: 80 },

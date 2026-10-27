@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { Badge, Button, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
 import { AgentPanel, type VoiceStatus } from "@/components/AgentPanel";
 import { BackLink, money, PageShell, StepTimeline, usePoll } from "@/components/ui";
-import { computeMonthlyValue, opportunityScore } from "@/lib/roi";
+import { ASSUMPTION_LABEL, computeMonthlyValue, dedupMonthly, moneyTrace, opportunityScore, traceLine } from "@/lib/roi";
 import { KIND_LABELS, SOLUTIONS } from "@/lib/solutions";
 import { isSuspicious } from "@/lib/untrusted";
 import type { AgentRecord, Assumption, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, SolutionId, WebPage } from "@/lib/types";
@@ -100,6 +100,9 @@ function RoiEditor({ roi, onSaved }: { roi: RoiEstimate; onSaved: () => void }) 
             <span className="min-w-0 text-footnote">
               {a.label}
               {a.note && <span className="block text-caption text-muted">{a.note}</span>}
+              {a.source === "assumption" && a.unit !== "multiplier" && !roi.is_edited && <span className="block text-caption text-warning">{ASSUMPTION_LABEL}</span>}
+              {a.unit === "multiplier" && a.key === "weeks_per_month" && <span className="block text-caption text-muted">Calendar: 52 weeks / 12 months.</span>}
+              {a.source === "listing" && <span className="block text-caption text-success">Sourced</span>}
             </span>
             <span className="text-right">
               <input
@@ -117,6 +120,10 @@ function RoiEditor({ roi, onSaved }: { roi: RoiEstimate; onSaved: () => void }) 
           </li>
         ))}
       </ul>
+      {live.value != null && (() => {
+        const t = moneyTrace(roi.assumptions.map((a) => (a.key in draft ? { ...a, value: Number(draft[a.key]) } : a)));
+        return t ? <p className="mt-2 text-caption text-subtle">How we got this: {traceLine(t)}.</p> : null;
+      })()}
       {(live.error || err) && <p className="mt-2 text-caption text-danger">{live.error ?? err}</p>}
       <div className="mt-3 flex gap-2">
         <Button
@@ -156,7 +163,15 @@ export default function BusinessPage() {
   if (!data) return <PageShell width="narrow"><p className="text-footnote text-muted">Loading report…</p></PageShell>;
 
   const b = data.business;
-  const total = data.roi.reduce((s, r) => s + r.monthly_value, 0);
+  const kindOf = new Map(data.findings.map((f) => [f.id, f.kind]));
+  // Overlapping problems (e.g. missed calls and slow replies) are counted once.
+  // Each figure is recomputed from its own inputs, so the total always traces to the cards below.
+  const titleOf = new Map(data.findings.map((f) => [f.kind as string, f.title]));
+  const dedup = dedupMonthly(data.roi.map((r) => ({ kind: kindOf.get(r.finding_id) ?? r.finding_id, monthly: moneyTrace(r.assumptions)?.result ?? null })));
+  const total = dedup.total;
+  const keptKinds = data.roi
+    .map((r) => ({ kind: kindOf.get(r.finding_id) ?? r.finding_id, t: moneyTrace(r.assumptions) }))
+    .filter((x) => x.t && x.t.result > 0 && !dedup.dropped.some((d) => d.kind === x.kind));
   const ok = b.diagnosis_status === "ok";
 
   return (
@@ -178,11 +193,17 @@ export default function BusinessPage() {
         )}
         <SectionHeader level={1} size="lg" title={b.name} description={[b.category, b.address].filter(Boolean).join(" · ")} />
         <StatGrid>
-          <Stat label="Est. / month" value={ok ? money(total) : "n/a"} emphasis />
+          <Stat label="Est. / month" value={ok ? money(total) : "n/a"} hint="overlaps counted once" emphasis />
           <Stat label="Opportunity" value={ok ? opportunityScore(total) : "n/a"} hint="out of 100" />
           <Stat label="Rating" value={b.rating ?? "n/a"} hint={`${b.review_count ?? 0} reviews`} />
-          <Stat label="Owner replies" value={b.owner_response_rate != null ? `${Math.round(b.owner_response_rate * 100)}%` : "n/a"} />
+          <Stat label="Owner replies" value={b.owner_response_rate != null ? `${Math.round(b.owner_response_rate * 100)}%` : "n/a"} hint={`Ringy's sample: ${b.scraped_review_count} reviews read${b.scraped_review_count < 5 ? " (small sample)" : ""}`} />
         </StatGrid>
+        {ok && total > 0 && (
+          <p className="text-caption text-subtle">
+            How we got {money(total)}/mo: {keptKinds.map((x) => `${titleOf.get(x.kind) ?? x.kind} (${money(x.t!.result)})`).join(" + ")}
+            {dedup.dropped.length ? `. Not added, because they can be the same customers: ${dedup.dropped.map((d) => `${titleOf.get(d.kind) ?? d.kind} (${money(d.monthly)})`).join(", ")}` : ""}. Each estimate&apos;s inputs and math are on its card below; inputs marked {ASSUMPTION_LABEL} are not measured. Rating and review count: the Google listing.
+          </p>
+        )}
         <p className="flex flex-wrap gap-x-4 gap-y-1 text-footnote text-muted">
           <span>{b.phone ?? "No phone listed"}</span>
           {b.website ? (

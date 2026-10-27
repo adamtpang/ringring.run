@@ -2,7 +2,7 @@ import { validateFindings } from "./citations";
 import { configured, llmConfig, runtimeMode } from "./env";
 import { llmDiagnoser, stubDiagnoser, type Diagnoser } from "./diagnose";
 import { errorMessage, withRetry, type RetryOptions } from "./retry";
-import { computeMonthlyValue, defaultAssumptions, formulaFor, opportunityScore } from "./roi";
+import { businessMonthly, computeMonthlyValue, defaultAssumptions, formulaFor, opportunityScore } from "./roi";
 import { apifyScraper, findFixtureByName, fixtureScraper, type Scraper } from "./scraper";
 import { dedupePlaces, normalizePlace } from "./scraper/normalize";
 import { getStore, type Store } from "./store";
@@ -316,14 +316,14 @@ async function processBusiness(
       b.id,
     );
 
-    let total = 0;
+    const priced: { kind: string; monthly: number }[] = [];
     const builtFor: { kind: string; title: string }[] = [];
     for (const f of kept) {
       builtFor.push({ kind: f.kind, title: f.title });
       const finding = await store.insertFinding({ ...f, business_id: b.id, run_id: run.id });
       const assumptions = defaultAssumptions(f.kind, { ...b, searchCategory: byNameRun(run) ? undefined : run.category });
       const monthly = computeMonthlyValue(assumptions);
-      total += monthly;
+      priced.push({ kind: f.kind, monthly });
       await store.insertRoi({
         finding_id: finding.id,
         business_id: b.id,
@@ -334,6 +334,8 @@ async function processBusiness(
       });
     }
     summary.findingCount += kept.length;
+    // Overlapping problems (e.g. missed calls and slow replies) are counted once.
+    const total = businessMonthly(priced);
     await store.updateBusiness(b.id, {
       diagnosis_status: "ok",
       diagnosis_summary: result.diagnosis.summary,
@@ -432,8 +434,9 @@ async function readSiteStep(b: Business, deps: PipelineDeps, steps: ReturnType<t
 
 /** Recompute a business's totals from its ROI rows (after an edit). */
 export async function recomputeBusinessTotals(store: Store, businessId: string) {
-  const rows = await store.listRoi(businessId);
-  const total = rows.reduce((s, r) => s + r.monthly_value, 0);
+  const [rows, findings] = await Promise.all([store.listRoi(businessId), store.listFindings(businessId)]);
+  const kindOf = new Map(findings.map((f) => [f.id, f.kind]));
+  const total = businessMonthly(rows.map((r) => ({ kind: kindOf.get(r.finding_id) ?? r.finding_id, monthly: r.monthly_value })));
   await store.updateBusiness(businessId, { est_monthly_value: total, opportunity_score: opportunityScore(total) });
   return total;
 }

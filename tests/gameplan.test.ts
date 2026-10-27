@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   ACTOR_LABEL,
+  ASSUMPTION_QUESTIONS,
   buildGamePlan,
   CHECK_IDS,
   COACHING,
@@ -9,7 +10,6 @@ import {
   leadActor,
   NEEDS_OK,
   pickQuestions,
-  ratingHeadroom,
   snippet,
   SUPPORT_ONLY,
   tierOf,
@@ -17,6 +17,7 @@ import {
 } from "@/lib/gameplan";
 import { buildBoard, toSubjectInput } from "@/lib/peers";
 import { INTERVIEW } from "@/lib/prescription";
+import { defaultAssumptions } from "@/lib/roi";
 import { OWNER_ONLY_KINDS, PLAN_KINDS, type Business, type Finding, type KnowledgeFact, type Review, type RoiEstimate } from "@/lib/types";
 
 const SCAN = "2026-10-26T21:48:51Z";
@@ -61,7 +62,7 @@ function finding(kind: Finding["kind"], r: Review, severity = 4): Finding {
 }
 
 function roi(f: Finding, monthly: number): RoiEstimate {
-  return { id: `roi-${f.id}`, finding_id: f.id, business_id: "b1", assumptions: [{ key: "a", label: "a", value: 1, unit: "count", source: "default", note: "" }], formula: "a", monthly_value: monthly, is_edited: false, updated_at: SCAN } as unknown as RoiEstimate;
+  return { id: `roi-${f.id}`, finding_id: f.id, business_id: "b1", assumptions: [{ key: "a", label: "Amount", value: monthly, unit: "usd", source: "assumption" }], formula: "a", monthly_value: monthly, is_edited: false, updated_at: SCAN } as unknown as RoiEstimate;
 }
 
 function input(over: Partial<PlanInput> & { business?: Business } = {}): PlanInput {
@@ -162,12 +163,27 @@ describe("scorecard", () => {
   it("quotes the newest unanswered bad review in the binding sentence", () => {
     const old = rev(1, "Nobody showed up at all.", "2026-01-02T00:00:00Z");
     const fresh = rev(2, "They never called me back.", "2026-09-01T00:00:00Z");
-    const ok = rev(1, "Bad visit but they apologized.", "2026-08-01T00:00:00Z", true);
-    const g = buildGamePlan(input({ reviews: [old, fresh, ok] }));
+    const rest = [3, 4, 5].map((i) => rev(1, `Bad visit ${i} but they apologized.`, `2026-08-0${i}T00:00:00Z`, true));
+    const g = buildGamePlan(input({ reviews: [old, fresh, ...rest] }));
     expect(g.binding.check).toBe("replies");
-    expect(g.binding.sentence).toMatch(/^2 of the 3 reviews/);
+    expect(g.binding.sentence).toMatch(/^The owner replied to 3 of the 5 reviews with 1 or 2 stars Ringy read \(60%; Ringy's sample, not a Google figure\), under the 80% target/);
     expect(g.binding.sentence).toContain("They never called me back.");
     expect(g.binding.evidence[0]!.url).toBe("https://maps.google.com/?cid=1");
+  });
+
+  it("never lets a small sample decide replies, and shows it as a secondary note", () => {
+    const happy = Array.from({ length: 15 }, (_, i) => rev(5, `Great service number ${i}.`, "2026-06-01T00:00:00Z", true));
+    const bad = rev(1, "Nobody came back to finish.", "2026-05-11T00:00:00Z");
+    const badOk = rev(1, "Tech was late.", "2025-07-29T00:00:00Z", true);
+    const g = buildGamePlan(input({ reviews: [...happy, bad, badOk] }));
+    const c = g.checks.find((x) => x.id === "replies")!;
+    expect(c.status).toBe("pass");
+    expect(c.detail).toMatch(/16 of the 17 newest reviews Ringy read \(94%/);
+    expect(c.note).toBe("1 of the 2 reviews with 1 or 2 stars has no reply (small sample, under 5).");
+    expect(g.binding.check).not.toBe("replies");
+    const tiny = buildGamePlan(input({ reviews: [bad, badOk] }));
+    expect(tiny.checks.find((x) => x.id === "replies")!.status).toBe("unknown");
+    expect(tiny.binding.check).not.toBe("replies");
   });
 
   it("never counts or quotes reviews with discrimination allegations", () => {
@@ -176,7 +192,9 @@ describe("scorecard", () => {
     const g = buildGamePlan(input({ reviews: [a, b] }));
     const all = JSON.stringify(g);
     expect(all).not.toMatch(/racist/i);
-    expect(g.checks.find((c) => c.id === "replies")!.detail).toMatch(/^1 of the 1 review/);
+    const c = g.checks.find((x) => x.id === "replies")!;
+    expect(c.detail).toMatch(/^Ringy read only 1 review, too few/);
+    expect(c.note).toMatch(/^1 of the 1 review with 1 or 2 stars has no reply \(small sample/);
     const staff = g.items.find((i) => i.kind === "staff_attitude")!;
     expect(staff.evidence.map((e) => e.reviewId)).toEqual([b.id]);
   });
@@ -231,27 +249,59 @@ describe("plan items", () => {
     const g = buildGamePlan(input({ business: biz({ opening_hours: [] }) }));
     const it0 = g.items.find((i) => i.kind === "no_hours")!;
     expect(it0.effects.money.value).toBeNull();
-    expect(it0.effects.rating.value).toBeNull();
     expect(it0.effects.quality.value).toBeNull();
   });
 
-  it("estimates rating headroom only from cited stars", () => {
-    expect(ratingHeadroom([1, 2], 100)).toBe(0.07);
-    expect(ratingHeadroom([], 100)).toBeNull();
-    expect(ratingHeadroom([1], null)).toBeNull();
+  it("drops a dollar figure whose inputs are not on file, and never shows a star-lift figure", () => {
+    const r1 = rev(1, "Called three times, no answer.", "2026-09-01T00:00:00Z");
+    const fMiss = finding("missed_calls", r1, 5);
+    const bare = { ...roi(fMiss, 3897), assumptions: [] } as RoiEstimate;
+    const g = buildGamePlan(input({ reviews: [r1], findings: [fMiss], roi: [bare] }));
+    const item = g.items.find((i) => i.kind === "missed_calls")!;
+    expect(item.monthly).toBeNull();
+    expect(item.effects.money.value).toBeNull();
+    expect(JSON.stringify(g)).not.toMatch(/\$3,897|stars at most|ceiling/);
   });
 });
 
 describe("prognosis and interview", () => {
   it("ties the prognosis to the measured reply rate and labels it an estimate", () => {
     const a = rev(1, "Never called back after the quote.", "2026-09-01T00:00:00Z");
-    const b = rev(2, "Late and messy.", "2026-08-01T00:00:00Z", true);
-    const g = buildGamePlan(input({ reviews: [a, b] }));
+    const b = [2, 3, 4, 5].map((i) => rev(2, `Late and messy ${i}.`, "2026-08-01T00:00:00Z", true));
+    const g = buildGamePlan(input({ reviews: [a, ...b] }));
     expect(g.prognosis.metric).toMatch(/Reply rate/);
-    expect(g.prognosis.now).toBe("50% (1 of 2)");
-    expect(g.prognosis.ifNothing).toMatch(/^If nothing changes: .*50% \(1 of 2\)/);
-    expect(g.prognosis.ifPlan).toMatch(/^If you do the A items in the next 30 days: .*100% \(2 of 2\)/);
+    expect(g.prognosis.now).toBe("80% (4 of 5 read)");
+    expect(g.prognosis.ifNothing).toMatch(/^If nothing changes: .*80% \(4 of 5 read\)/);
+    expect(g.prognosis.ifPlan).toMatch(/^If you do the A items in the next 30 days: .*100% \(5 of 5\)/);
     expect(g.prognosis.note).toMatch(/Estimate, not a promise/);
+  });
+
+  it("counts overlapping dollar estimates once and shows the rule", () => {
+    const r1 = rev(1, "Called three times, no answer.", "2026-09-01T00:00:00Z", true);
+    const r2 = rev(2, "Took days to answer my message.", "2026-09-02T00:00:00Z", true);
+    const fMiss = finding("missed_calls", r1, 5);
+    const fSlow = finding("slow_response", r2, 4);
+    const g = buildGamePlan(input({ reviews: [r1, r2], findings: [fMiss, fSlow], roi: [roi(fMiss, 3897), roi(fSlow, 1080)] }));
+    const a = g.items.filter((i) => i.tier === "A");
+    expect(a.map((i) => i.kind).sort()).toEqual(["missed_calls", "slow_response"]);
+    expect(JSON.stringify(g.prognosis)).toContain("$3,897/mo");
+    expect(JSON.stringify(g.prognosis)).not.toContain("$4,977");
+    expect(g.prognosis.note).toMatch(/counted once/);
+  });
+
+  it("shows the inputs and math behind each dollar figure inline", () => {
+    const r1 = rev(1, "Called three times, no answer.", "2026-09-01T00:00:00Z", true);
+    const fMiss = finding("missed_calls", r1, 5);
+    const est = { ...roi(fMiss, 3897), assumptions: defaultAssumptions("missed_calls", { category: "HVAC contractor", owner_response_rate: null }) };
+    const g = buildGamePlan(input({ reviews: [r1], findings: [fMiss], roi: [est] }));
+    const item = g.items[0]!;
+    expect(item.effects.money.basis).toMatch(/10 missed calls per week \(assumed\)/i);
+    expect(item.effects.money.basis).toMatch(/4\.33 weeks per month \(52 weeks \/ 12 months\)/);
+    expect(item.effects.money.basis).toMatch(/default assumption, ask the owner/);
+    expect(item.moneyTrace!.math).toBe("10 × 4.33 × 50% × 40% × $450 = $3,897");
+    expect(item.monthly).toBe(3897);
+    expect(g.questions).toContain(ASSUMPTION_QUESTIONS.avg_ticket);
+    expect(g.questions.length).toBeLessThanOrEqual(5);
   });
 
   it("falls back to listing basics when one is missing, without a peer guess", () => {

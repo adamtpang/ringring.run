@@ -43,7 +43,9 @@ function Scorecard({ checks }: { checks: Check[] }) {
             <div className="min-w-0">
               <p className="text-footnote font-medium">{c.label}</p>
               <p className="text-caption text-muted">{c.detail}</p>
-              {c.status !== "pass" && c.evidence.length > 0 && (
+              {/\d/.test(c.detail) && <p className="text-caption text-subtle">Source: {c.source}</p>}
+              {c.note && <p className="text-caption text-subtle">{c.note}</p>}
+              {(c.status !== "pass" || c.note) && c.evidence.length > 0 && (
                 <ul className="mt-1 space-y-0.5">
                   {c.evidence.map((e, j) => (
                     <EvidenceQuote key={j} e={e} />
@@ -61,12 +63,34 @@ function Scorecard({ checks }: { checks: Check[] }) {
   );
 }
 
-function EffectRow({ label, value, basis }: { label: string; value: string | null; basis: string }) {
+function MoneyHow({ money }: { money: NonNullable<GamePlan["prognosis"]["money"]> }) {
+  const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
+  return (
+    <div className="mt-3 text-caption text-subtle">
+      <p className="font-medium">How we got {usd(money.total)}/mo:</p>
+      <ul className="list-disc pl-4">
+        {money.kept.map((k) => (
+          <li key={k.kind}>
+            {k.label}: {k.trace.math}
+          </li>
+        ))}
+        {money.dropped.map((d) => (
+          <li key={d.kind}>
+            Not added: {d.label} ({usd(d.monthly)}/mo), because it can be the same customers as {d.keptLabel.toLowerCase()}.
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function EffectRow({ label, value, basis, source }: { label: string; value: string | null; basis: string; source?: string }) {
   return (
     <div className="min-w-0">
       <dt className="text-caption text-subtle">{label}</dt>
       <dd className={value ? "text-footnote font-medium" : "text-footnote text-subtle"}>{value ?? "not estimated"}</dd>
       <dd className="text-caption text-subtle">{basis}</dd>
+      {value && source && <dd className="text-caption text-subtle">Source: {source}.</dd>}
     </div>
   );
 }
@@ -89,6 +113,11 @@ function Item({ item, n }: { item: PlanItem; n: number }) {
       <p className="mt-1 text-caption text-subtle">
         {item.urgentWhy} {item.importantWhy}
       </p>
+      {item.moneyInputs && (
+        <p className="mt-1 text-caption text-subtle">
+          <span className="font-medium">How we got this:</span> {item.moneyInputs}. Inputs marked assumed are a default assumption, ask the owner.
+        </p>
+      )}
 
       {item.evidence.length > 0 && (
         <ul className="mt-3 space-y-1 border-l-2 border-hairline pl-3">
@@ -140,7 +169,6 @@ function Item({ item, n }: { item: PlanItem; n: number }) {
         <dl className="mt-3 grid gap-3 sm:grid-cols-2">
           <EffectRow label="Money" {...item.effects.money} />
           <EffectRow label="Your time" {...item.effects.time} />
-          <EffectRow label="Rating" {...item.effects.rating} />
           <EffectRow label="Review volume" {...item.effects.reviews} />
           <EffectRow label="How often it comes up" {...item.effects.quality} />
         </dl>
@@ -195,6 +223,7 @@ export function GamePlanSection({ plan, onePagerHref }: { plan: GamePlan; onePag
       <Card tone="sunken" padding="md" as="div">
         <p className="text-eyebrow uppercase text-accent">The one thing first</p>
         <p className="mt-2 text-title-3 text-pretty">{binding.sentence}</p>
+        <p className="mt-1 text-caption text-subtle">Source: {binding.source}</p>
         {binding.evidence.length > 0 && (
           <ul className="mt-3 space-y-1">
             {binding.evidence.map((e, i) => (
@@ -215,9 +244,12 @@ export function GamePlanSection({ plan, onePagerHref }: { plan: GamePlan; onePag
 
       <Card as="div" padding="md">
         <h3 className="text-headline">Prognosis</h3>
-        <p className="mt-1 text-caption text-subtle">Measured by: {pg.metric}. Today: {pg.now}.</p>
+        <p className="mt-1 text-caption text-subtle">
+          Measured by: {pg.metric}. Today: {pg.now}. Source: {pg.source}
+        </p>
         <p className="mt-3 text-footnote">{pg.ifNothing}</p>
         <p className="mt-2 text-footnote font-medium">{pg.ifPlan}</p>
+        {pg.money && <MoneyHow money={pg.money} />}
         <p className="mt-3 text-caption text-subtle">{pg.note}</p>
       </Card>
 

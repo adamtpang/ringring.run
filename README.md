@@ -122,6 +122,8 @@ Put these in `.env.local` (gitignored). Never commit real values.
 | `OVERPASS_URL` | No | Overpass endpoint(s) for `/find`, comma separated, tried in order. Default: overpass.private.coffee, then maps.mail.ru |
 | `FORCE_DEMO` | No | Set to `1` to force demo mode even with keys |
 | `LOCAL_DB_PATH` | No | Local store file, default `.data/local-db.json` |
+| `CRON_SECRET` | For cron | Bearer secret for `/api/cron/checkin`; Vercel Cron sends it automatically. Route returns 503 without it |
+| `CHECKIN_MONTHLY_BUDGET_USD` | No | Hard monthly cap on check-in spend, default `1.00` |
 | `ELEVENLABS_API_KEY` | Only to deploy an agent | ElevenLabs > Developers > API Keys |
 | `ELEVENLABS_PHONE_NUMBER_ID` | Only to deploy an agent | ElevenLabs Agents > Phone Numbers (a number already imported there) |
 

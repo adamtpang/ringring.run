@@ -39,6 +39,8 @@ export const ENV_KEYS = [
   { name: "OVERPASS_URL", required: false, purpose: "Overpass endpoint(s) for /find, comma separated, tried in order (default: private.coffee, then maps.mail.ru)" },
   { name: "FORCE_DEMO", required: false, purpose: "Force demo mode even with keys" },
   { name: "LOCAL_DB_PATH", required: false, purpose: "Local demo store file" },
+  { name: "CRON_SECRET", required: false, purpose: "Bearer secret Vercel Cron sends to /api/cron/checkin (route returns 503 without it)" },
+  { name: "CHECKIN_MONTHLY_BUDGET_USD", required: false, purpose: "Hard monthly cap on check-in spend (default 1.00)" },
 ] as const;
 
 /** Names to booleans. Never includes values. */

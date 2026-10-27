@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { AgentRecord, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, WebPage } from "../types";
+import type { AgentRecord, Business, Checkin, CheckinReview, CheckinSnapshot, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, TrackedBusiness, WebPage } from "../types";
 import { newId, now, rankBusinesses, type Store } from "./types";
 
 // DEMO / LOCAL store. In-memory tables, optionally persisted to a JSON file
@@ -17,6 +17,10 @@ interface Tables {
   web_pages: WebPage[];
   knowledge_facts: KnowledgeFact[];
   agents: AgentRecord[];
+  tracked_businesses: TrackedBusiness[];
+  checkins: Checkin[];
+  checkin_snapshots: CheckinSnapshot[];
+  checkin_reviews: CheckinReview[];
 }
 
 const empty = (): Tables => ({
@@ -29,6 +33,10 @@ const empty = (): Tables => ({
   web_pages: [],
   knowledge_facts: [],
   agents: [],
+  tracked_businesses: [],
+  checkins: [],
+  checkin_snapshots: [],
+  checkin_reviews: [],
 });
 
 export function createLocalStore(opts: { file?: string | null } = {}): Store {
@@ -170,5 +178,49 @@ export function createLocalStore(opts: { file?: string | null } = {}): Store {
           .sort((a, b) => b.created_at.localeCompare(a.created_at))
           .slice(0, o.limit ?? 200),
       ),
+
+    getTracked: (placeId) => read(() => db.tracked_businesses.find((t) => t.place_id === placeId) ?? null),
+    listTracked: (o = {}) => read(() => db.tracked_businesses.filter((t) => !o.trackedOnly || t.tracked)),
+    upsertTracked: (row) => mutate(() => {
+      const t = now();
+      const i = db.tracked_businesses.findIndex((x) => x.place_id === row.place_id);
+      const prev = db.tracked_businesses[i];
+      const next: TrackedBusiness = { ...row, created_at: prev?.created_at ?? t, updated_at: t };
+      if (prev) db.tracked_businesses[i] = next;
+      else db.tracked_businesses.push(next);
+      return next;
+    }),
+    insertCheckin: (c) => mutate(() => {
+      const row: Checkin = { ...c, id: newId() };
+      db.checkins.push(row);
+      return row;
+    }),
+    updateCheckin: (id, patch) => mutate(() => patchRow(db.checkins, id, patch)),
+    listCheckins: (o = {}) =>
+      read(() =>
+        db.checkins
+          .filter((c) => (!o.placeId || c.place_id === o.placeId) && (!o.since || c.started_at >= o.since))
+          .sort((a, b) => b.started_at.localeCompare(a.started_at))
+          .slice(0, o.limit ?? 500),
+      ),
+    insertSnapshot: (x) => mutate(() => {
+      const row: CheckinSnapshot = { ...x, id: newId() };
+      db.checkin_snapshots.push(row);
+      return row;
+    }),
+    listSnapshots: (placeId, limit = 52) =>
+      read(() => db.checkin_snapshots.filter((x) => x.place_id === placeId).sort((a, b) => b.taken_at.localeCompare(a.taken_at)).slice(0, limit)),
+    insertCheckinReviews: (rows) => mutate(() => {
+      const out: CheckinReview[] = [];
+      for (const r of rows) {
+        if (db.checkin_reviews.some((x) => x.place_id === r.place_id && x.external_id === r.external_id)) continue;
+        const row: CheckinReview = { ...r, id: newId(), created_at: now() };
+        db.checkin_reviews.push(row);
+        out.push(row);
+      }
+      return out;
+    }),
+    listCheckinReviews: (placeId) =>
+      read(() => db.checkin_reviews.filter((x) => x.place_id === placeId).sort((a, b) => (b.published_at ?? "").localeCompare(a.published_at ?? ""))),
   };
 }

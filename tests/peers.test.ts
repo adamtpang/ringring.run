@@ -156,8 +156,13 @@ describe("peer board", () => {
     if (b.status !== "ok") return;
     expect(b.peerCount).toBe(6);
     expect(b.rows).toHaveLength(7);
-    expect(b.subject.metrics.reply).toBe(0.5);
-    expect(b.missing).toEqual(["complaints", "reach"]);
+    // 2 low reviews is a small sample: the reply share is not scored.
+    expect(b.subject.metrics.reply).toBeNull();
+    expect(b.missing).toEqual(["reply", "complaints", "reach"]);
+    const five = [1, 1, 2, 2, 1].map((rating, i) => ({ rating, owner_replied: i < 3, text: "bad" }));
+    const b5 = buildBoard(subject({ reviews: five }), data([1, 2, 3, 4, 5, 6].map((i) => row(i, { negative_reviews: 5 }))));
+    if (b5.status !== "ok") throw new Error("expected ok");
+    expect(b5.subject.metrics.reply).toBe(0.6);
     expect(b.subject.rank).toBeGreaterThanOrEqual(1);
   });
 

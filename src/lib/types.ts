@@ -236,3 +236,68 @@ export interface AgentRecord {
   created_at: string;
   updated_at: string;
 }
+
+// ---------- weekly check-ins ----------
+
+export const CHECKIN_KINDS = ["baseline", "light", "new_reviews", "deep"] as const;
+export type CheckinKind = (typeof CHECKIN_KINDS)[number];
+export type CheckinTrigger = "cron" | "manual";
+/** ok: something was measured and stored. no_change: count unchanged. deferred: count rose but the new-review fetch was skipped (light-only run). */
+export type CheckinStatus = "ok" | "no_change" | "deferred" | "skipped_budget" | "error";
+
+export interface TrackedBusiness {
+  place_id: string;
+  business_id: string | null;
+  tracked: boolean;
+  opted_in_at: string | null;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Checkin {
+  id: string;
+  place_id: string;
+  business_id: string | null;
+  kind: CheckinKind;
+  trigger: CheckinTrigger;
+  status: CheckinStatus;
+  est_cost_usd: number;
+  actual_cost_usd: number | null;
+  apify_run_id: string | null;
+  message: string | null;
+  started_at: string;
+  finished_at: string | null;
+}
+
+/** What one check-in measured. Null means not measured this time, never zero. */
+export interface CheckinSnapshot {
+  id: string;
+  place_id: string;
+  business_id: string | null;
+  checkin_id: string | null;
+  kind: CheckinKind;
+  rating: number | null;
+  review_count: number | null;
+  reply_rate: number | null;
+  reply_sample: number | null;
+  neg_reply_rate: number | null;
+  neg_sample: number | null;
+  complaint_counts: Record<string, number> | null;
+  new_reviews: number;
+  taken_at: string;
+}
+
+export interface CheckinReview {
+  id: string;
+  place_id: string;
+  checkin_id: string | null;
+  external_id: string;
+  rating: number | null;
+  text: string;
+  published_at: string | null;
+  owner_response: string | null;
+  complaints: string[];
+  classified_by: "llm" | "rules";
+  created_at: string;
+}

@@ -1,4 +1,4 @@
-import type { AgentRecord, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, WebPage } from "../types";
+import type { AgentRecord, Business, Checkin, CheckinReview, CheckinSnapshot, Finding, KnowledgeFact, Review, RoiEstimate, Run, RunStep, TrackedBusiness, WebPage } from "../types";
 
 export type NewRun = Omit<Run, "id" | "created_at">;
 export type NewStep = Omit<RunStep, "id" | "created_at" | "updated_at">;
@@ -9,6 +9,9 @@ export type NewRoi = Omit<RoiEstimate, "id" | "updated_at">;
 export type NewWebPage = Omit<WebPage, "id" | "fetched_at">;
 export type NewKnowledgeFact = Omit<KnowledgeFact, "id" | "created_at">;
 export type NewAgent = Omit<AgentRecord, "id" | "created_at" | "updated_at">;
+export type NewCheckin = Omit<Checkin, "id">;
+export type NewSnapshot = Omit<CheckinSnapshot, "id">;
+export type NewCheckinReview = Omit<CheckinReview, "id" | "created_at">;
 
 export interface Store {
   kind: "supabase" | "local";
@@ -48,6 +51,22 @@ export interface Store {
   /** Latest agent for a business, or null. */
   getAgentForBusiness(businessId: string): Promise<AgentRecord | null>;
   listAgents(opts?: { runId?: string; limit?: number }): Promise<AgentRecord[]>;
+
+  // Weekly check-ins (keyed by Google place_id).
+  getTracked(placeId: string): Promise<TrackedBusiness | null>;
+  /** Owner opt-in rows; trackedOnly returns only tracked = true. */
+  listTracked(opts?: { trackedOnly?: boolean }): Promise<TrackedBusiness[]>;
+  upsertTracked(row: Pick<TrackedBusiness, "place_id" | "business_id" | "tracked" | "opted_in_at" | "note">): Promise<TrackedBusiness>;
+  insertCheckin(c: NewCheckin): Promise<Checkin>;
+  updateCheckin(id: string, patch: Partial<Checkin>): Promise<void>;
+  /** Newest first. */
+  listCheckins(opts?: { placeId?: string; since?: string; limit?: number }): Promise<Checkin[]>;
+  insertSnapshot(s: NewSnapshot): Promise<CheckinSnapshot>;
+  /** Newest first. */
+  listSnapshots(placeId: string, limit?: number): Promise<CheckinSnapshot[]>;
+  /** Inserts reviews not stored yet (unique place_id + external_id); returns only the new rows. */
+  insertCheckinReviews(rows: NewCheckinReview[]): Promise<CheckinReview[]>;
+  listCheckinReviews(placeId: string): Promise<CheckinReview[]>;
 }
 
 export const now = () => new Date().toISOString();

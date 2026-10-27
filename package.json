@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "scan": "tsx scripts/scan.ts",
+    "checkin": "tsx scripts/checkin.ts",
     "eval": "tsx scripts/eval.ts",
     "check": "pnpm lint && pnpm typecheck && pnpm test"
   },

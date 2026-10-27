@@ -3,6 +3,7 @@ import coachingJson from "@/data/coaching.json";
 import { ALLEGATION_RE } from "./allegations";
 import { buildBoard, type Board, type SubjectInput } from "./peers";
 import { INTERVIEW } from "./prescription";
+import { ASSUMPTION_LABEL, dedupMonthly, type FigureTrace, moneyTrace, OVERLAP_RULE, traceLine } from "./roi";
 import { PLAN_KINDS, type Business, type Finding, type KnowledgeFact, type PlanKind, type Review, type RoiEstimate } from "./types";
 
 // Ringy's game plan. Deterministic code decides everything here: which checks
@@ -73,6 +74,10 @@ export const RECENT_DAYS = 180;
 export const MIN_REVIEWS = 25;
 export const MIN_RATING = 4.0;
 export const IMPORTANT_MONTHLY_USD = 1000;
+/** Below this many reviews a share is shown with a "small sample" note and never decides a check on its own. */
+export const MIN_SAMPLE = 5;
+/** Reply rate at or above this passes the replies check. */
+export const REPLY_TARGET = 0.8;
 
 export function fmtDate(iso: string | null | undefined): string | null {
   if (!iso) return null;
@@ -155,7 +160,7 @@ export const CHECK_LABEL: Record<CheckId, string> = {
   listing: "Google listing found",
   hours: "Hours listed",
   rating_reviews: `Rating ${MIN_RATING.toFixed(1)}+ with ${MIN_REVIEWS}+ reviews`,
-  replies: "Owner replies to 1 or 2 star reviews",
+  replies: `Owner replies to ${Math.round(REPLY_TARGET * 100)}%+ of reviews`,
   reach: "No can't-reach complaints",
   website: "Website on the listing",
   phone: "Phone on the listing",
@@ -178,7 +183,11 @@ export interface Check {
   status: CheckStatus;
   /** Plain words: what Ringy saw, or why it is unknown. */
   detail: string;
+  /** A secondary reading shown under the detail, e.g. the 1-2 star reply share with a small-sample note. */
+  note?: string;
   evidence: EvidenceLine[];
+  /** Where the reading came from, so every figure in the detail traces to data. */
+  source: string;
 }
 
 const BOOK_RE = /\b(book|schedul\w*|request (an? )?(appointment|service|visit))\b[^.]{0,30}\b(online|now|here)\b|\bonline (booking|scheduling)\b/i;
@@ -198,6 +207,44 @@ export interface PlanInput {
   scanDate: string;
 }
 
+export interface ReplyRate {
+  basis: "negative" | "all";
+  replied: number;
+  n: number;
+  rate: number;
+}
+
+export interface ReplyStats {
+  read: number;
+  replied: number;
+  neg: number;
+  negReplied: number;
+  /** The figure that decides the check: the 1-2 star share when there are at least MIN_SAMPLE of those, else the share across all reviews read (at least MIN_SAMPLE), else null. */
+  primary: ReplyRate | null;
+}
+
+/**
+ * Reply rates from the reviews Ringy read. Google's listing does not expose an
+ * owner response rate through our scraper, so every figure here is Ringy's own
+ * sample and is labeled that way. Small samples never decide the check.
+ */
+export function replyStats(reviews: Pick<Review, "rating" | "owner_response" | "text">[]): ReplyStats {
+  const read = reviews.filter(quotable);
+  const has = (r: Pick<Review, "owner_response">) => !!r.owner_response?.trim();
+  const neg = read.filter(isNegative);
+  const replied = read.filter(has).length;
+  const negReplied = neg.filter(has).length;
+  const primary: ReplyRate | null =
+    neg.length >= MIN_SAMPLE
+      ? { basis: "negative", replied: negReplied, n: neg.length, rate: negReplied / neg.length }
+      : read.length >= MIN_SAMPLE
+        ? { basis: "all", replied, n: read.length, rate: replied / read.length }
+        : null;
+  return { read: read.length, replied, neg: neg.length, negReplied, primary };
+}
+
+const smallNote = (n: number) => (n < MIN_SAMPLE ? ` (small sample, under ${MIN_SAMPLE})` : "");
+
 export function runChecks(p: PlanInput): Check[] {
   const b = p.business;
   const listingLine = (text: string): EvidenceLine => ({ text, cite: "Google listing", url: b.maps_url, date: null, reviewId: null, rating: null });
@@ -213,8 +260,16 @@ export function runChecks(p: PlanInput): Check[] {
   const citedQuote = new Map<string, string>();
   for (const f of p.findings) for (const e of f.evidence) if (e.source === "review" && !citedQuote.has(e.review_id)) citedQuote.set(e.review_id, e.quote);
 
+  const day = p.scanDate.slice(0, 10);
+  const checkSource = (id: CheckId): string =>
+    id === "replies" || id === "reach"
+      ? `Ringy's sample: the ${plural(read.length, "review")} Ringy read on ${day} (not a Google figure).${id === "replies" ? ` The ${pct(REPLY_TARGET)} target is Ringy's rule of thumb.` : ""}`
+      : id === "prices" || id === "booking"
+        ? `The Google listing and website Ringy read on ${day}.`
+        : `The Google listing, read on ${day}.`;
   const checks: Check[] = [];
-  const add = (id: CheckId, status: CheckStatus, detail: string, evidence: EvidenceLine[] = []) => checks.push({ id, label: CHECK_LABEL[id], status, detail, evidence });
+  const add = (id: CheckId, status: CheckStatus, detail: string, evidence: EvidenceLine[] = [], note?: string) =>
+    checks.push({ id, label: CHECK_LABEL[id], status, detail, evidence, source: checkSource(id), ...(note ? { note } : {}) });
 
   add("listing", b.place_id ? "pass" : "unknown", b.place_id ? `Found on Google Maps${b.category ? ` as ${b.category}` : ""}.` : "We could not confirm a Google listing.", b.maps_url ? [listingLine(b.name)] : []);
 
@@ -227,16 +282,21 @@ export function runChecks(p: PlanInput): Check[] {
     add("rating_reviews", ok ? "pass" : "gap", `${b.rating ?? "No"} stars from ${plural(n, "review")}.`, [listingLine(`${b.rating ?? "n/a"} stars, ${n} reviews`)]);
   }
 
+  const rs = replyStats(p.reviews);
+  const unrepliedLines = unreplied.slice(0, 2).map((r) => reviewLine(r, citedQuote.get(r.id) ?? snippet(r.text, /./), b.maps_url));
+  const negNote =
+    rs.primary?.basis === "negative" || rs.neg === 0
+      ? undefined
+      : `${unreplied.length} of the ${plural(rs.neg, "review")} with 1 or 2 stars ${unreplied.length === 1 ? "has" : "have"} no reply${smallNote(rs.neg)}.`;
   if (read.length === 0) add("replies", "unknown", "No reviews were read, so replies are unknown.");
-  else if (neg.length === 0) add("replies", "unknown", `None of the ${read.length} reviews read has 1 or 2 stars, so there is nothing to measure yet.`);
-  else if (unreplied.length === 0) add("replies", "pass", `All ${plural(neg.length, "review")} with 1 or 2 stars that Ringy read have a reply.`);
-  else
-    add(
-      "replies",
-      "gap",
-      `${unreplied.length} of the ${plural(neg.length, "review")} with 1 or 2 stars that Ringy read ${unreplied.length === 1 ? "has" : "have"} no reply.`,
-      unreplied.slice(0, 2).map((r) => reviewLine(r, citedQuote.get(r.id) ?? snippet(r.text, /./), b.maps_url)),
-    );
+  else if (!rs.primary)
+    add("replies", "unknown", `Ringy read only ${plural(read.length, "review")}, too few to judge replies (needs ${MIN_SAMPLE}).`, unrepliedLines, negNote);
+  else {
+    const { basis, replied, n, rate } = rs.primary;
+    const what = basis === "negative" ? `the ${n} reviews with 1 or 2 stars` : `the ${n} newest reviews`;
+    const detail = `The owner replied to ${replied} of ${what} Ringy read (${pct(rate)}; Ringy's sample, not a Google figure). Target: ${pct(REPLY_TARGET)}+.`;
+    add("replies", rate >= REPLY_TARGET ? "pass" : "gap", detail, unrepliedLines, negNote);
+  }
 
   if (reachFindings.length) {
     const lines = reachFindings.flatMap((f) => findingLines(f, reviewsById, b)).filter((l, i, a) => a.findIndex((x) => x.text === l.text) === i);
@@ -266,6 +326,10 @@ export interface Effect {
   /** Display value, or null for "not estimated". */
   value: string | null;
   basis: string;
+  /** The inputs and math behind a dollar value. */
+  trace?: FigureTrace;
+  /** Where a non-dollar value came from. */
+  source?: string;
 }
 
 export interface PlanItem {
@@ -284,7 +348,15 @@ export interface PlanItem {
   importantWhy: string;
   evidence: EvidenceLine[];
   monthly: number | null;
-  effects: { money: Effect; time: Effect; rating: Effect; reviews: Effect; quality: Effect };
+  /** "How we got this": each input marked assumed or sourced, then the math. Null when not estimated. */
+  moneyInputs: string | null;
+  /** The structured trace behind `monthly`. Null when not estimated. */
+  moneyTrace: FigureTrace | null;
+  /** Where the title and detail came from. */
+  source: string;
+  /** Assumption keys behind the dollar figure that are still defaults, for the interview. */
+  defaultKeys: string[];
+  effects: { money: Effect; time: Effect; reviews: Effect; quality: Effect };
   why: string;
   unlocks: string;
   ringy: { actor: Actor; capability: Capability; text: string }[];
@@ -296,12 +368,6 @@ export interface PlanItem {
 
 /** Which peer-score metric an item moves, for "important because it moves your tier". */
 const MOVE_KIND: Record<string, PlanKind[]> = { reply: ["unanswered_reviews"], reviews: ["few_reviews"], reach: ["missed_calls", "slow_response"] };
-
-/** Effect on the average rating if these reviews had been 5 stars. Traceable: listing rating, count and the cited stars. */
-export function ratingHeadroom(ratings: number[], reviewCount: number | null): number | null {
-  if (!reviewCount || reviewCount <= 0 || ratings.length === 0) return null;
-  return Math.round((ratings.reduce((s, r) => s + (5 - r), 0) / reviewCount) * 100) / 100;
-}
 
 export function tierOf(urgent: boolean, important: boolean): PlanTier {
   return urgent && important ? "A" : important ? "B" : "C";
@@ -319,12 +385,14 @@ interface Candidate {
   evidence: EvidenceLine[];
   title: string;
   detail: string;
+  source: string;
 }
 
 function candidates(p: PlanInput, checks: Check[]): Candidate[] {
   const b = p.business;
   const reviewsById = new Map(p.reviews.map((r) => [r.id, r]));
-  const out: Candidate[] = p.findings.map((f) => ({ kind: f.kind, finding: f, evidence: findingLines(f, reviewsById, b), title: f.title, detail: f.detail }));
+  const fromReviews = `The Google reviews and listing Ringy read on ${p.scanDate.slice(0, 10)}.`;
+  const out: Candidate[] = p.findings.map((f) => ({ kind: f.kind, finding: f, evidence: findingLines(f, reviewsById, b), title: f.title, detail: f.detail, source: fromReviews }));
   const have = new Set<PlanKind>(out.map((c) => c.kind));
 
   // Owner-only problems from 1-3 star reviews.
@@ -339,6 +407,7 @@ function candidates(p: PlanInput, checks: Check[]): Candidate[] {
       evidence: hits.slice(0, 3).map((r) => reviewLine(r, snippet(r.text, re), b.maps_url)),
       title: c.label,
       detail: `${plural(hits.length, "1 to 3 star review")} read ${hits.length === 1 ? "mentions" : "mention"} this. Ringy can help, but this one is yours to fix.`,
+      source: fromReviews,
     });
     have.add(kind);
   }
@@ -349,7 +418,7 @@ function candidates(p: PlanInput, checks: Check[]): Candidate[] {
     if (ch.status !== "gap" || !kind || have.has(kind)) continue;
     if (ch.id === "reach") continue; // only raised by findings, which are already in
     const c = COACHING.kinds[kind];
-    out.push({ kind, finding: null, evidence: ch.evidence, title: c.label, detail: ch.detail });
+    out.push({ kind, finding: null, evidence: ch.evidence, title: c.label, detail: ch.detail, source: ch.source });
     have.add(kind);
   }
   return out;
@@ -374,7 +443,9 @@ export function buildItems(p: PlanInput, checks: Check[], binding: CheckId | nul
     const coach = COACHING.kinds[c.kind];
     const severity = c.finding?.severity ?? coach.severity;
     const roi = c.finding ? roiByFinding.get(c.finding.id) ?? null : null;
-    const monthly = roi ? roi.monthly_value : null;
+    // A dollar figure is shown only when its inputs are on file, and it is always the product of those inputs.
+    const trace = roi ? moneyTrace(roi.assumptions) : null;
+    const monthly = trace ? trace.result : null;
 
     const ids = [...new Set(c.evidence.map((e) => e.reviewId).filter((x): x is string => !!x))];
     const evReviews = ids.map((id) => reviewsById.get(id)).filter((r): r is Review => !!r);
@@ -399,24 +470,24 @@ export function buildItems(p: PlanInput, checks: Check[], binding: CheckId | nul
     const important = reasons.length > 0;
     const importantWhy = important ? `Important: ${reasons.join("; ")}.` : `Not marked important: severity ${severity} of 5${monthly != null ? `, about ${usd(monthly)}/mo (estimate)` : ""}.`;
 
-    const ratings = evReviews.map((r) => r.rating).filter((x): x is number => x != null);
-    const head = ratingHeadroom(ratings, b.review_count);
     const assumptions = roi?.assumptions ?? [];
-    const fromListing = assumptions.filter((a) => a.source === "listing").length;
+    const defaults = assumptions.filter((a) => a.source === "assumption" && a.note !== "Edited by user." && a.unit !== "multiplier");
+    const moneyInputs = trace ? traceLine(trace) : null;
 
     const effects: PlanItem["effects"] = {
       money: monthly != null
-        ? { value: `${usd(monthly)}/mo at risk`, basis: `Estimate: ${plural(assumptions.length, "editable assumption")} multiplied, ${fromListing} from the listing. Change them on the problem card.` }
+        ? {
+            value: `${usd(monthly)}/mo at risk`,
+            basis: `How we got this: ${moneyInputs}.${defaults.length ? ` ${defaults.length === assumptions.filter((a) => a.unit !== "multiplier").length ? "Every input" : `${defaults.length} inputs`} marked assumed ${defaults.length === 1 ? "is a" : "are a"} ${ASSUMPTION_LABEL}.` : ""} Change them on the problem card.`,
+            trace: trace!,
+          }
         : { value: null, basis: "Not estimated: no traceable dollar figure for this one." },
       time: coach.owner_time ? { value: coach.owner_time.replace(/\s*\(assumption\)\.?$/, ""), basis: "Your time. Assumption, not measured." } : { value: null, basis: "Not estimated." },
-      rating: head != null
-        ? { value: `up to +${head.toFixed(2)} stars`, basis: `If the ${plural(ratings.length, "review")} cited here had been 5 stars instead, across your ${b.review_count} reviews. Google rounds the shown rating.` }
-        : { value: null, basis: "Not estimated: no rated reviews cited." },
       reviews: c.kind === "few_reviews" && peerMedian != null
-        ? { value: `peers' median is ${peerMedian}`, basis: `You have ${b.review_count ?? 0}. From the peer benchmark.` }
+        ? { value: `peers' median is ${peerMedian}`, basis: `You have ${b.review_count ?? 0}. From the peer benchmark.`, source: "Google listings of the anonymized peers Ringy read" }
         : { value: null, basis: "Not estimated." },
       quality: ids.length && readCount
-        ? { value: `${ids.length} of ${readCount} reviews read`, basis: "Reviews that mention this, out of those Ringy read." }
+        ? { value: `${ids.length} of ${readCount} reviews read`, basis: "Reviews that mention this, out of those Ringy read.", source: "Google reviews Ringy read" }
         : { value: null, basis: "Not estimated." },
     };
 
@@ -436,6 +507,10 @@ export function buildItems(p: PlanInput, checks: Check[], binding: CheckId | nul
       importantWhy,
       evidence: c.evidence,
       monthly,
+      moneyInputs,
+      moneyTrace: trace,
+      source: c.source,
+      defaultKeys: monthly != null ? defaults.map((a) => a.key) : [],
       effects,
       why: coach.why,
       unlocks: coach.unlocks,
@@ -469,24 +544,26 @@ export interface Binding {
   check: CheckId | null;
   sentence: string;
   evidence: EvidenceLine[];
+  /** Where the sentence's figures came from (the check's source). */
+  source: string;
 }
 
 export function bindingConstraint(checks: Check[], b: Business): Binding {
   const gap = checks.find((c) => c.status === "gap");
-  if (!gap) return { check: null, sentence: "Nothing in Ringy's fixed checks is a gap. The plan below works on what the reviews say.", evidence: [] };
+  if (!gap) return { check: null, sentence: "Nothing in Ringy's fixed checks is a gap. The plan below works on what the reviews say.", evidence: [], source: "Ringy's fixed checks" };
   const ev = gap.evidence[0];
   const s: Record<CheckId, string> = {
     listing: "Ringy could not confirm a Google listing, so customers may not find you.",
     hours: "Your Google listing shows no hours, so customers cannot tell when you are open.",
     rating_reviews: `With ${b.rating ?? "no"} stars from ${plural(b.review_count ?? 0, "review")}, new customers have little to go on.`,
-    replies: `${gap.detail.replace(/\.$/, "")}${ev ? (gap.detail.startsWith("1 of") ? `: the one from ${ev.date ?? "the scan"} says "${ev.text}"` : `, including the newest${ev.date ? ` (${ev.date})` : ""}: "${ev.text}"`) : ""}.`,
+    replies: `${gap.detail.replace(/ Target:.*$/, "").replace(/\.$/, "")}, under the ${pct(REPLY_TARGET)} target${ev ? `. The newest unanswered low review${ev.date ? ` (${ev.date})` : ""} says "${ev.text}"` : ""}.`,
     reach: `Customers say they could not reach you${ev ? `: "${ev.text}"` : ""}.`,
     website: "There is no website on your listing, so customers who want details have nowhere to go.",
     phone: "There is no phone number on your listing, so customers cannot call you.",
     prices: "Customers cannot see prices before they call.",
     booking: "Customers cannot book online.",
   };
-  return { check: gap.id, sentence: s[gap.id], evidence: gap.evidence };
+  return { check: gap.id, sentence: s[gap.id], evidence: gap.evidence, source: gap.source };
 }
 
 // ---------- prognosis ----------
@@ -497,6 +574,10 @@ export interface Prognosis {
   ifNothing: string;
   ifPlan: string;
   note: string;
+  /** Where the metric's reading came from. */
+  source: string;
+  /** How the A-item dollar total was built: each kept estimate with its own trace, and what overlap left out. Null when no A item is priced. */
+  money: { total: number; kept: { kind: string; label: string; trace: FigureTrace }[]; dropped: { kind: string; label: string; monthly: number; keptKind: string; keptLabel: string }[]; rule: string | null } | null;
 }
 
 function rescore(subject: SubjectInput | null, change: (s: SubjectInput) => SubjectInput): Board | null {
@@ -508,19 +589,26 @@ const tierText = (bd: Board | null) => (bd?.status === "ok" ? `peer tier ${bd.su
 export function prognosis(p: PlanInput, binding: Binding, items: PlanItem[], checks: Check[]): Prognosis {
   const b = p.business;
   const aItems = items.filter((i) => i.tier === "A");
-  const aMoney = aItems.reduce((s, i) => s + (i.monthly ?? 0), 0);
+  // Overlapping estimates (e.g. missed calls and slow replies) share the same lost jobs: count them once.
+  const dedup = dedupMonthly(aItems.map((i) => ({ kind: i.kind, monthly: i.monthly })));
+  const aMoney = dedup.total;
+  const labelOf = (k: string) => aItems.find((i) => i.kind === k)?.label ?? k;
   const aUnpriced = aItems.filter((i) => i.monthly == null).length;
   const moneyLine = aItems.length
     ? aMoney > 0
-      ? `an estimated ${usd(aMoney)}/mo tied to the A items${aUnpriced ? ` (${aUnpriced} not estimated)` : ""}`
+      ? `about ${usd(aMoney)}/mo tied to the A items (estimate${dedup.dropped.length ? ", overlaps counted once" : ""})${aUnpriced ? ` (${aUnpriced} not estimated)` : ""}`
       : "the A items, which Ringy did not price"
     : null;
   const nowTier = tierText(p.board);
   const read = p.reviews.filter(quotable);
-  const neg = read.filter(isNegative);
-  const replied = neg.filter((r) => r.owner_response?.trim()).length;
-  const note =
-    "Estimate, not a promise. Built from the reviews Ringy read on the scan date, the listing, the editable cost assumptions, and the peer benchmark. Dollar figures can overlap between problems. The peer tier only counts reviews, so call fixes show up there only as new reviews come in.";
+  const rs = replyStats(p.reviews);
+  const note = [
+    "Estimate, not a promise. Built from the reviews Ringy read on the scan date, the listing, the cost assumptions (defaults until the owner corrects them), and the peer benchmark.",
+    dedup.dropped.length ? OVERLAP_RULE : null,
+    "The peer tier only counts reviews, so call fixes show up there only as new reviews come in.",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   let metric: string;
   let now: string;
@@ -528,10 +616,11 @@ export function prognosis(p: PlanInput, binding: Binding, items: PlanItem[], che
   let afterBoard: Board | null = null;
 
   const check = binding.check;
-  if (check === "replies" || (check == null && neg.length > 0)) {
-    metric = "Reply rate to 1 or 2 star reviews";
-    now = `${pct(replied / neg.length)} (${replied} of ${neg.length})`;
-    after = `100% (${neg.length} of ${neg.length})`;
+  if (rs.primary && (check === "replies" || (check == null && rs.primary.rate < 1))) {
+    const { basis, replied, n, rate } = rs.primary;
+    metric = basis === "negative" ? "Reply rate to 1 or 2 star reviews" : "Owner reply rate on recent reviews";
+    now = `${pct(rate)} (${replied} of ${n} read)`;
+    after = `100% (${n} of ${n})`;
     afterBoard = rescore(p.subject, (s) => ({ ...s, reviews: s.reviews.map((r) => (r.rating != null && r.rating <= 2 ? { ...r, owner_replied: true } : r)) }));
   } else if (check === "reach") {
     const reach = checks.find((c) => c.id === "reach");
@@ -569,6 +658,18 @@ export function prognosis(p: PlanInput, binding: Binding, items: PlanItem[], che
     ifNothing: `If nothing changes: ${ifNothing}.`,
     ifPlan: `If you do the A items in the next 30 days: ${ifPlan}.`,
     note,
+    source: (check && checks.find((c) => c.id === check)?.source) || checks.find((c) => c.id === "rating_reviews")?.source || "The Google listing",
+    money:
+      aMoney > 0
+        ? {
+            total: aMoney,
+            kept: aItems
+              .filter((i) => i.moneyTrace && !dedup.dropped.some((d) => d.kind === i.kind))
+              .map((i) => ({ kind: i.kind, label: i.label, trace: i.moneyTrace! })),
+            dropped: dedup.dropped.map((d) => ({ ...d, label: labelOf(d.kind), keptLabel: labelOf(d.keptKind) })),
+            rule: dedup.dropped.length ? OVERLAP_RULE : null,
+          }
+        : null,
   };
 }
 
@@ -577,12 +678,33 @@ export function prognosis(p: PlanInput, binding: Binding, items: PlanItem[], che
 /** A check's question is skipped when a plan item already asks about the same thing. */
 const CHECK_QUESTION_KIND: Partial<Record<CheckId, PlanKind>> = { booking: "booking_friction", reach: "missed_calls", replies: "unanswered_reviews" };
 
+/** Questions that replace a default dollar assumption with the owner's own number. */
+export const ASSUMPTION_QUESTIONS: Record<string, string> = {
+  avg_ticket: "What is a typical job worth to you, roughly, in dollars?",
+  missed_calls_per_week: "In a normal week, about how many calls go unanswered or to voicemail?",
+  monthly_inquiries: "About how many new customers call, text or message you in a month?",
+  close_rate: "Out of 10 people who ask for a quote, about how many book?",
+  monthly_booking_attempts: "About how many people try to book with you in a month?",
+  monthly_profile_views: "Do you know how many people view your Google profile in a month? (It is in your Google Business Profile.)",
+};
+
 export function pickQuestions(items: PlanItem[], checks: Check[], min = 3, max = 5): string[] {
   const out: string[] = [];
   const push = (q: string | undefined) => {
     if (q && !out.includes(q) && out.length < max) out.push(q);
   };
   for (const i of items) push(INTERVIEW[i.kind][0]);
+  // The dollar figures rest on defaults: ask for the two inputs that move the biggest A figure most.
+  const priced = items.filter((i) => i.monthly != null && i.defaultKeys.length).sort((x, y) => x.tier.localeCompare(y.tier) || (y.monthly ?? 0) - (x.monthly ?? 0))[0];
+  if (priced) {
+    const order = ["avg_ticket", "missed_calls_per_week", "monthly_inquiries", "monthly_booking_attempts", "close_rate", "monthly_profile_views"];
+    for (const k of order.filter((k) => priced.defaultKeys.includes(k)).slice(0, 2)) {
+      const q = ASSUMPTION_QUESTIONS[k];
+      // Skip when an existing question already asks for the same number.
+      const dup = k === "missed_calls_per_week" && out.some((x) => /unanswered|voicemail|miss/i.test(x));
+      if (!dup) push(q);
+    }
+  }
   const kinds = new Set(items.map((i) => i.kind));
   for (const c of checks) {
     const covered = CHECK_QUESTION_KIND[c.id];

@@ -87,44 +87,74 @@ async function apifyFetch(token: string, path: string, init?: RequestInit): Prom
   return res.json();
 }
 
-/** Start an actor run, poll until it finishes, then fetch the dataset items. */
-export function apifyScraper(token: string, opts: { pollMs?: number; timeoutSecs?: number } = {}): Scraper {
+export interface ApifyRunResult {
+  runId: string;
+  items: ApifyPlaceItem[];
+  /** Pay-per-event charges Apify recorded for the run, by event name (e.g. place-scraped). */
+  chargedEventCounts: Record<string, number>;
+  /** Apify's own usage figure for the run, when it reports one. */
+  usageTotalUsd: number | null;
+}
+
+/** Start an actor run with any input, poll until it finishes, then fetch the dataset items and the run's charges. */
+/** The run was never created, so nothing was charged. */
+export class ApifyNotStartedError extends Error {}
+
+/** Apify rejects a per-run maxTotalChargeUsd below this. */
+export const APIFY_MIN_RUN_CAP_USD = 0.5;
+
+export async function runApifyActor(
+  token: string,
+  input: Record<string, unknown>,
+  opts: { pollMs?: number; timeoutSecs?: number; maxTotalChargeUsd?: number; onProgress?: (m: string) => void | Promise<void>; retry?: RetryOptions } = {},
+): Promise<ApifyRunResult> {
   const pollMs = opts.pollMs ?? 5000;
   const timeoutSecs = opts.timeoutSecs ?? Number(process.env.APIFY_TIMEOUT_SECS || 600);
+  const retry = { retries: 3, baseDelayMs: 1000, ...(opts.retry ?? {}) };
+  // maxTotalChargeUsd makes Apify itself stop charging past the cap (pay-per-event actors).
+  const cap = opts.maxTotalChargeUsd != null ? `&maxTotalChargeUsd=${Math.max(APIFY_MIN_RUN_CAP_USD, opts.maxTotalChargeUsd).toFixed(4)}` : "";
+  let started: { data: { id: string; defaultDatasetId: string; status: string } };
+  try {
+    started = (await withRetry(
+      () => apifyFetch(token, `/acts/${APIFY_ACTOR_ID}/runs?timeout=${timeoutSecs}${cap}`, { method: "POST", body: JSON.stringify(input) }),
+      retry,
+    )) as typeof started;
+  } catch (e) {
+    throw new ApifyNotStartedError((e as Error).message);
+  }
+  const runId = started.data.id;
+  const datasetId = started.data.defaultDatasetId;
+  await opts.onProgress?.(`Apify run ${runId} started`);
+
+  const deadline = Date.now() + (timeoutSecs + 60) * 1000;
+  let run: { status: string; chargedEventCounts?: Record<string, number>; usageTotalUsd?: number } = { status: started.data.status };
+  while (!["SUCCEEDED", "FAILED", "ABORTED", "TIMED-OUT"].includes(run.status)) {
+    if (Date.now() > deadline) throw new Error(`Apify run ${runId} did not finish in time`);
+    await new Promise((r) => setTimeout(r, pollMs));
+    run = ((await withRetry(() => apifyFetch(token, `/actor-runs/${runId}`), retry)) as { data: typeof run }).data;
+    await opts.onProgress?.(`Apify run ${runId}: ${run.status}`);
+  }
+  if (run.status !== "SUCCEEDED") throw new NonRetryableError(`Apify run ${runId} ended with ${run.status}`);
+  const items = (await withRetry(() => apifyFetch(token, `/datasets/${datasetId}/items?clean=true&format=json`), retry)) as ApifyPlaceItem[];
+  // Charges can settle after SUCCEEDED (our first proof run read only the start event). Re-read until
+  // every returned place shows up as charged, or the counts stop changing.
+  const charged = (r: typeof run) => (r.chargedEventCounts?.["place-scraped"] ?? 0);
+  for (let i = 0; i < 5 && (!run.chargedEventCounts || charged(run) < items.length); i++) {
+    const before = JSON.stringify(run.chargedEventCounts ?? null);
+    await new Promise((r) => setTimeout(r, Math.min(pollMs, 2000)));
+    run = ((await withRetry(() => apifyFetch(token, `/actor-runs/${runId}`), retry)) as { data: typeof run }).data;
+    if (i > 1 && JSON.stringify(run.chargedEventCounts ?? null) === before) break;
+  }
+  return { runId, items, chargedEventCounts: run.chargedEventCounts ?? {}, usageTotalUsd: typeof run.usageTotalUsd === "number" ? run.usageTotalUsd : null };
+}
+
+/** Start an actor run, poll until it finishes, then fetch the dataset items. */
+export function apifyScraper(token: string, opts: { pollMs?: number; timeoutSecs?: number } = {}): Scraper {
   return {
     mode: "apify",
     async scrape(input, hooks) {
-      const retry = { retries: 3, baseDelayMs: 1000, ...(hooks?.retry ?? {}) };
-      const started = (await withRetry(
-        () =>
-          apifyFetch(token, `/acts/${APIFY_ACTOR_ID}/runs?timeout=${timeoutSecs}`, {
-            method: "POST",
-            body: JSON.stringify(apifyInput(input)),
-          }),
-        retry,
-      )) as { data: { id: string; defaultDatasetId: string; status: string } };
-      const runId = started.data.id;
-      const datasetId = started.data.defaultDatasetId;
-      await hooks?.onProgress?.(`Apify run ${runId} started`);
-
-      const deadline = Date.now() + (timeoutSecs + 60) * 1000;
-      let status = started.data.status;
-      while (!["SUCCEEDED", "FAILED", "ABORTED", "TIMED-OUT"].includes(status)) {
-        if (Date.now() > deadline) throw new Error(`Apify run ${runId} did not finish in time`);
-        await new Promise((r) => setTimeout(r, pollMs));
-        const s = (await withRetry(() => apifyFetch(token, `/actor-runs/${runId}`), retry)) as {
-          data: { status: string; stats?: { durationMillis?: number } };
-        };
-        status = s.data.status;
-        await hooks?.onProgress?.(`Apify run ${runId}: ${status}`);
-      }
-      if (status !== "SUCCEEDED") throw new NonRetryableError(`Apify run ${runId} ended with ${status}`);
-
-      const items = (await withRetry(
-        () => apifyFetch(token, `/datasets/${datasetId}/items?clean=true&format=json`),
-        retry,
-      )) as ApifyPlaceItem[];
-      return items;
+      const r = await runApifyActor(token, apifyInput(input), { ...opts, onProgress: hooks?.onProgress, retry: hooks?.retry });
+      return r.items;
     },
   };
 }

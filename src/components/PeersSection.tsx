@@ -219,7 +219,7 @@ function HowTiersWork({ board, scanDate }: { board: Board; scanDate: string }) {
         </p>
         <p>
           This business: rating and review count from its Google listing, and replies to 1-2 star reviews from the newest reviews in
-          Ringy&apos;s scan on {fmtDate(scanDate)} (needs at least {MIN_NEGATIVE_FOR_REPLY}). Complaint shares need the same classifier as the peers,
+          Ringy&apos;s scan on {fmtDate(scanDate)} (needs at least {MIN_NEGATIVE_FOR_REPLY}; fewer is a small sample and is not scored). Complaint shares need the same classifier as the peers,
           so they are not measured for live scans yet. The rating is steadied with {RATING_PRIOR_REVIEWS} reviews at the group average.
         </p>
       </div>

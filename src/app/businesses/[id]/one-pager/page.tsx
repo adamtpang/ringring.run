@@ -8,6 +8,7 @@ import { TIER_TONE, useGamePlan } from "@/components/GamePlan";
 import { usePeerBoard, usePeerSubject } from "@/components/PeersSection";
 import { Qr } from "@/components/Qr";
 import { usePoll } from "@/components/ui";
+import { ASSUMPTION_LABEL } from "@/lib/roi";
 import { ACTOR_LABEL, fmtDate, type EvidenceLine, type PlanItem } from "@/lib/gameplan";
 import type { Business, Finding, KnowledgeFact, Review, RoiEstimate, Run } from "@/lib/types";
 
@@ -43,6 +44,11 @@ function Problem({ item, n, e }: { item: PlanItem; n: number; e: EvidenceLine | 
           </p>
         ) : (
           <p className="text-caption text-muted">{item.detail}</p>
+        )}
+        {item.moneyInputs && (
+          <p className="text-[0.625rem] leading-snug text-subtle">
+            How we got this: {item.moneyInputs}.{item.defaultKeys.length ? ` Assumed = ${ASSUMPTION_LABEL}.` : ""}
+          </p>
         )}
       </div>
     </li>
@@ -149,7 +155,15 @@ export default function OnePagerPage() {
             <h2 className="text-headline">Prognosis</h2>
             <p className="mt-1 text-caption">{plan.prognosis.ifNothing}</p>
             <p className="mt-1 text-caption font-medium">{plan.prognosis.ifPlan}</p>
-            <p className="mt-1 text-caption text-subtle">Estimate, not a promise. Measured by {plan.prognosis.metric.toLowerCase()}.</p>
+            {plan.prognosis.money && (
+              <p className="mt-1 text-[0.625rem] leading-snug text-subtle">
+                How we got ${plan.prognosis.money.total.toLocaleString("en-US")}/mo: {plan.prognosis.money.kept.map((k) => `${k.label.toLowerCase()} ($${k.trace.result.toLocaleString("en-US")}, math at left)`).join(" + ")}
+                {plan.prognosis.money.dropped.length
+                  ? `. Not added: ${plan.prognosis.money.dropped.map((d) => `${d.label.toLowerCase()} ($${d.monthly.toLocaleString("en-US")})`).join(", ")}, since it can be the same customers.`
+                  : "."}
+              </p>
+            )}
+            <p className="mt-1 text-caption text-subtle">Estimate, not a promise. Measured by {plan.prognosis.metric.toLowerCase()}. Source: {plan.prognosis.source}</p>
           </section>
         </div>
 
@@ -211,8 +225,8 @@ export default function OnePagerPage() {
         </div>
 
         <footer className="mt-auto border-t border-hairline pt-2 text-[0.625rem] leading-snug text-subtle">
-          Built from public Google reviews, the Google listing{b.website ? " and your website" : ""}, read on {scanned ?? "the scan date"}. Dollar figures and tiers are estimates from editable
-          assumptions and an anonymized peer benchmark, not promises. Ringy never posts, sends or changes anything without your OK.
+          Built from public Google reviews, the Google listing{b.website ? " and your website" : ""}, read on {scanned ?? "the scan date"}. Dollar figures and tiers are estimates from default
+          assumptions (tell us your real numbers) and an anonymized peer benchmark, not promises. Overlapping problems are counted once in any total. Ringy never posts, sends or changes anything without your OK.
         </footer>
       </article>
     </div>

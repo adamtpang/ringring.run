@@ -5,10 +5,11 @@ import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Badge, ButtonLink, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
 import { GamePlanSection, useGamePlan } from "@/components/GamePlan";
+import { WhatChanged, type CheckinData } from "@/components/WhatChanged";
 import { PeersSection, usePeerBoard, usePeerSubject } from "@/components/PeersSection";
 import { BackLink, money, PageShell, usePoll } from "@/components/ui";
 import { callsPerMonth, CATALOG, INTERVIEW, prescribe, rankProblems, verticalFor, type MenuOption, type RankedProblem, type Vertical } from "@/lib/prescription";
-import { computeMonthlyValue } from "@/lib/roi";
+import { ASSUMPTION_LABEL, computeMonthlyValue, dedupMonthly, moneyTrace, traceLine } from "@/lib/roi";
 import { KIND_LABELS } from "@/lib/solutions";
 import type { AgentRecord, Assumption, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run } from "@/lib/types";
 
@@ -21,6 +22,7 @@ interface Report {
   pages: { status: string }[];
   knowledge?: KnowledgeFact[];
   agent: AgentRecord | null;
+  checkin?: CheckinData | null;
 }
 
 const VERTICAL_LABEL: Record<Vertical, string> = { home_services: "home services", dental: "dental", any: "local business" };
@@ -71,8 +73,10 @@ function CostEditor({ assumptions, edits, setEdits }: { assumptions: Assumption[
             <span className="mr-2">{a.label}</span>
             {a.source === "listing" ? (
               <Badge tone="success" className="h-5 px-2">From listing</Badge>
+            ) : a.key === "weeks_per_month" ? (
+              <Badge className="h-5 px-2">Calendar: 52 weeks / 12 months</Badge>
             ) : (
-              <Badge tone="warning" className="h-5 px-2">Assumption</Badge>
+              <Badge tone="warning" className="h-5 px-2">Default assumption, ask the owner</Badge>
             )}
           </span>
           <span className="text-right">
@@ -176,6 +180,10 @@ function ProblemCard({ rank, rp, b, reviews, agent }: { rank: number; rp: Ranked
         ) : (
           <p className="mt-2 text-footnote text-muted">No estimate on file for this problem.</p>
         )}
+        {!err && base.length > 0 && (() => {
+          const t = moneyTrace(current);
+          return t ? <p className="mt-2 text-caption text-subtle">How we got this: {traceLine(t)}.</p> : null;
+        })()}
         {err && <p className="mt-2 text-caption text-danger">{err}</p>}
         {Object.keys(edits).length > 0 && (
           <button type="button" onClick={() => setEdits({})} className="mt-2 text-caption font-medium text-accent hover:underline">Reset to defaults</button>
@@ -263,7 +271,12 @@ export default function DiagnosisPage() {
   if (!data) return <PageShell width="narrow"><p className="text-footnote text-muted">Loading diagnosis…</p></PageShell>;
 
   const b = data.business;
-  const total = ranked.reduce((s, r) => s + r.monthly, 0);
+  // Overlapping problems (e.g. missed calls and slow replies) are counted once.
+  const priced = ranked.map((r) => ({ kind: r.finding.kind, title: r.finding.title, monthly: r.roi ? moneyTrace(r.roi.assumptions)?.result ?? null : null }));
+  const dedup = dedupMonthly(priced);
+  const total = dedup.total;
+  const kept = priced.filter((r) => r.monthly && !dedup.dropped.some((d) => d.kind === r.kind));
+  const titleOf = (k: string) => priced.find((r) => r.kind === k)?.title ?? k;
   const sources = [`${b.scraped_review_count} Google reviews`, "the listing", ...(data.pages.some((p) => p.status === "ok") ? ["their website"] : [])];
   const current = data.agent ? 3 : 1;
 
@@ -295,11 +308,17 @@ export default function DiagnosisPage() {
           description={`Ringy checked this business from the outside: ${sources.length > 1 ? `${sources.slice(0, -1).join(", ")} and ${sources[sources.length - 1]}` : sources[0]}. These are the best first problems to fix, with a prescription for each.`}
         />
         <StatGrid>
-          <Stat label="May cost / month" value={money(total)} hint="estimate, top problems" emphasis />
+          <Stat label="May cost / month" value={money(total)} hint="estimate, overlaps counted once" emphasis />
           <Stat label="Problems found" value={data.findings.length} hint={`top ${ranked.length} shown`} />
           <Stat label="Rating" value={b.rating ?? "n/a"} hint={`${b.review_count ?? 0} reviews`} />
-          <Stat label="Owner replies" value={b.owner_response_rate != null ? `${Math.round(b.owner_response_rate * 100)}%` : "n/a"} hint="to reviews" />
+          <Stat label="Owner replies" value={b.owner_response_rate != null ? `${Math.round(b.owner_response_rate * 100)}%` : "n/a"} hint={`Ringy's sample: ${b.scraped_review_count} newest reviews read${b.scraped_review_count < 5 ? " (small sample)" : ""}`} />
         </StatGrid>
+        {total > 0 && (
+          <p className="text-caption text-subtle">
+            How we got {money(total)}/mo: {kept.map((r) => `${r.title} (${money(r.monthly!)})`).join(" + ")}
+            {dedup.dropped.length ? `. Not added, because they can be the same customers: ${dedup.dropped.map((d) => `${titleOf(d.kind)} (${money(d.monthly)})`).join(", ")}` : ""}. Each problem below shows its inputs and math; inputs marked {ASSUMPTION_LABEL} are not measured.
+          </p>
+        )}
         {board?.status === "ok" && (
           <a href="#peers" className="flex flex-wrap items-center gap-2 text-footnote font-medium text-accent hover:underline">
             <Badge tone="accent">Tier {board.subject.tier}</Badge>
@@ -318,6 +337,8 @@ export default function DiagnosisPage() {
       )}
 
       {plan && <GamePlanSection plan={plan} onePagerHref={`/businesses/${b.id}/one-pager`} />}
+
+      {data.checkin && <WhatChanged data={data.checkin} planStep={plan?.items.find((i) => i.recommended)?.you[0] ?? null} />}
 
       {ranked.length > 0 && <SectionHeader eyebrow="Prescriptions" title="Each problem in detail" description="The evidence, the cost assumptions you can edit, and the tools that fix it." />}
       {ranked.map((rp, i) => (
