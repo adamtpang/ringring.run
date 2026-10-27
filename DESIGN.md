@@ -1,6 +1,6 @@
 # ringring.run design system
 
-One idea: **a handset inside a ring**. Calm surfaces, one blue, honest copy.
+One idea: **a handset inside a ring**. Calm surfaces, one green for Ringy, peach for Rungy, honest copy.
 Live reference: `/design` (renders the palette, type, motion and components from the real tokens).
 
 ## Files
@@ -12,29 +12,45 @@ Live reference: `/design` (renders the palette, type, motion and components from
 | `src/components/ds/` | Shared components: `Button`/`ButtonLink`, `Card`, `Badge`, `Stat`/`StatGrid`, `SectionHeader`, `Timeline`/`TimelineStep`, `Field`. Server-safe (no hooks). |
 | `src/components/ui.tsx` | App chrome (client): `AppHeader`, `PageShell`, `BackLink`, `ModeBadge`, `RunStatusPill`, `StepTimeline`. |
 | `src/components/Logo.tsx` | `LogoMark`, `Wordmark`, `RingEmblem` (hero). |
-| `src/app/icon.svg`, `favicon.ico`, `apple-icon.png`, `opengraph-image.tsx` | Brand assets via Next.js app/ file conventions. |
+| `src/app/icon.svg`, `favicon.ico`, `apple-icon.png`, `opengraph-image.tsx` | Brand assets via Next.js app/ file conventions, all in Ringy green `#60d394` (favicon.ico has 16/32/48 px; icon.png is 512 px; apple-icon.png is 180 px full-bleed). |
 
 ## Color
 
-Named palette. Ratios are WCAG 2 contrast for text: light against Canvas `#fbfbfd`, dark against Surface `#161618` (the lower of dark bg/surface). All text colors pass **AA (4.5:1)** on Canvas, Surface and Mist, and on their own soft badge tint.
+Palette: [coolors.co/ee6055-60d394-aaf683-ffd97d-ff9b85](https://coolors.co/ee6055-60d394-aaf683-ffd97d-ff9b85). The five hues and their text shades live once in `tokens.css` as `--pal-*`; every role token points at them.
+
+The raw hues are fills. As text on white they fail (green 1.9, peach 2.0, coral 3.3, yellow 1.4, light green 1.3), so text uses a darker `-ink` shade of the same hue, and fills carry dark text, never white. `pnpm contrast` prints every pairing; `tests/contrast.test.ts` fails the build if one drops under 4.5:1.
+
+| Hue | Fill | Text shade (light) | Role |
+|---|---|---|---|
+| Ringy green | `#60d394` (`accent-solid`, `ringy`) | `#217748` (`accent`, `success`) | Ringy, primary actions, links, pass. Logo and favicon. |
+| Rungy peach | `#ff9b85` (`rungy-solid`, `peach`) | `#a23d22` (`rungy`) | Rungy: scans, searches and runs in progress |
+| Coral | `#ee6055` (`coral`) | `#c42014` (`danger`) | Problems, fail, gaps, urgent (A-tier) |
+| Yellow | `#ffd97d` (`yellow`) | `#84610b` (`warning`) | Warnings, unknown, estimates, saved snapshot, demo data |
+| Light green | `#aaf683` (`lime`, `highlight`) | text on it is Ink | Success backgrounds (`success-soft`), highlights |
+
+| Pair | Ratio |
+|---|---|
+| `accent` #217748 on white / Canvas / Mist | 5.5 / 5.4 / 5.1 |
+| Primary button: `#0b2a19` on #60d394 (hover #4cc584) | 8.3 (7.1) |
+| Rungy button: `#3a1309` on #ff9b85 (hover #ff8a70) | 8.1 (7.1) |
+| Badges on white: accent / success / rungy / warning / danger | 4.9 / 4.9 / 5.6 / 5.0 / 4.9 |
+| Same badges on a Mist card | 4.6 / 4.6 / n/a / 4.8 / 4.6 |
+| Dark theme text (on #161618): green / peach / yellow / coral #f4847b | 9.7 / 8.9 / 13.3 / 7.3 |
+
+Neutrals:
 
 | Name | Token | Light | Ratio | Dark | Ratio | Use |
 |---|---|---|---|---|---|---|
-| Ring Blue | `accent` | `#0066cc` | 5.4 | `#2997ff` | 6.0 | Links, eyebrows, text actions |
-| Ring Blue Solid | `accent-solid` | `#0071e3` | white on it 4.7 | `#0071e3` | 4.7 | Primary button, logo fill |
 | Ink | `foreground` | `#1d1d1f` | 16.3 | `#f5f5f7` | 16.6 | Body text |
 | Graphite | `muted` | `#636368` | 5.8 | `#a1a1a6` | 7.0 | Secondary text |
 | Pewter | `subtle` | `#6f6f74` | 4.8 | `#8d8d92` | 5.5 | Captions, meta |
 | Canvas | `background` | `#fbfbfd` | | `#000000` | | Page |
 | Surface | `surface` | `#ffffff` | | `#161618` | | Cards |
 | Mist | `surface-2` | `#f5f5f7` | | `#1c1c1e` | | Inputs, sunken areas |
-| Success | `success` | `#1a7f37` | 4.9 | `#30d158` | 8.9 | Live, completed |
-| Warning | `warning` | `#935200` | 5.9 | `#ffb340` | 10.1 | Demo data, retries |
-| Danger | `danger` | `#c9251d` | 5.4 | `#ff6961` | 6.4 | Errors |
+
+Mapping in the app: scorecard pass = green, gap = coral, unknown = yellow. Plan tiers A = coral, B = yellow, C = neutral. Peer tiers S = green, A = light green, B = neutral, C = yellow, D = coral. "Ringy does this" and "Ringy does this after your OK" = green; "You do this" = neutral. Eval PASS = green, FAIL = coral. The one-pager forces the light palette and prints with `print-color-adjust: exact`; every badge also carries its words, so it still reads in grayscale.
 
 Each status color has a `-soft` tint for badge backgrounds. Hairlines are translucent (`rgba(0,0,0,.08)` / `rgba(255,255,255,.1)`) so they work on any surface. `prefers-contrast: more` darkens muted text and hairlines.
-
-Why split `accent` and `accent-solid`: `#2997ff` reads well as text on black but white text on it is only 2.9:1, so filled buttons keep `#0071e3` in both themes.
 
 ## Type
 
@@ -91,8 +107,8 @@ Reduced motion: loops stop, movement becomes opacity. Reduced transparency: the 
 
 ## Brand assets
 
-- Mark: white handset on a Ring Blue disc inside a faint ring. Built from one 24px handset path (`HANDSET_PATH` in `Logo.tsx`).
-- `icon.svg` (32 viewBox), `favicon.ico` (16/32/48), `apple-icon.png` (180, full-bleed blue, iOS rounds it).
+- Mark: white handset on a Ringy green (#60d394) disc inside a faint ring. Built from one 24px handset path (`HANDSET_PATH` in `Logo.tsx`).
+- `icon.svg` (32 viewBox), `icon.png` (512), `favicon.ico` (16/32/48), `apple-icon.png` (180, full-bleed green, iOS rounds it).
 - `opengraph-image.tsx` (1200×630): wordmark, headline, emblem.
 - Theme color: `#fbfbfd` light, `#000000` dark.
 

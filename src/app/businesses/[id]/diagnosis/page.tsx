@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { Badge, ButtonLink, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
 import { GamePlanSection, useGamePlan } from "@/components/GamePlan";
 import { WhatChanged, type CheckinData } from "@/components/WhatChanged";
-import { PeersSection, usePeerBoard, usePeerSubject } from "@/components/PeersSection";
+import { PEER_TIER_TONE, PeersSection, usePeerBoard, usePeerSubject } from "@/components/PeersSection";
 import { BackLink, money, PageShell, usePoll } from "@/components/ui";
 import { SnapshotBanner, snapQs, useReportUrl } from "@/components/Snapshot";
 import type { SnapshotMeta } from "@/lib/snapshot";
@@ -47,7 +47,7 @@ function Quotes({ finding, reviews }: { finding: Finding; reviews: Review[] }) {
   return (
     <ul className="space-y-2">
       {items.map((e, i) => (
-        <li key={i} className="rounded-md border-l-2 border-accent bg-surface-2 px-4 py-3">
+        <li key={i} className="rounded-md border-l-2 border-coral bg-surface-2 px-4 py-3">
           {e.source === "listing" ? (
             <p className="text-callout">{e.value}</p>
           ) : (
@@ -156,7 +156,7 @@ function ProblemCard({ rank, rp, b, reviews, agent }: { rank: number; rp: Ranked
     <Card as="article" padding="lg" id={`problem-${f.kind}`} className="scroll-mt-24 space-y-6">
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-eyebrow uppercase text-accent">Problem {rank}</span>
+          <span className="text-eyebrow uppercase text-danger">Problem {rank}</span>
           <Badge tone="accent">{KIND_LABELS[f.kind]}</Badge>
           <Badge tone={severityTone(f.severity)}>Severity {f.severity} of 5</Badge>
           <Badge>{rp.evidenceCount} {rp.evidenceCount === 1 ? "piece" : "pieces"} of evidence</Badge>
@@ -173,7 +173,7 @@ function ProblemCard({ rank, rp, b, reviews, agent }: { rank: number; rp: Ranked
       <section className="rounded-md bg-surface-2 p-4 sm:p-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h3 className="text-eyebrow uppercase text-muted">What it may cost</h3>
-          <span className="text-title-2 tabular-nums text-accent">{monthly == null ? "Check inputs" : `${money(monthly)}/mo`}</span>
+          <span className="text-title-2 tabular-nums text-warning">{monthly == null ? "Check inputs" : `${money(monthly)}/mo`}</span>
         </div>
         <p className="mt-1 text-caption text-muted">
           An estimate, not a fact. It multiplies the numbers below. Most are assumptions; change any of them to match what you know. Edits stay on this page and are not saved.
@@ -313,7 +313,7 @@ export default function DiagnosisPage() {
           description={`Ringy checked this business from the outside: ${sources.length > 1 ? `${sources.slice(0, -1).join(", ")} and ${sources[sources.length - 1]}` : sources[0]}. These are the best first problems to fix, with a prescription for each.`}
         />
         <StatGrid>
-          <Stat label="May cost / month" value={money(total)} hint="estimate, overlaps counted once" emphasis />
+          <Stat label="May cost / month" value={money(total)} hint="estimate, overlaps counted once" emphasis estimate />
           <Stat label="Problems found" value={data.findings.length} hint={`top ${ranked.length} shown`} />
           <Stat label="Rating" value={b.rating ?? "n/a"} hint={`${b.review_count ?? 0} reviews`} />
           <Stat label="Owner replies" value={b.owner_response_rate != null ? `${Math.round(b.owner_response_rate * 100)}%` : "n/a"} hint={`Ringy's sample: ${b.scraped_review_count} newest reviews read${b.scraped_review_count < 5 ? " (small sample)" : ""}`} />
@@ -326,7 +326,7 @@ export default function DiagnosisPage() {
         )}
         {board?.status === "ok" && (
           <a href="#peers" className="flex flex-wrap items-center gap-2 text-footnote font-medium text-accent hover:underline">
-            <Badge tone="accent">Tier {board.subject.tier}</Badge>
+            <Badge tone={board.subject.tier ? PEER_TIER_TONE[board.subject.tier] : "neutral"}>Tier {board.subject.tier}</Badge>
             {board.subject.tied ? "Tied " : ""}#{board.subject.rank} of {board.rows.length} {board.meta.plural}. See your peers
           </a>
         )}

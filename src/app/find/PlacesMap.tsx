@@ -96,7 +96,7 @@ export default function PlacesMap({ center, radiusM, places, selectedId, hovered
     area.current?.remove();
     area.current = L.circle([center.lat, center.lon], {
       radius: radiusM,
-      color: "#0071e3",
+      color: "#217748",
       weight: 1,
       opacity: 0.35,
       fillOpacity: 0.03,
@@ -104,7 +104,7 @@ export default function PlacesMap({ center, radiusM, places, selectedId, hovered
     }).addTo(m);
     user.current?.remove();
     user.current = showUser
-      ? L.circleMarker([center.lat, center.lon], { radius: 7, color: "#fff", weight: 3, fillColor: "#0071e3", fillOpacity: 1, interactive: false }).addTo(m)
+      ? L.circleMarker([center.lat, center.lon], { radius: 7, color: "#fff", weight: 3, fillColor: "#60d394", fillOpacity: 1, interactive: false }).addTo(m)
       : null;
   }, [center.lat, center.lon, radiusM, showUser, fit]);
 

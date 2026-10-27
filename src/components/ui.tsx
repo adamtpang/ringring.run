@@ -162,7 +162,7 @@ export function BackLink({ href, children }: { href: string; children: React.Rea
 
 const RUN_STATUS: Record<RunStatus, { tone: BadgeTone; label: string }> = {
   queued: { tone: "neutral", label: "Queued" },
-  running: { tone: "accent", label: "Running" },
+  running: { tone: "rungy", label: "Running" },
   completed: { tone: "success", label: "Completed" },
   completed_with_errors: { tone: "warning", label: "Completed with errors" },
   failed: { tone: "danger", label: "Failed" },

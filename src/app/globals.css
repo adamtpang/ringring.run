@@ -30,6 +30,18 @@
   --color-warning-soft: var(--color-warning-soft-raw);
   --color-danger: var(--color-danger-raw);
   --color-danger-soft: var(--color-danger-soft-raw);
+  --color-rungy: var(--color-rungy-raw);
+  --color-rungy-solid: var(--color-rungy-solid-raw);
+  --color-rungy-hover: var(--color-rungy-hover-raw);
+  --color-rungy-fg: var(--color-rungy-fg-raw);
+  --color-rungy-soft: var(--color-rungy-soft-raw);
+  --color-highlight: var(--color-highlight-raw);
+  /* Fixed palette hues, for fills and marks (never text on white). */
+  --color-ringy: var(--pal-ringy);
+  --color-coral: var(--pal-coral);
+  --color-yellow: var(--pal-yellow);
+  --color-lime: var(--pal-lime);
+  --color-peach: var(--pal-rungy);
   --color-inverse: var(--color-inverse-raw);
   --color-inverse-fg: var(--color-inverse-fg-raw);
 
@@ -220,12 +232,19 @@
   --color-subtle-raw: #6f6f74;
   --color-hairline-raw: rgba(0, 0, 0, 0.08);
   --color-hairline-strong-raw: rgba(0, 0, 0, 0.14);
-  --color-accent-raw: #0066cc;
-  --color-accent-soft-raw: rgba(0, 113, 227, 0.08);
-  --color-success-raw: #1a7f37;
-  --color-success-soft-raw: rgba(52, 199, 89, 0.13);
-  --color-warning-raw: #935200;
-  --color-warning-soft-raw: rgba(255, 159, 10, 0.15);
+  /* Roles reset to the light palette so the sheet prints the same in dark mode. */
+  --color-accent-raw: var(--pal-ringy-ink);
+  --color-accent-solid-raw: var(--pal-ringy);
+  --color-accent-fg-raw: var(--pal-ringy-on);
+  --color-accent-soft-raw: rgba(96, 211, 148, 0.18);
+  --color-rungy-raw: var(--pal-rungy-ink);
+  --color-rungy-soft-raw: rgba(255, 155, 133, 0.22);
+  --color-success-raw: var(--pal-ringy-ink);
+  --color-success-soft-raw: rgba(170, 246, 131, 0.45);
+  --color-warning-raw: var(--pal-yellow-ink);
+  --color-warning-soft-raw: rgba(255, 217, 125, 0.4);
+  --color-danger-raw: var(--pal-coral-ink);
+  --color-danger-soft-raw: rgba(238, 96, 85, 0.16);
   color: var(--color-fg);
 }
 .op-sheet { min-height: 11in; }

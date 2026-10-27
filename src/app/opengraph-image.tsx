@@ -14,8 +14,8 @@ export default function OgImage() {
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 0 0 88px", width: 760 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 36, fontWeight: 600, letterSpacing: -0.5 }}>
             <svg width="48" height="48" viewBox="0 0 32 32">
-              <circle cx="16" cy="16" r="14.75" fill="none" stroke="#0071e3" strokeWidth="2.5" opacity="0.32" />
-              <circle cx="16" cy="16" r="10.5" fill="#0071e3" />
+              <circle cx="16" cy="16" r="14.75" fill="none" stroke="#60d394" strokeWidth="2.5" opacity="0.32" />
+              <circle cx="16" cy="16" r="10.5" fill="#60d394" />
               <path d={HANDSET} fill="white" transform="translate(9.4 9.4) scale(0.55)" />
             </svg>
             <span>
@@ -28,10 +28,10 @@ export default function OgImage() {
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
           <svg width="400" height="400" viewBox="0 0 400 400">
-            <circle cx="200" cy="200" r="190" fill="none" stroke="#0071e3" strokeWidth="2" opacity="0.12" />
-            <circle cx="200" cy="200" r="150" fill="none" stroke="#0071e3" strokeWidth="2" opacity="0.22" />
-            <circle cx="200" cy="200" r="110" fill="#0071e3" opacity="0.08" />
-            <circle cx="200" cy="200" r="76" fill="#0071e3" />
+            <circle cx="200" cy="200" r="190" fill="none" stroke="#60d394" strokeWidth="2" opacity="0.12" />
+            <circle cx="200" cy="200" r="150" fill="none" stroke="#60d394" strokeWidth="2" opacity="0.22" />
+            <circle cx="200" cy="200" r="110" fill="#60d394" opacity="0.08" />
+            <circle cx="200" cy="200" r="76" fill="#60d394" />
             <path d={HANDSET} fill="white" transform="translate(167 167) scale(2.75)" />
           </svg>
         </div>

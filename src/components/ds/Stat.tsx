@@ -7,18 +7,21 @@ export function Stat({
   value,
   hint,
   emphasis = false,
+  estimate = false,
   className,
 }: {
   label: ReactNode;
   value: ReactNode;
   hint?: ReactNode;
   emphasis?: boolean;
+  /** An estimate, not a measured figure: shown in the warning (yellow) shade. */
+  estimate?: boolean;
   className?: string;
 }) {
   return (
     <div className={cx("min-w-0 rounded-md bg-surface p-4 shadow-card", className)}>
       <div className="truncate text-footnote text-muted">{label}</div>
-      <div className={cx("mt-1 truncate font-semibold tabular-nums", emphasis ? "text-title-2 text-accent" : "text-title-3")}>{value}</div>
+      <div className={cx("mt-1 truncate font-semibold tabular-nums", emphasis ? cx("text-title-2", estimate ? "text-warning" : "text-accent") : "text-title-3")}>{value}</div>
       {hint && <div className="mt-0.5 truncate text-caption text-subtle">{hint}</div>}
     </div>
   );

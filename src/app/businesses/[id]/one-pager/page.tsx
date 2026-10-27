@@ -42,7 +42,7 @@ const SITE = "https://ringring.run";
 const ACTOR_TEXT = {
   ringy: "text-accent",
   ringy_after_ok: "text-accent",
-  you: "text-warning",
+  you: "text-foreground",
 } as const;
 
 function Problem({

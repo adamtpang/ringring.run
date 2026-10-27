@@ -2,11 +2,13 @@ import Link from "next/link";
 import type { ComponentProps } from "react";
 import { cx } from "./cx";
 
-export type ButtonVariant = "primary" | "secondary" | "plain" | "inverse";
+export type ButtonVariant = "primary" | "rungy" | "secondary" | "plain" | "inverse";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const VARIANT: Record<ButtonVariant, string> = {
   primary: "bg-accent-solid text-accent-fg hover:bg-accent-hover",
+  /** Starts a Rungy run (a scan or search that runs in the background). */
+  rungy: "bg-rungy-solid text-rungy-fg hover:bg-rungy-hover",
   secondary: "bg-surface text-accent ring-1 ring-inset ring-hairline-strong hover:bg-surface-2",
   plain: "text-accent hover:bg-accent-soft",
   inverse: "bg-inverse text-inverse-fg hover:opacity-90",

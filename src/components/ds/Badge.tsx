@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 import { cx } from "./cx";
 
-export type BadgeTone = "neutral" | "accent" | "success" | "warning" | "danger";
+export type BadgeTone = "neutral" | "accent" | "rungy" | "success" | "warning" | "danger";
 
 const TONE: Record<BadgeTone, string> = {
   neutral: "bg-surface-2 text-muted ring-hairline",
   accent: "bg-accent-soft text-accent ring-accent/20",
+  rungy: "bg-rungy-soft text-rungy ring-rungy/20",
   success: "bg-success-soft text-success ring-success/20",
   warning: "bg-warning-soft text-warning ring-warning/25",
   danger: "bg-danger-soft text-danger ring-danger/20",
@@ -14,6 +15,7 @@ const TONE: Record<BadgeTone, string> = {
 const DOT: Record<BadgeTone, string> = {
   neutral: "bg-subtle",
   accent: "bg-accent",
+  rungy: "bg-rungy",
   success: "bg-success",
   warning: "bg-warning",
   danger: "bg-danger",

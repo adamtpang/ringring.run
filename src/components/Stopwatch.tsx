@@ -57,7 +57,7 @@ export function Stopwatch({
             {under ? "Under target" : "Over target"}
           </Badge>
         ) : ticking ? (
-          <Badge tone="accent" live>
+          <Badge tone="rungy" live>
             Timing
           </Badge>
         ) : (

@@ -127,7 +127,7 @@ export function BusinessChat({ place, onClose }: { place: Place; onClose: () => 
             <p
               className={cx(
                 "max-w-[85%] rounded-lg px-3 py-2 text-callout",
-                m.role === "user" ? "bg-accent-solid text-white" : "bg-surface text-foreground shadow-card",
+                m.role === "user" ? "bg-accent-solid text-accent-fg" : "bg-surface text-foreground shadow-card",
               )}
             >
               {m.text}

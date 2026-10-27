@@ -12,6 +12,7 @@
     "scan": "tsx scripts/scan.ts",
     "checkin": "tsx scripts/checkin.ts",
     "eval": "tsx scripts/eval.ts",
+    "contrast": "tsx scripts/contrast.ts",
     "check": "pnpm lint && pnpm typecheck && pnpm test"
   },
   "dependencies": {

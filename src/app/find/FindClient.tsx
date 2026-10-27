@@ -490,7 +490,7 @@ function PlaceRow({
             <Button size="sm" onClick={onChat}>
               Chat with its AI
             </Button>
-            <Button size="sm" variant="secondary" onClick={onScan} disabled={scanning}>
+            <Button size="sm" variant="rungy" onClick={onScan} disabled={scanning}>
               {scanning ? "Starting…" : "Scan this business"}
             </Button>
           </div>
@@ -556,7 +556,7 @@ function GoogleMapsSearch({
       </label>
       <input id="gm-city" className={inputClass} value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" maxLength={80} autoComplete="address-level2" />
       <div className="flex flex-wrap gap-2">
-        <Button type="submit" size="sm" disabled={!ready || scan.submitting}>
+        <Button type="submit" size="sm" variant="rungy" disabled={!ready || scan.submitting}>
           {scan.submitting ? "Starting…" : "Search Google Maps"}
         </Button>
         {onRetry && (

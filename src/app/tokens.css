@@ -15,20 +15,47 @@
   --color-inverse-raw: #1d1d1f;
   --color-inverse-fg-raw: #ffffff;
 
-  /* Color: brand (the ring) */
-  --color-accent-raw: #0066cc;         /* text and links */
-  --color-accent-solid-raw: #0071e3;   /* fills behind white text */
-  --color-accent-hover-raw: #0077ed;
-  --color-accent-fg-raw: #ffffff;
-  --color-accent-soft-raw: rgba(0, 113, 227, 0.1);
+  /* Palette (coolors.co/ee6055-60d394-aaf683-ffd97d-ff9b85). The five hues and
+     their AA text shades are fixed; every color role below points at these.
+     Raw hues are fills: they fail as text on white, so text uses the -ink shades
+     (>= 4.5:1 on white and on their own soft fill). Run scripts/contrast.mjs. */
+  --pal-ringy: #60d394;        /* green: Ringy, primary actions, pass */
+  --pal-ringy-hover: #4cc584;
+  --pal-ringy-ink: #217748;
+  --pal-ringy-on: #0b2a19;     /* text on a ringy fill */
+  --pal-rungy: #ff9b85;        /* peach: Rungy, runs and scans */
+  --pal-rungy-hover: #ff8a70;
+  --pal-rungy-ink: #a23d22;
+  --pal-rungy-on: #3a1309;     /* text on a rungy fill */
+  --pal-coral: #ee6055;        /* problems, fail, urgent (A-tier) */
+  --pal-coral-ink: #c42014;
+  --pal-yellow: #ffd97d;       /* warnings, unknown, estimates */
+  --pal-yellow-ink: #84610b;
+  --pal-lime: #aaf683;         /* success backgrounds, highlights */
+  --pal-lime-ink: #2e760a;
+
+  /* Color: roles */
+  --color-accent-raw: var(--pal-ringy-ink);        /* text and links */
+  --color-accent-solid-raw: var(--pal-ringy);      /* fills behind accent-fg text */
+  --color-accent-hover-raw: var(--pal-ringy-hover);
+  --color-accent-fg-raw: var(--pal-ringy-on);
+  --color-accent-soft-raw: rgba(96, 211, 148, 0.18);
+
+  --color-rungy-raw: var(--pal-rungy-ink);
+  --color-rungy-solid-raw: var(--pal-rungy);
+  --color-rungy-hover-raw: var(--pal-rungy-hover);
+  --color-rungy-fg-raw: var(--pal-rungy-on);
+  --color-rungy-soft-raw: rgba(255, 155, 133, 0.22);
+
+  --color-highlight-raw: var(--pal-lime);
 
   /* Color: status */
-  --color-success-raw: #1a7f37;
-  --color-success-soft-raw: rgba(52, 199, 89, 0.13);
-  --color-warning-raw: #935200;
-  --color-warning-soft-raw: rgba(255, 159, 10, 0.15);
-  --color-danger-raw: #c9251d;
-  --color-danger-soft-raw: rgba(255, 59, 48, 0.11);
+  --color-success-raw: var(--pal-ringy-ink);
+  --color-success-soft-raw: rgba(170, 246, 131, 0.45);
+  --color-warning-raw: var(--pal-yellow-ink);
+  --color-warning-soft-raw: rgba(255, 217, 125, 0.4);
+  --color-danger-raw: var(--pal-coral-ink);
+  --color-danger-soft-raw: rgba(238, 96, 85, 0.16);
 
   /* Materials */
   --material-bar-bg: rgba(251, 251, 253, 0.72);
@@ -91,18 +118,21 @@
     --color-inverse-raw: #f5f5f7;
     --color-inverse-fg-raw: #1d1d1f;
 
-    --color-accent-raw: #2997ff;
-    --color-accent-solid-raw: #0071e3;
-    --color-accent-hover-raw: #0077ed;
-    --color-accent-fg-raw: #ffffff;
-    --color-accent-soft-raw: rgba(41, 151, 255, 0.16);
+    --color-accent-raw: var(--pal-ringy);
+    --color-accent-solid-raw: var(--pal-ringy);
+    --color-accent-hover-raw: var(--pal-ringy-hover);
+    --color-accent-fg-raw: var(--pal-ringy-on);
+    --color-accent-soft-raw: rgba(96, 211, 148, 0.17);
 
-    --color-success-raw: #30d158;
-    --color-success-soft-raw: rgba(48, 209, 88, 0.15);
-    --color-warning-raw: #ffb340;
-    --color-warning-soft-raw: rgba(255, 159, 10, 0.17);
-    --color-danger-raw: #ff6961;
-    --color-danger-soft-raw: rgba(255, 69, 58, 0.17);
+    --color-rungy-raw: var(--pal-rungy);
+    --color-rungy-soft-raw: rgba(255, 155, 133, 0.17);
+
+    --color-success-raw: var(--pal-ringy);
+    --color-success-soft-raw: rgba(170, 246, 131, 0.14);
+    --color-warning-raw: var(--pal-yellow);
+    --color-warning-soft-raw: rgba(255, 217, 125, 0.15);
+    --color-danger-raw: #f4847b;
+    --color-danger-soft-raw: rgba(238, 96, 85, 0.18);
 
     --material-bar-bg: rgba(0, 0, 0, 0.68);
 

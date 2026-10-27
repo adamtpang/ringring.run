@@ -8,9 +8,9 @@ export function useGamePlan(p: PlanInput | null): GamePlan | null {
   return useMemo(() => (p ? buildGamePlan(p) : null), [p]);
 }
 
-export const STATUS_TONE: Record<CheckStatus, BadgeTone> = { pass: "success", gap: "warning", unknown: "neutral" };
+export const STATUS_TONE: Record<CheckStatus, BadgeTone> = { pass: "success", gap: "danger", unknown: "warning" };
 export const STATUS_LABEL: Record<CheckStatus, string> = { pass: "Pass", gap: "Gap", unknown: "Unknown" };
-export const TIER_TONE: Record<PlanTier, BadgeTone> = { A: "accent", B: "warning", C: "neutral" };
+export const TIER_TONE: Record<PlanTier, BadgeTone> = { A: "danger", B: "warning", C: "neutral" };
 export const TIER_LABEL: Record<PlanTier, string> = { A: "A · urgent and important", B: "B · important", C: "C · when you can" };
 export const ACTOR_TONE: Record<Actor, BadgeTone> = { ringy: "accent", ringy_after_ok: "accent", you: "neutral" };
 

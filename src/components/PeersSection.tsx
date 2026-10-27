@@ -22,13 +22,13 @@ import {
 import { KIND_LABELS } from "@/lib/solutions";
 import type { Business, FindingKind, Review } from "@/lib/types";
 
-const TIER_TONE: Record<Tier, BadgeTone> = { S: "accent", A: "success", B: "neutral", C: "neutral", D: "neutral" };
+export const PEER_TIER_TONE: Record<Tier, BadgeTone> = { S: "accent", A: "success", B: "neutral", C: "warning", D: "danger" };
 const TIER_TILE: Record<Tier, string> = {
   S: "bg-accent-soft text-accent",
   A: "bg-success-soft text-success",
   B: "bg-surface-2 text-foreground",
-  C: "bg-surface-2 text-muted",
-  D: "bg-surface-2 text-muted",
+  C: "bg-warning-soft text-warning",
+  D: "bg-danger-soft text-danger",
 };
 
 const fmtDate = (iso: string) => new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -115,7 +115,7 @@ function TierList({ rows, name }: { rows: Scored[]; name: string }) {
               {members.map((r) => (
                 <span
                   key={r.id}
-                  className={`inline-flex h-6 items-center gap-1 whitespace-nowrap rounded-pill px-2 text-caption tabular-nums ring-1 ring-inset ${r.id === SUBJECT_ID ? "bg-accent-solid font-semibold text-white ring-transparent" : "bg-surface text-muted ring-hairline"}`}
+                  className={`inline-flex h-6 items-center gap-1 whitespace-nowrap rounded-pill px-2 text-caption tabular-nums ring-1 ring-inset ${r.id === SUBJECT_ID ? "bg-accent-solid font-semibold text-accent-fg ring-transparent" : "bg-surface text-muted ring-hairline"}`}
                 >
                   {r.id === SUBJECT_ID ? (name.length > 22 ? `${name.slice(0, 20)}…` : name) : `#${r.position}`}
                   <span className={r.id === SUBJECT_ID ? "opacity-90" : "text-subtle"}>{fmt("rating", r.metrics.rating)}★</span>
@@ -162,7 +162,7 @@ function Leaderboard({ rows, singular, name, subject }: { rows: Scored[]; singul
                   </span>
                 </span>
                 <span className="flex items-center gap-2 sm:contents">
-                  {r.tier ? <Badge tone={TIER_TONE[r.tier]} className="w-8 justify-center px-0">{r.tier}</Badge> : <span className="text-caption text-subtle">n/a</span>}
+                  {r.tier ? <Badge tone={PEER_TIER_TONE[r.tier]} className="w-8 justify-center px-0">{r.tier}</Badge> : <span className="text-caption text-subtle">n/a</span>}
                   <span className="w-10 text-right text-footnote font-medium tabular-nums sm:w-auto">{r.score ?? "n/a"}</span>
                 </span>
                 <span className="hidden text-right text-footnote tabular-nums sm:block">

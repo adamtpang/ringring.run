@@ -6,13 +6,16 @@ import { Badge, Button, Card, Field, SectionHeader, Stat, StatGrid, Timeline, Ti
 export const metadata: Metadata = { title: "Design system", description: "Tokens, palette, type, and components behind ringring.run." };
 
 // Light and dark values mirror src/app/tokens.css. Contrast is computed here, not typed in.
-type Swatch = { name: string; token: string; light: string; dark: string; text?: boolean };
+type Swatch = { name: string; token: string; light: string; dark: string; text?: boolean; on?: string };
 const palette: { group: string; swatches: Swatch[] }[] = [
   {
     group: "Brand",
     swatches: [
-      { name: "Ring Blue", token: "accent", light: "#0066cc", dark: "#2997ff", text: true },
-      { name: "Ring Blue Solid", token: "accent-solid", light: "#0071e3", dark: "#0071e3" },
+      { name: "Ringy Green", token: "accent-solid", light: "#60d394", dark: "#60d394", on: "#0b2a19" },
+      { name: "Ringy Ink", token: "accent", light: "#217748", dark: "#60d394", text: true },
+      { name: "Rungy Peach", token: "rungy-solid", light: "#ff9b85", dark: "#ff9b85", on: "#3a1309" },
+      { name: "Rungy Ink", token: "rungy", light: "#a23d22", dark: "#ff9b85", text: true },
+      { name: "Highlight", token: "highlight", light: "#aaf683", dark: "#aaf683", on: "#1d1d1f" },
     ],
   },
   {
@@ -29,9 +32,9 @@ const palette: { group: string; swatches: Swatch[] }[] = [
   {
     group: "Status",
     swatches: [
-      { name: "Success", token: "success", light: "#1a7f37", dark: "#30d158", text: true },
-      { name: "Warning", token: "warning", light: "#935200", dark: "#ffb340", text: true },
-      { name: "Danger", token: "danger", light: "#c9251d", dark: "#ff6961", text: true },
+      { name: "Pass", token: "success", light: "#217748", dark: "#60d394", text: true },
+      { name: "Unknown, estimate", token: "warning", light: "#84610b", dark: "#ffd97d", text: true },
+      { name: "Problem, fail, urgent", token: "danger", light: "#c42014", dark: "#f4847b", text: true },
     ],
   },
 ];
@@ -39,6 +42,9 @@ const palette: { group: string; swatches: Swatch[] }[] = [
 const RAW: Record<string, string> = {
   accent: "--color-accent-raw",
   "accent-solid": "--color-accent-solid-raw",
+  rungy: "--color-rungy-raw",
+  "rungy-solid": "--color-rungy-solid-raw",
+  highlight: "--color-highlight-raw",
   foreground: "--color-fg",
   muted: "--color-muted-raw",
   subtle: "--color-subtle-raw",
@@ -138,10 +144,10 @@ export default function DesignPage() {
                       <div className="grid grid-cols-[3rem_1fr_auto] gap-x-2 font-mono text-caption text-muted">
                         <span>Light</span>
                         <span>{s.light}</span>
-                        {s.text ? <Ratio fg={s.light} bg="#fbfbfd" /> : s.token === "accent-solid" ? <span className="text-subtle">white <Ratio fg="#ffffff" bg={s.light} /></span> : <span />}
+                        {s.text ? <Ratio fg={s.light} bg="#fbfbfd" /> : s.on ? <span className="text-subtle">text <Ratio fg={s.on} bg={s.light} /></span> : <span />}
                         <span>Dark</span>
                         <span>{s.dark}</span>
-                        {s.text ? <Ratio fg={s.dark} bg="#161618" /> : <span />}
+                        {s.text ? <Ratio fg={s.dark} bg="#161618" /> : s.on ? <span className="text-subtle">text <Ratio fg={s.on} bg={s.dark} /></span> : <span />}
                       </div>
                     </div>
                   </Card>
@@ -204,7 +210,8 @@ export default function DesignPage() {
           <SectionHeader title="Components" description="Buttons respond on press. Badges carry status. Cards group." />
           <Card className="space-y-6">
             <div className="flex flex-wrap items-center gap-3">
-              <Button>Run scan</Button>
+              <Button>Chat with its AI</Button>
+              <Button variant="rungy">Run scan</Button>
               <Button variant="secondary">Timeline</Button>
               <Button variant="plain">How it works</Button>
               <Button variant="inverse" size="sm">Try the demo</Button>
@@ -212,7 +219,7 @@ export default function DesignPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge>Queued</Badge>
-              <Badge tone="accent" dot live>Running</Badge>
+              <Badge tone="rungy" dot live>Running</Badge>
               <Badge tone="success" dot>Completed</Badge>
               <Badge tone="warning" dot>Demo data</Badge>
               <Badge tone="danger" dot>Failed</Badge>
