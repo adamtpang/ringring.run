@@ -341,7 +341,7 @@ export default function DiagnosisPage() {
         <Card><p className="text-footnote text-muted">No evidence-backed problems found. Nothing to prescribe.</p></Card>
       )}
 
-      {plan && <GamePlanSection plan={plan} onePagerHref={`/businesses/${b.id}/one-pager`} />}
+      {plan && <GamePlanSection plan={plan} onePagerHref={`/businesses/${b.id}/one-pager`} interviewHref={`/businesses/${b.id}/interview${snapQs(data.snapshot)}`} />}
 
       {data.checkin && <WhatChanged data={data.checkin} planStep={plan?.items.find((i) => i.recommended)?.you[0] ?? null} />}
 

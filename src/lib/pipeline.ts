@@ -6,6 +6,7 @@ import { businessMonthly, computeMonthlyValue, defaultAssumptions, formulaFor, o
 import { apifyScraper, findFixtureByName, fixtureScraper, type Scraper } from "./scraper";
 import { dedupePlaces, normalizePlace } from "./scraper/normalize";
 import { getStore, type Store } from "./store";
+import { isInterviewFact } from "./interview";
 import { listingKnowledge, websiteKnowledge } from "./knowledge";
 import { readWebsite, type WebsiteReadResult } from "./website";
 import { generateAgentConfig } from "./agent/generate";
@@ -373,7 +374,9 @@ async function agentStep(
   const { store } = deps;
   const step = await steps.start("agent", `${b.name}: building phone agent from stored facts`, b.id);
   try {
-    const [facts, reviews] = await Promise.all([store.listKnowledgeFacts(b.id), store.listReviews(b.id)]);
+    const [allFacts, reviews] = await Promise.all([store.listKnowledgeFacts(b.id), store.listReviews(b.id)]);
+    // Owner interview answers are private notes, never phone agent knowledge.
+    const facts = allFacts.filter((f) => !isInterviewFact(f));
     const config = generateAgentConfig({ business: b, facts, reviews, findings: builtFor });
     const readyAt = new Date();
     const readyMs = readyAt.getTime() - Date.parse(run.created_at);

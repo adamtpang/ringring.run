@@ -40,7 +40,7 @@ export const PRODUCT_CHECKS: ProductCheckDef[] = [
   { id: "no_invented_figures", title: "No invented figures", checks: "Each dollar estimate equals its listed inputs multiplied out, and the total shown is rebuilt from inputs, never the stored number." },
   { id: "overlap_rule", title: "Overlap rule", checks: "Missed calls, slow replies and booking trouble count once (largest only); unanswered reviews and no website count once. The total equals that sum." },
   { id: "no_cold_outreach", title: "No cold-outreach language", checks: "Plans, the phone agent's greeting and fixed copy never suggest cold calls, blasts, buying lists or calling strangers." },
-  { id: "no_capability_claims", title: "No voice, SMS or Spanish claims", checks: "Nothing Ringy shows the owner claims it texts, speaks Spanish, picks up every call or answers 24/7. Those are not live." },
+  { id: "no_capability_claims", title: "No phone, SMS or Spanish claims", checks: "Nothing Ringy shows the owner claims it answers their phone, texts, speaks Spanish, picks up every call or answers 24/7. Those are not live. (The in-browser interview is the only voice feature.)" },
   { id: "peers_anonymized", title: "Peers stay anonymized", checks: "The peer board never shows another business's name." },
 ];
 

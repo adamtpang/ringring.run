@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Badge, Card, SectionHeader, type BadgeTone } from "@/components/ds";
+import { Badge, ButtonLink, Card, SectionHeader, type BadgeTone } from "@/components/ds";
 import { ACTOR_LABEL, buildGamePlan, type Actor, type Check, type CheckStatus, type EvidenceLine, type GamePlan, type PlanInput, type PlanItem, type PlanTier } from "@/lib/gameplan";
 
 export function useGamePlan(p: PlanInput | null): GamePlan | null {
@@ -207,7 +207,7 @@ function Item({ item, n }: { item: PlanItem; n: number }) {
   );
 }
 
-export function GamePlanSection({ plan, onePagerHref }: { plan: GamePlan; onePagerHref: string }) {
+export function GamePlanSection({ plan, onePagerHref, interviewHref }: { plan: GamePlan; onePagerHref: string; interviewHref?: string }) {
   const { binding, prognosis: pg } = plan;
   return (
     <section id="game-plan" className="space-y-5" aria-labelledby="game-plan-title">
@@ -263,7 +263,7 @@ export function GamePlanSection({ plan, onePagerHref }: { plan: GamePlan; onePag
 
       <Card as="div" padding="md">
         <h3 className="text-headline">What we&apos;d love to learn from you</h3>
-        <p className="mt-1 text-caption text-subtle">A few questions for a short conversation. Your answers replace Ringy&apos;s guesses with your numbers.</p>
+        <p className="mt-1 text-caption text-subtle">A few questions for a short conversation with Ringy. Your answers are saved to your business profile.</p>
         <ol className="mt-3 list-decimal space-y-1.5 pl-5">
           {plan.questions.map((q) => (
             <li key={q} className="text-footnote">
@@ -271,6 +271,11 @@ export function GamePlanSection({ plan, onePagerHref }: { plan: GamePlan; onePag
             </li>
           ))}
         </ol>
+        {interviewHref && (
+          <ButtonLink size="sm" className="mt-4" href={interviewHref}>
+            Answer with Ringy
+          </ButtonLink>
+        )}
       </Card>
     </section>
   );

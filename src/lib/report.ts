@@ -1,11 +1,13 @@
 import { elevenLabsProvider } from "./agent/providers";
+import { isInterviewFact, latestAnswers } from "./interview";
+import { voiceInterviewStatus } from "./interview-voice";
 import type { Store } from "./store/types";
 
 /** Everything a business report page needs, in one payload. Throws on store errors. Null when not found. */
 export async function loadReport(store: Store, id: string) {
   const business = await store.getBusiness(id);
   if (!business) return null;
-  const [reviews, findings, roi, steps, run, pages, knowledge] = await Promise.all([
+  const [reviews, findings, roi, steps, run, pages, facts] = await Promise.all([
     store.listReviews(id),
     store.listFindings(id),
     store.listRoi(id),
@@ -14,6 +16,9 @@ export async function loadReport(store: Store, id: string) {
     store.listWebPages(id),
     store.listKnowledgeFacts(id),
   ]);
+  // Interview answers are the owner's own notes: kept out of `knowledge`, which feeds the plan and the phone agent.
+  const knowledge = facts.filter((f) => !isInterviewFact(f));
+  const interview = latestAnswers(facts);
   // Agents table may be missing on an older Supabase schema: the report still renders without it.
   const agent = await store.getAgentForBusiness(id).catch(() => null);
   // Check-in tables may be missing on an older Supabase schema: the report renders without them.
@@ -27,6 +32,8 @@ export async function loadReport(store: Store, id: string) {
     business, run, reviews, findings, roi, steps, pages: pageSummaries, knowledge,
     agent,
     checkin,
+    interview,
+    interviewVoice: voiceInterviewStatus(),
     // Names and booleans only; never key values.
     voice: elevenLabsProvider.status(),
   };
