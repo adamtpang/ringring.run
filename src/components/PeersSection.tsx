@@ -11,10 +11,12 @@ import {
   RATING_PRIOR_REVIEWS,
   SUBJECT_ID,
   TIERS,
+  toSubjectInput,
   type Board,
   type MetricKey,
   type Move,
   type Scored,
+  type SubjectInput,
   type Tier,
 } from "@/lib/peers";
 import { KIND_LABELS } from "@/lib/solutions";
@@ -226,24 +228,13 @@ function HowTiersWork({ board, scanDate }: { board: Board; scanDate: string }) {
 }
 
 /** The peer board for a business on the page (null until data loads). */
-export function usePeerBoard(b: Business | null, reviews: Review[] | null): Board | null {
+export function usePeerSubject(b: Business | null, reviews: Review[] | null): SubjectInput | null {
   const hash = useSha12(b?.place_id ?? null);
-  return useMemo(
-    () =>
-      b
-        ? buildBoard({
-            id: b.id,
-            name: b.name,
-            category: b.category,
-            city: b.city,
-            rating: b.rating,
-            review_count: b.review_count,
-            place_hash: hash,
-            reviews: (reviews ?? []).map((r) => ({ rating: r.rating, owner_replied: !!r.owner_response?.trim(), text: r.text })),
-          })
-        : null,
-    [b, reviews, hash],
-  );
+  return useMemo(() => (b ? toSubjectInput(b, reviews ?? [], hash) : null), [b, reviews, hash]);
+}
+
+export function usePeerBoard(subject: SubjectInput | null): Board | null {
+  return useMemo(() => (subject ? buildBoard(subject) : null), [subject]);
 }
 
 export function PeersSection({ business: b, board, fixes }: { business: Business; board: Board; fixes: FindingKind[] }) {

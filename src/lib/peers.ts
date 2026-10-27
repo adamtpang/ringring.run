@@ -280,6 +280,24 @@ export interface SubjectInput {
   reviews: { rating: number | null; owner_replied: boolean; text: string }[];
 }
 
+/** The board input for a scanned business. */
+export function toSubjectInput(
+  b: { id: string; name: string; category: string | null; city: string | null; rating: number | null; review_count: number | null },
+  reviews: { rating: number | null; owner_response: string | null; text: string }[],
+  placeHash: string | null,
+): SubjectInput {
+  return {
+    id: b.id,
+    name: b.name,
+    category: b.category,
+    city: b.city,
+    rating: b.rating,
+    review_count: b.review_count,
+    place_hash: placeHash,
+    reviews: reviews.map((r) => ({ rating: r.rating, owner_replied: !!r.owner_response?.trim(), text: r.text })),
+  };
+}
+
 export type Board =
   | { status: "no_industry"; reason: string }
   | { status: "not_enough_peers"; industry: Industry; meta: IndustryMeta; peerCount: number }

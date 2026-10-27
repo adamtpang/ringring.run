@@ -112,6 +112,12 @@ export const FINDING_KINDS = [
 ] as const;
 export type FindingKind = (typeof FINDING_KINDS)[number];
 
+/** Everything the game plan can prioritize: the diagnoser's findings, owner-only problems read from 1-3 star reviews, and gaps in what the listing shows. */
+export const OWNER_ONLY_KINDS = ["work_quality", "staff_attitude", "pricing", "refunds"] as const;
+export const GAP_KINDS = ["no_phone", "no_hours", "few_reviews"] as const;
+export const PLAN_KINDS = [...FINDING_KINDS, ...OWNER_ONLY_KINDS, ...GAP_KINDS] as const;
+export type PlanKind = (typeof PLAN_KINDS)[number];
+
 export const LISTING_FACTS = [
   "no_website",
   "no_phone",

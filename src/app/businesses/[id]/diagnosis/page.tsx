@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Badge, ButtonLink, Card, SectionHeader, Stat, StatGrid } from "@/components/ds";
-import { PeersSection, usePeerBoard } from "@/components/PeersSection";
+import { GamePlanSection, useGamePlan } from "@/components/GamePlan";
+import { PeersSection, usePeerBoard, usePeerSubject } from "@/components/PeersSection";
 import { BackLink, money, PageShell, usePoll } from "@/components/ui";
 import { callsPerMonth, CATALOG, INTERVIEW, prescribe, rankProblems, verticalFor, type MenuOption, type RankedProblem, type Vertical } from "@/lib/prescription";
 import { computeMonthlyValue } from "@/lib/roi";
 import { KIND_LABELS } from "@/lib/solutions";
-import type { AgentRecord, Assumption, Business, Finding, Review, RoiEstimate, Run } from "@/lib/types";
+import type { AgentRecord, Assumption, Business, Finding, KnowledgeFact, Review, RoiEstimate, Run } from "@/lib/types";
 
 interface Report {
   business: Business;
@@ -18,6 +19,7 @@ interface Report {
   findings: Finding[];
   roi: RoiEstimate[];
   pages: { status: string }[];
+  knowledge?: KnowledgeFact[];
   agent: AgentRecord | null;
 }
 
@@ -246,7 +248,16 @@ export default function DiagnosisPage() {
   const { id } = useParams<{ id: string }>();
   const { data, error } = usePoll<Report>(`/api/businesses/${id}`, (d) => d.business.diagnosis_status === "running" || d.business.diagnosis_status === "pending");
   const ranked = useMemo(() => (data ? rankProblems(data.findings, data.roi) : []), [data]);
-  const board = usePeerBoard(data?.business ?? null, data?.reviews ?? null);
+  const subject = usePeerSubject(data?.business ?? null, data?.reviews ?? null);
+  const board = usePeerBoard(subject);
+  const planInput = useMemo(
+    () =>
+      data && data.business.diagnosis_status === "ok"
+        ? { business: data.business, findings: data.findings, roi: data.roi, reviews: data.reviews, knowledge: data.knowledge ?? [], board, subject, scanDate: data.run?.created_at ?? data.business.created_at }
+        : null,
+    [data, board, subject],
+  );
+  const plan = useGamePlan(planInput);
 
   if (error) return <PageShell width="narrow"><p className="rounded-md bg-danger-soft px-4 py-3 text-footnote text-danger">{error}</p></PageShell>;
   if (!data) return <PageShell width="narrow"><p className="text-footnote text-muted">Loading diagnosis…</p></PageShell>;
@@ -306,6 +317,9 @@ export default function DiagnosisPage() {
         <Card><p className="text-footnote text-muted">No evidence-backed problems found. Nothing to prescribe.</p></Card>
       )}
 
+      {plan && <GamePlanSection plan={plan} onePagerHref={`/businesses/${b.id}/one-pager`} />}
+
+      {ranked.length > 0 && <SectionHeader eyebrow="Prescriptions" title="Each problem in detail" description="The evidence, the cost assumptions you can edit, and the tools that fix it." />}
       {ranked.map((rp, i) => (
         <ProblemCard key={rp.finding.id} rank={i + 1} rp={rp} b={b} reviews={data.reviews} agent={data.agent} />
       ))}

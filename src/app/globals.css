@@ -207,3 +207,37 @@
 }
 .leaflet-container { font: inherit; }
 .leaflet-control-attribution { font-size: 11px; }
+
+/* One-pager: always light, US Letter, one page. */
+.paper {
+  color-scheme: light;
+  --color-bg: #ffffff;
+  --color-fg: #1d1d1f;
+  --color-surface-1: #ffffff;
+  --color-surface-2-raw: #f5f5f7;
+  --color-sunken-raw: #f2f2f5;
+  --color-muted-raw: #636368;
+  --color-subtle-raw: #6f6f74;
+  --color-hairline-raw: rgba(0, 0, 0, 0.08);
+  --color-hairline-strong-raw: rgba(0, 0, 0, 0.14);
+  --color-accent-raw: #0066cc;
+  --color-accent-soft-raw: rgba(0, 113, 227, 0.08);
+  --color-success-raw: #1a7f37;
+  --color-success-soft-raw: rgba(52, 199, 89, 0.13);
+  --color-warning-raw: #935200;
+  --color-warning-soft-raw: rgba(255, 159, 10, 0.15);
+  color: var(--color-fg);
+}
+.op-sheet { min-height: 11in; }
+
+@page {
+  size: letter;
+  margin: 0;
+}
+@media print {
+  html, body { background: #ffffff !important; }
+  .op-toolbar { display: none !important; }
+  .op-sheet { width: 8.5in; height: 11in; min-height: 0; max-width: none; overflow: hidden; margin: 0; box-shadow: none; }
+  .op-avoid { break-inside: avoid; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

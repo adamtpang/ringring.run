@@ -1,7 +1,7 @@
 import { z } from "zod";
 import catalogJson from "@/data/solutions.json";
 import interviewJson from "@/data/interview.json";
-import { FINDING_KINDS, type Assumption, type Finding, type FindingKind, type RoiEstimate } from "./types";
+import { FINDING_KINDS, PLAN_KINDS, type Assumption, type Finding, type FindingKind, type PlanKind, type RoiEstimate } from "./types";
 
 // Ringy's prescription: for each top problem, a short menu of real products
 // (from a hand-checked catalog) plus our in-house agent, and one pick with a
@@ -66,8 +66,8 @@ export type Catalog = z.infer<typeof CatalogSchema>;
 
 export const CATALOG: Catalog = CatalogSchema.parse(catalogJson);
 
-export const InterviewSchema = z.record(Kind, z.array(z.string().min(10)).min(4).max(5));
-export const INTERVIEW: Record<FindingKind, string[]> = InterviewSchema.parse(interviewJson);
+export const InterviewSchema = z.record(z.enum(PLAN_KINDS), z.array(z.string().min(10)).min(4).max(5));
+export const INTERVIEW: Record<PlanKind, string[]> = InterviewSchema.parse(interviewJson);
 
 export function verticalFor(category: string | null | undefined): Vertical {
   if (!category) return "any";

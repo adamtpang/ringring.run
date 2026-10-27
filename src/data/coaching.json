@@ -1,0 +1,288 @@
+{
+  "note": "General, well-known practices written as advice. Any specific claim about a platform rule cites the public source it came from, checked on the date below.",
+  "checked_on": "2026-10-26",
+  "kinds": {
+    "missed_calls": {
+      "label": "Calls go unanswered",
+      "severity": 5,
+      "owner_only": false,
+      "why": "When a call goes unanswered, the caller often tries the next business on the list.",
+      "unlocks": "Every caller gets an answer or a same-day callback, and you can see how many calls came in.",
+      "ringy": [
+        { "actor": "ringy_after_ok", "capability": "build_agent", "text": "Turn on the phone agent Ringy already built from your listing and website, so busy-hour and after-hours calls get answered and logged." },
+        { "actor": "ringy_after_ok", "capability": "set_up_tool", "text": "Or set up the call-answering option picked in the prescription, if you would rather use it." }
+      ],
+      "you": [
+        "Pick one person who owns callbacks each day, and a time by which every voicemail gets a call back.",
+        "Tell Ringy how you answer your three most common calls, so the agent sounds like you."
+      ],
+      "checklist": [
+        { "week": 1, "who": "you", "text": "Choose the callback owner and a same-day callback rule." },
+        { "week": 1, "who": "ringy_after_ok", "text": "Turn on call answering after your OK." },
+        { "week": 2, "who": "ringy", "text": "Send you a short weekly count of answered and missed calls." },
+        { "week": 3, "who": "you", "text": "Listen to a few handled calls and correct anything that sounds off." },
+        { "week": 4, "who": "you", "text": "Decide to keep, change or stop it." }
+      ],
+      "owner_time": "About 30 minutes to set up, then a few minutes a day for callbacks (assumption).",
+      "sources": []
+    },
+    "slow_response": {
+      "label": "Follow-up goes quiet",
+      "severity": 4,
+      "owner_only": false,
+      "why": "Customers who are waiting on you after a visit or a quote read silence as a no.",
+      "unlocks": "Every open job gets a next step and a time, so fewer customers have to chase you.",
+      "ringy": [
+        { "actor": "ringy_after_ok", "capability": "set_up_tool", "text": "Set up the follow-up option from the prescription, so customers get a text after each visit and anyone still waiting after a day is flagged." },
+        { "actor": "ringy", "capability": "draft_content", "text": "Draft the follow-up texts in your words for you to edit." }
+      ],
+      "you": [
+        "Decide who owns follow-up once a tech leaves, and tell customers when they will hear back.",
+        "Keep that promise for a month and see where it slips."
+      ],
+      "checklist": [
+        { "week": 1, "who": "you", "text": "Name the follow-up owner and the promised reply time." },
+        { "week": 1, "who": "ringy", "text": "Draft the follow-up texts." },
+        { "week": 2, "who": "ringy_after_ok", "text": "Turn on follow-up texts after your OK." },
+        { "week": 4, "who": "you", "text": "Check which jobs still waited too long, and why." }
+      ],
+      "owner_time": "About 20 minutes to agree the texts, then a few minutes a day (assumption).",
+      "sources": []
+    },
+    "booking_friction": {
+      "label": "Booking is hard",
+      "severity": 4,
+      "owner_only": false,
+      "why": "If booking takes more than one try, some customers book whoever can say yes first.",
+      "unlocks": "A customer can ask for a time on the first try, day or night.",
+      "ringy": [
+        { "actor": "ringy_after_ok", "capability": "set_up_tool", "text": "Set up the booking option from the prescription, so customers can request a time without waiting for a callback." },
+        { "actor": "ringy_after_ok", "capability": "build_agent", "text": "Let the phone agent take booking requests and pass them to you." }
+      ],
+      "you": [
+        "Tell Ringy your real service windows and how far out you book.",
+        "Hold a few slots each week for urgent new customers."
+      ],
+      "checklist": [
+        { "week": 1, "who": "you", "text": "Write down service windows and the slots you hold for urgent jobs." },
+        { "week": 2, "who": "ringy_after_ok", "text": "Turn on booking requests after your OK." },
+        { "week": 4, "who": "you", "text": "Count booking requests that turned into jobs." }
+      ],
+      "owner_time": null,
+      "sources": []
+    },
+    "unanswered_reviews": {
+      "label": "Bad reviews have no reply",
+      "severity": 3,
+      "owner_only": false,
+      "why": "New customers read the bad reviews first, and a calm reply shows them what happens when something goes wrong.",
+      "unlocks": "Every 1 to 2 star review has your side of the story next to it.",
+      "ringy": [
+        { "actor": "ringy_after_ok", "capability": "draft_replies", "text": "Draft a calm, specific reply to each open 1 to 2 star review. Nothing is posted until you approve it." },
+        { "actor": "ringy", "capability": "monitor", "text": "Flag new 1 to 3 star reviews when Ringy rescans your listing." }
+      ],
+      "you": [
+        "Approve or edit the drafts, then post them from your Google Business Profile.",
+        "If a review describes a real miss, call that customer and try to make it right before you reply."
+      ],
+      "checklist": [
+        { "week": 1, "who": "ringy_after_ok", "text": "Draft replies to the open bad reviews." },
+        { "week": 1, "who": "you", "text": "Approve and post them." },
+        { "week": 2, "who": "you", "text": "Call back any customer whose complaint is still open." },
+        { "week": 4, "who": "ringy", "text": "Rescan and check that no bad review is left without a reply." }
+      ],
+      "owner_time": "About 10 minutes per reply to read and approve a draft (assumption).",
+      "sources": [
+        { "label": "Google: Manage customer reviews (replying shows customers you value their feedback)", "url": "https://support.google.com/business/answer/3474050" }
+      ]
+    },
+    "no_website": {
+      "label": "No website",
+      "severity": 3,
+      "owner_only": false,
+      "why": "Customers who want more than the listing shows have nowhere to look.",
+      "unlocks": "A place to show services, area, hours and a way to ask for a quote.",
+      "ringy": [
+        { "actor": "ringy_after_ok", "capability": "draft_content", "text": "Draft a one-page site from your listing: services, area, hours, phone and a request form." }
+      ],
+      "you": [
+        "Approve the wording and add a few real photos of your work.",
+        "Pick who keeps it current."
+      ],
+      "checklist": [
+        { "week": 1, "who": "ringy_after_ok", "text": "Draft the page from your listing." },
+        { "week": 2, "who": "you", "text": "Edit it and send photos." },
+        { "week": 3, "who": "you", "text": "Add the link to your Google Business Profile." }
+      ],
+      "owner_time": null,
+      "sources": [
+        { "label": "Google: Edit your Business Profile (add a website, phone and hours)", "url": "https://support.google.com/business/answer/3039617" }
+      ]
+    },
+    "work_quality": {
+      "label": "Quality complaints",
+      "severity": 4,
+      "owner_only": true,
+      "why": "Reviews about work that did not hold up are the hardest for a new customer to look past.",
+      "unlocks": "Fewer repeat visits, and reviews that talk about the work going right.",
+      "ringy": [
+        { "actor": "ringy", "capability": "research", "text": "Group the quality complaints by job type and month, so you can see if there is a pattern." },
+        { "actor": "ringy_after_ok", "capability": "draft_replies", "text": "Draft replies to those reviews for you to approve." }
+      ],
+      "you": [
+        "Call the customers who reported a problem and offer to make it right.",
+        "Add a short end-of-job check: test it, show the customer, take a photo.",
+        "Go over repeat issues with the team each week, and pair newer staff with your best for a few jobs."
+      ],
+      "checklist": [
+        { "week": 1, "who": "you", "text": "Call back the customers in these reviews." },
+        { "week": 1, "who": "ringy", "text": "Send you the complaints grouped by job type." },
+        { "week": 2, "who": "you", "text": "Start the end-of-job check on every job." },
+        { "week": 4, "who": "you", "text": "Review a month of callbacks and redo visits with the team." }
+      ],
+      "owner_time": null,
+      "sources": []
+    },
+    "staff_attitude": {
+      "label": "Complaints about how staff treat people",
+      "severity": 4,
+      "owner_only": true,
+      "why": "People remember how they were treated longer than what they paid.",
+      "unlocks": "A team that handles a bad moment the same calm way every time.",
+      "ringy": [
+        { "actor": "ringy", "capability": "research", "text": "Pull the reviews that praise staff by name, so you can thank them, and the ones that describe a bad moment." },
+        { "actor": "ringy_after_ok", "capability": "draft_replies", "text": "Draft replies to the complaints for you to approve." }
+      ],
+      "you": [
+        "Talk through the specific reviews with the team, privately and without blame.",
+        "Practice a simple recovery routine: listen, apologize, fix it, thank them.",
+        "Thank the people customers praise by name."
+      ],
+      "checklist": [
+        { "week": 1, "who": "you", "text": "Share the reviews with the team in a short meeting." },
+        { "week": 2, "who": "you", "text": "Role-play the recovery routine for two common situations." },
+        { "week": 4, "who": "you", "text": "Ask the team what makes those moments hard, and fix one thing." }
+      ],
+      "owner_time": null,
+      "sources": []
+    },
+    "pricing": {
+      "label": "Price complaints",
+      "severity": 3,
+      "owner_only": true,
+      "why": "Price complaints usually come from a surprise, not the number itself.",
+      "unlocks": "Customers who know the price before work starts.",
+      "ringy": [
+        { "actor": "ringy", "capability": "research", "text": "Collect what your reviews say about price, quote by quote." },
+        { "actor": "ringy_after_ok", "capability": "draft_content", "text": "Draft a plain 'how our pricing works' note for your site and replies." }
+      ],
+      "you": [
+        "Give a written quote or a clear diagnostic fee before work starts.",
+        "Decide whether any prices should change. Ringy will not set your prices."
+      ],
+      "checklist": [
+        { "week": 1, "who": "ringy", "text": "Send you the price quotes from reviews." },
+        { "week": 2, "who": "you", "text": "Start written quotes on every job." },
+        { "week": 3, "who": "ringy_after_ok", "text": "Draft the pricing note." }
+      ],
+      "owner_time": null,
+      "sources": []
+    },
+    "refunds": {
+      "label": "Refund or dispute complaints",
+      "severity": 4,
+      "owner_only": true,
+      "why": "A slow or unclear refund turns one bad job into a public argument.",
+      "unlocks": "Disputes settled quickly and quietly, by one person, with a written policy.",
+      "ringy": [
+        { "actor": "ringy_after_ok", "capability": "draft_content", "text": "Draft a short refund and warranty policy for you to edit." },
+        { "actor": "ringy_after_ok", "capability": "draft_replies", "text": "Draft replies to the refund complaints for you to approve." }
+      ],
+      "you": [
+        "Write down your refund and warranty policy and make it easy to find.",
+        "Give one person the authority to settle disputes fast."
+      ],
+      "checklist": [
+        { "week": 1, "who": "you", "text": "Name the person who settles disputes." },
+        { "week": 2, "who": "ringy_after_ok", "text": "Draft the policy." },
+        { "week": 3, "who": "you", "text": "Publish it on your site and invoices." }
+      ],
+      "owner_time": null,
+      "sources": []
+    },
+    "no_phone": {
+      "label": "No phone on the listing",
+      "severity": 5,
+      "owner_only": false,
+      "why": "Customers who want to call have no way to.",
+      "unlocks": "Calls from people who find you on Google.",
+      "ringy": [
+        { "actor": "ringy", "capability": "monitor", "text": "Rescan the listing after you update it and confirm the number shows." }
+      ],
+      "you": [
+        "Add a phone number to your Google Business Profile."
+      ],
+      "checklist": [
+        { "week": 1, "who": "you", "text": "Add the phone number to your profile." },
+        { "week": 2, "who": "ringy", "text": "Confirm it shows on the listing." }
+      ],
+      "owner_time": null,
+      "sources": [
+        { "label": "Google: Edit your Business Profile (add a website, phone and hours)", "url": "https://support.google.com/business/answer/3039617" }
+      ]
+    },
+    "no_hours": {
+      "label": "No hours on the listing",
+      "severity": 3,
+      "owner_only": false,
+      "why": "Customers cannot tell if you are open, so some pick a business that says it is.",
+      "unlocks": "Customers who know when to call or come in.",
+      "ringy": [
+        { "actor": "ringy", "capability": "draft_content", "text": "Write out your regular and holiday hours from what you tell Ringy, ready to paste." },
+        { "actor": "ringy", "capability": "monitor", "text": "Rescan the listing and confirm the hours show." }
+      ],
+      "you": [
+        "Add your hours to your Google Business Profile, plus special hours for holidays."
+      ],
+      "checklist": [
+        { "week": 1, "who": "you", "text": "Add regular hours to your profile." },
+        { "week": 2, "who": "ringy", "text": "Confirm they show on the listing." }
+      ],
+      "owner_time": null,
+      "sources": [
+        { "label": "Google: Edit your Business Profile (add a website, phone and hours)", "url": "https://support.google.com/business/answer/3039617" }
+      ]
+    },
+    "few_reviews": {
+      "label": "Few reviews",
+      "severity": 3,
+      "owner_only": false,
+      "why": "With few reviews, one bad one weighs a lot, and new customers have little to go on.",
+      "unlocks": "A steady stream of recent reviews from real customers.",
+      "ringy": [
+        { "actor": "ringy_after_ok", "capability": "draft_content", "text": "Make a review-request text and a small card with your Google review link and QR code." }
+      ],
+      "you": [
+        "Ask every customer at the end of the job, the same way every time.",
+        "Do not offer gifts or discounts for reviews, and do not ask only the customers you expect to be happy. Google's review policy forbids both, and the FTC bans buying reviews that express a particular sentiment."
+      ],
+      "checklist": [
+        { "week": 1, "who": "ringy_after_ok", "text": "Make the review link, text and card." },
+        { "week": 1, "who": "you", "text": "Start asking every customer." },
+        { "week": 4, "who": "ringy", "text": "Rescan and count new reviews." }
+      ],
+      "owner_time": "A few seconds per job to ask (assumption).",
+      "sources": [
+        { "label": "Google: Tips to get more reviews (share a review link or QR code)", "url": "https://support.google.com/business/answer/3474122" },
+        { "label": "Google Maps content policy: no incentives for reviews and no asking only happy customers", "url": "https://support.google.com/contributionpolicy/answer/7400114" },
+        { "label": "FTC: final rule banning fake reviews and paid reviews of a set sentiment (Aug 14, 2024)", "url": "https://www.ftc.gov/news-events/news/press-releases/2024/08/federal-trade-commission-announces-final-rule-banning-fake-reviews-testimonials" }
+      ]
+    }
+  },
+  "check_questions": {
+    "prices": "Do you share prices or a diagnostic fee before work starts? Where can a customer see them?",
+    "booking": "How does a new customer book with you today, and can they do it after hours?",
+    "reach": "Roughly how many calls or messages come in on a busy day, and how many get a reply the same day?",
+    "replies": "Who sees new Google reviews, and who would reply to them?"
+  }
+}

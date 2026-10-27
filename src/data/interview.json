@@ -31,5 +31,47 @@
     "Have you had a website before? What happened to it?",
     "What would you want a website to do: show services, take requests, or both?",
     "Who would keep it up to date?"
+  ],
+  "work_quality": [
+    "When a job does not hold up, how do you usually find out?",
+    "Which kinds of jobs come back for a second visit most often?",
+    "Who checks the work before the team leaves?",
+    "How do newer team members learn how you like things done?"
+  ],
+  "staff_attitude": [
+    "When a customer is upset, what does your team do first?",
+    "Is there a situation that keeps going badly with customers?",
+    "How do you hear about it when a customer felt treated poorly?",
+    "Who on your team do customers praise most, and what do they do differently?"
+  ],
+  "pricing": [
+    "How do customers learn the price before you start?",
+    "Which price surprises customers most?",
+    "Do you charge a trip or diagnostic fee, and how is it explained?",
+    "When did you last change your prices?"
+  ],
+  "refunds": [
+    "What is your refund or warranty policy today, and where is it written?",
+    "Who can approve a refund, and how long does it take?",
+    "What was the last dispute about, and how did it end?",
+    "Would a written policy have changed how it went?"
+  ],
+  "no_phone": [
+    "What number should customers call?",
+    "Who answers it during the day, and after you close?",
+    "Do you prefer calls, texts, or online requests?",
+    "Is there a reason the number is not on your listing?"
+  ],
+  "no_hours": [
+    "What are your regular hours?",
+    "Do you take emergency or after-hours work?",
+    "Which holidays are you closed?",
+    "Is there a reason the hours are not on your listing?"
+  ],
+  "few_reviews": [
+    "Do you ask customers for a review today? How?",
+    "At what point in a job are customers happiest with you?",
+    "Who on your team talks to the customer last?",
+    "Where else do customers review you, like Yelp or Nextdoor?"
   ]
 }
