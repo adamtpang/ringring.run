@@ -70,6 +70,31 @@ export interface Turn {
   message: string;
 }
 
+export const TYPE_INSTEAD = "You can type your answers below instead.";
+
+/**
+ * Turn a raw voice failure (browser, network, ElevenLabs, or our API) into one
+ * plain sentence that always ends by pointing at the typed answers, so a failed
+ * call never leaves the owner stuck.
+ */
+export function voiceErrorMessage(raw: unknown): string {
+  const m = (raw instanceof Error ? raw.message : String(raw ?? "")).trim();
+  let lead: string;
+  if (/notallowed|permission|denied/i.test(m)) lead = "The browser blocked the microphone. Allow it in the address bar and try again.";
+  else if (/notfound|requested device|no microphone|device not found|notreadable|could not start audio/i.test(m)) lead = "No working microphone was found. Plug one in or pick it in your sound settings, then try again.";
+  else if (/quota|credit|limit|exceed/i.test(m)) lead = "Ringy's voice minutes are used up for now.";
+  else if (/unexpected token|not valid json|json/i.test(m)) lead = "The voice service did not answer properly.";
+  else if (/socket|connection|network|failed to fetch|load failed|closed/i.test(m)) lead = "The voice connection dropped. Check the internet connection and try again.";
+  else lead = m ? (/[.!?]$/.test(m) ? m : `${m}.`) : "Voice is unavailable right now.";
+  return `${lead} ${TYPE_INSTEAD}`;
+}
+
+/** One short line for a call that ended on an error mid-way (network drop, voice minutes running out). */
+export function droppedCallNote(raw: unknown): string {
+  const m = raw instanceof Error ? raw.message : String(raw ?? "");
+  return /quota|credit|limit|exceed/i.test(m) ? "Ringy's voice minutes ran out during the call." : "The call dropped before it finished.";
+}
+
 /** Drop voice style tags like "[calm]" and lone filler like "..." from a spoken turn. */
 export function cleanMessage(m: string | null | undefined): string {
   const t = (m ?? "").replace(/\[[a-z][a-z ]{1,24}\]\s*/gi, "").replace(/\s+/g, " ").trim();

@@ -8,7 +8,7 @@ import { useGamePlan } from "@/components/GamePlan";
 import { usePeerBoard, usePeerSubject } from "@/components/PeersSection";
 import { SnapshotBanner, snapQs, useReportUrl } from "@/components/Snapshot";
 import { BackLink, dateTime12, PageShell, usePoll } from "@/components/ui";
-import { cleanMessage, mapTranscript, MAX_ANSWER_CHARS, type InterviewMode, type SavedAnswer, type Turn } from "@/lib/interview";
+import { cleanMessage, droppedCallNote, mapTranscript, MAX_ANSWER_CHARS, voiceErrorMessage, type InterviewMode, type SavedAnswer, type Turn } from "@/lib/interview";
 import type { SnapshotMeta } from "@/lib/snapshot";
 import type { Business, Finding, KnowledgeFact, Review, RoiEstimate, Run } from "@/lib/types";
 
@@ -101,11 +101,12 @@ function Interview({ businessId, questions, saved: initialSaved, voice, readOnly
 
   const apiBase = `/api/businesses/${businessId}/interview`;
 
-  async function readTranscript(id: string) {
+  async function readTranscript(id: string, dropped: string | null = null) {
     setPhase("reading");
     let answers: Record<string, string> | null = null;
     let note = "From your conversation. Check and edit before saving.";
-    for (let i = 0; i < 12 && !answers; i++) {
+    // After a dropped call, don't make the owner wait long for a saved copy that may never come.
+    for (let i = 0; i < (dropped ? 3 : 12) && !answers; i++) {
       const r = await fetch(`${apiBase}/voice/transcript`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ questions, conversation_id: id }) }).catch(() => null);
       const j = r ? await r.json().catch(() => null) : null;
       if (r?.ok && j && j.status !== "in-progress" && j.status !== "processing" && (j.turns?.length ?? 0) > 0) answers = j.answers;
@@ -120,7 +121,8 @@ function Interview({ businessId, questions, saved: initialSaved, voice, readOnly
     setDrafts((d) => ({ ...d, ...Object.fromEntries(Object.entries(answers).filter(([, a]) => a.trim())) }));
     setMode("voice");
     setConvId(id);
-    setVoiceMsg(filled ? `${note} ${filled} of ${questions.length} answered.` : "Ringy didn't catch any answers. You can try again or type them below.");
+    const result = filled ? `${note} ${filled} of ${questions.length} answered.` : "Ringy didn't catch any answers. You can try again or type them below.";
+    setVoiceMsg(dropped ? `${dropped} ${result}` : result);
     setPhase("done");
   }
 
@@ -131,8 +133,8 @@ function Interview({ businessId, questions, saved: initialSaved, voice, readOnly
     setPhase("connecting");
     try {
       const r = await fetch(`${apiBase}/voice`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ questions }) });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error ?? "Voice is unavailable right now.");
+      const j = await r.json().catch(() => ({ error: `The voice service did not answer properly (HTTP ${r.status}).` }));
+      if (!r.ok || !j.signedUrl) throw new Error(j.error ?? "Voice is unavailable right now.");
       const { Conversation } = await import("@elevenlabs/client");
       let id = "";
       const conv = await Conversation.startSession({
@@ -145,9 +147,10 @@ function Interview({ businessId, questions, saved: initialSaved, voice, readOnly
           setLive(liveRef.current);
         },
         onModeChange: ({ mode }) => setSpeaking(mode === "speaking"),
-        onDisconnect: () => {
+        onDisconnect: (details) => {
           session.current = null;
-          if (id) void readTranscript(id);
+          const dropped = details.reason === "error" ? droppedCallNote(details.message) : null;
+          if (id) void readTranscript(id, dropped);
           else setPhase("idle");
         },
         onError: (msg) => setVoiceMsg(String(msg)),
@@ -157,7 +160,7 @@ function Interview({ businessId, questions, saved: initialSaved, voice, readOnly
       setPhase("live");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      setVoiceMsg(/permission|notallowed|denied/i.test(msg) ? "The browser blocked the microphone. Allow it and try again, or type your answers." : msg);
+      setVoiceMsg(voiceErrorMessage(msg));
       setPhase("error");
     }
   }

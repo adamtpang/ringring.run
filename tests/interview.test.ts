@@ -13,6 +13,9 @@ import {
   mapTranscript,
   QuestionsSchema,
   SaveAnswersSchema,
+  droppedCallNote,
+  TYPE_INSTEAD,
+  voiceErrorMessage,
 } from "@/lib/interview";
 import { agentName, ensureInterviewAgent, fetchTranscript, MAX_CALL_SECONDS, VoiceError, voiceInterviewStatus } from "@/lib/interview-voice";
 import { createRun, executeRun } from "@/lib/pipeline";
@@ -254,5 +257,35 @@ describe("interview API and the business profile", () => {
     const agent = await base.getAgentForBusiness(b!.id);
     expect(agent).toBeTruthy();
     expect(JSON.stringify(agent!.config)).not.toContain(secret);
+  });
+});
+
+describe("voice failures always point to typed answers (demo hardening)", () => {
+  it("maps each failure to a plain message that ends with the typing fallback", () => {
+    const cases: [unknown, RegExp][] = [
+      [new Error("Permission denied"), /blocked the microphone/],
+      ["NotAllowedError: Permission dismissed", /blocked the microphone/],
+      ["NotFoundError: Requested device not found", /No working microphone/],
+      ["This request exceeds your quota of 10000. You have 0 credits remaining.", /voice minutes are used up/],
+      ["Unexpected token '<', \"<html>An e\"... is not valid JSON", /did not answer properly/],
+      ["Connection closed unexpectedly before session could be established.", /connection dropped/],
+      ["The connection was closed due to a socket error.", /connection dropped/],
+      [new TypeError("Failed to fetch"), /connection dropped/],
+      ["Could not start the voice interview (ElevenLabs HTTP 401).", /^Could not start the voice interview \(ElevenLabs HTTP 401\)\. /],
+      ["", /^Voice is unavailable right now\. /],
+      [undefined, /^Voice is unavailable right now\. /],
+    ];
+    for (const [raw, re] of cases) {
+      const m = voiceErrorMessage(raw);
+      expect(m).toMatch(re);
+      expect(m.endsWith(TYPE_INSTEAD)).toBe(true);
+      expect(m).not.toMatch(/Unexpected token|undefined/);
+    }
+  });
+
+  it("names a mid-call quota cutoff, otherwise says the call dropped", () => {
+    expect(droppedCallNote("quota_exceeded")).toMatch(/minutes ran out/);
+    expect(droppedCallNote("The connection was closed due to a socket error.")).toBe("The call dropped before it finished.");
+    expect(droppedCallNote(undefined)).toBe("The call dropped before it finished.");
   });
 });
