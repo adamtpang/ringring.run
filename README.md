@@ -22,9 +22,11 @@ Each line names how it was checked. "Live" means it ran against the real service
 | Printable 1-pager (no price, no money-back promise) | `/businesses/[id]/one-pager` | Tests; screenshots |
 | Owner interview: Ringy asks the questions from `src/data/interview.json` (and the game plan's open questions), the owner answers by voice in the browser or by typing, and answers are saved to the business profile | `/businesses/[id]/interview` | Tested end to end in a real browser (headless Chrome) against a real ElevenLabs Conversational AI session with a **scripted microphone** (recorded answers played into the mic input), 2026-10-26: all 5 questions asked in order, all 5 answers transcribed, mapped, saved and shown after reload (`scripts/e2e/interview-voice.mjs`). Not yet tried by a person on a real microphone. 18 unit and route tests |
 | Weekly check-in: light rating and review-count check, new reviews only when the count went up, a deeper refresh monthly, under a monthly cap (default $1.00) | Vercel Cron `/api/cron/checkin`, Mondays 15:00 UTC | Tests with mocked Apify (no spend). Needs `CRON_SECRET` in the deploy env; not set here, so not run live |
-| Phone-agent config per business: AI disclosure first, every fact numbered and cited, rules for unknown answers, bookings, after hours, upset callers | business page | Tests; simulated caller evals 10/10 (fixture), 8/8 live LLM on 2026-10-26 before the 2 new cases were added |
+| Phone-agent config per business: AI disclosure first, every fact numbered and cited, rules for unknown answers, bookings, after hours, upset callers | business page | Tests; simulated caller evals 14/14 (fixture), 8/8 live LLM on 2026-10-26 before the 6 newer cases were added (not re-run live since) |
 | Demo-safe fallback: if Supabase, Apify or xAI fail or hang (8 s timeout), the Aire Serv flow renders from a committed real report labeled "Saved snapshot from Oct 26, 2026", with editing, voice and saving off | every Aire Serv page | Tests simulate each failure; screenshots with Supabase pointed at a dead port |
-| Eval panel: rule checks run on real saved reports, plus simulated callers | `/evals`, `pnpm eval` | 8/8 rule checks and 10/10 callers at the last commit |
+| Eval panel: rule checks run on real saved reports, plus 14 simulated callers (hours, prices, booking, angry, off-hours, prompt injection, owner, text, Spanish, gas-leak emergency, spoken callback number, discount, price then booking) | `/evals`, `pnpm eval` | 8/8 rule checks and 14/14 callers at the last commit |
+| Red team: a deliberately careless agent (no AI disclosure, invented prices, confirmed bookings, a visit promised during a gas leak) runs through the same callers to prove the grader catches each mistake | `/evals` "Red team", `pnpm eval --responder careless` | 0/14 passed, every case caught on substance, not only on disclosure (test) |
+| Co-founder tour: eight chapters (why, scan, proof, price, agent, evals, real data, live vs next), every number computed on page load by running the pipeline and 28 simulated calls in memory | `/showcase` (arrow keys to move) | Tests; screenshots desktop and phone |
 | Customer mode: nearby businesses from OpenStreetMap on a map, and chat with a business's AI built only from cited facts | `/find` | Tests; bundled Austin OSM snapshot when public Overpass mirrors are down |
 
 ### Not live (do not claim)
@@ -45,7 +47,7 @@ pnpm dev                     # http://localhost:3000
 
 With no keys at all, everything runs in demo mode on fictional fixtures (`Example Plumbing Co`, `555` numbers, `example.com` sites) and a local JSON store, with a "Demo data" badge. `/health` shows which keys the server can see (names and true/false only, never values).
 
-Demo path: `/owners` > find the business > diagnosis (findings, peers, game plan) > "Answer with Ringy" (interview) > 1-pager. `/evals` shows the checks.
+Fastest demo: `/showcase`, then arrow keys. Full path: `/owners` > find the business > diagnosis (findings, peers, game plan) > "Answer with Ringy" (interview) > 1-pager. `/evals` shows the checks.
 
 Checks (CI runs all five with no secrets):
 

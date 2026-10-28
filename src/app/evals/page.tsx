@@ -80,7 +80,7 @@ function CaseCard({ c }: { c: CaseResult }) {
 function Evals() {
   const params = useSearchParams();
   const businessId = params.get("businessId");
-  const [responder, setResponder] = useState<"fixture" | "llm">("fixture");
+  const [responder, setResponder] = useState<"fixture" | "llm" | "careless">("fixture");
   const q = new URLSearchParams();
   if (businessId) q.set("businessId", businessId);
   q.set("responder", responder);
@@ -88,6 +88,8 @@ function Evals() {
   const r = data?.report;
   const llm = data?.responders.find((x) => x.id === "llm");
   const voice = data?.responders.find((x) => x.id === "voice");
+  // Red team: the careless agent should fail every case, so a "pass" here is a grader miss.
+  const redTeam = r?.responder.id === "careless";
 
   return (
     <PageShell>
@@ -108,9 +110,15 @@ function Evals() {
         description="Scripted callers talk to the generated agent in text. Each reply is graded for AI disclosure, facts against the knowledge base, the task, invented claims, and turn latency."
         action={
           r ? (
-            <Badge tone={r.failed ? "danger" : "success"} dot>
-              {r.passed}/{r.passed + r.failed} passed
-            </Badge>
+            redTeam ? (
+              <Badge tone={r.passed ? "danger" : "success"} dot>
+                Grader caught {r.failed}/{r.passed + r.failed}
+              </Badge>
+            ) : (
+              <Badge tone={r.failed ? "danger" : "success"} dot>
+                {r.passed}/{r.passed + r.failed} passed
+              </Badge>
+            )
           ) : undefined
         }
       />
@@ -128,6 +136,14 @@ function Evals() {
         >
           LLM responder
         </Button>
+        <Button
+          size="sm"
+          variant={responder === "careless" ? "primary" : "secondary"}
+          onClick={() => setResponder("careless")}
+          title="A deliberately bad agent. Every case should fail, which shows the grader catching each mistake."
+        >
+          Red team: careless agent
+        </Button>
         <Button size="sm" variant="secondary" disabled title={voice?.reason ?? undefined}>
           Voice responder
         </Button>
@@ -135,6 +151,7 @@ function Evals() {
       </div>
       <p className="-mt-4 text-caption text-muted">
         The fixture responder is a rule-based stand-in that follows the agent config exactly. It tests the config and the grader, not a model.
+        The red-team agent breaks every rule on purpose (no AI disclosure, invented prices, confirmed bookings, a visit promised during a gas leak), so every case should fail.
         {llm && !llm.available ? ` LLM responder: ${llm.reason}` : ""} Voice: simulated calls over audio are not built yet.
       </p>
 
@@ -143,12 +160,21 @@ function Evals() {
       {r && data && (
         <>
           <StatGrid>
-            <Stat
-              label="Pass rate"
-              value={r.passed + r.failed ? `${Math.round((100 * r.passed) / (r.passed + r.failed))}%` : "No cases"}
-              hint={`${r.passed} passed ÷ ${r.passed + r.failed} cases, this run`}
-              emphasis
-            />
+            {redTeam ? (
+              <Stat
+                label="Grader catch rate"
+                value={r.passed + r.failed ? `${Math.round((100 * r.failed) / (r.passed + r.failed))}%` : "No cases"}
+                hint={`${r.failed} bad answers caught ÷ ${r.passed + r.failed} cases`}
+                emphasis
+              />
+            ) : (
+              <Stat
+                label="Pass rate"
+                value={r.passed + r.failed ? `${Math.round((100 * r.passed) / (r.passed + r.failed))}%` : "No cases"}
+                hint={`${r.passed} passed ÷ ${r.passed + r.failed} cases, this run`}
+                emphasis
+              />
+            )}
             <Stat label="Failed" value={r.failed} hint={r.skipped ? `${r.skipped} skipped` : undefined} />
             <Stat
               label="Slowest turn"

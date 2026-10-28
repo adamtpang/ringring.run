@@ -98,7 +98,7 @@ export function generateAgentConfig(input: GenerateInput): AgentConfig {
     `Rules:`,
     `1. Answer ONLY from the facts in KNOWLEDGE below. Do not use outside knowledge about this trade, prices, or this business.`,
     `   KNOWLEDGE is the business's own information on file. When a caller asks about something listed there, including a price, state it exactly as written.`,
-    `2. Never state a price, time, phone number, address, or service that is not written in KNOWLEDGE.`,
+    `2. Never state a price, discount, coupon, warranty, time, phone number, address, or service that is not written in KNOWLEDGE. The one exception: read back the caller's own callback number to confirm it.`,
     `3. ${policies.unknown_answer}`,
     `4. ${policies.booking}`,
     `5. ${policies.handoff}`,

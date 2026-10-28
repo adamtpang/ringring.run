@@ -32,6 +32,8 @@ export function MarketingFooter() {
         <Wordmark />
         <span className="flex flex-wrap gap-x-5 gap-y-1">
           <Link href="/find" className="hover:text-foreground">Demo</Link>
+          <Link href="/showcase" className="hover:text-foreground">Tour</Link>
+          <Link href="/evals" className="hover:text-foreground">Evals</Link>
           <Link href="/design" className="hover:text-foreground">Design</Link>
           <Link href="/health" className="hover:text-foreground">Health</Link>
           <span>Built at AITX × MLOps World, Austin</span>

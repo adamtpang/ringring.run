@@ -263,3 +263,12 @@
   .op-sheet > * { zoom: 0.92; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* /showcase chapter change */
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[fadein_\.25s_ease-out\] { animation: none; }
+}

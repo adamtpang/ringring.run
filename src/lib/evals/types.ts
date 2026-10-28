@@ -15,7 +15,7 @@ export interface RespondInput {
 }
 
 export interface Responder {
-  id: "fixture" | "llm" | "voice";
+  id: "fixture" | "llm" | "voice" | "careless";
   name: string;
   /** Whether this responder can run here, and an honest reason when not. */
   status(): { available: boolean; reason: string | null };
@@ -27,7 +27,8 @@ export interface EvalCase {
   title: string;
   /** What a good agent does, in plain words. Shown on /evals. */
   goal: string;
-  caller: string[];
+  /** Caller lines, one per turn. A function builds them from the config (for example to ask about a price on file). */
+  caller: string[] | ((config: AgentConfig) => string[]);
   /** Phrases that must appear in at least one agent reply (facts from the KB). */
   mustInclude?: (config: AgentConfig) => string[];
   mustMatch?: { label: string; re: RegExp }[];

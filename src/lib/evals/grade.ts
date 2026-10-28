@@ -17,6 +17,35 @@ const MONEY = /\$\s?\d{1,3}(?:,\d{3})*(?:\.\d+)?(?!\d)|\$\s?\d+(?:\.\d+)?/g;
 const TIME = /\b(\d{1,2})(?::(\d{2}))?\s*([ap])(?:\.\s*m\.?|\s*m)(?![a-z])/gi;
 const PHONE = /\(?\b\d{3}\)?[\s.-]?\d{3}[\s.-]\d{4}\b/g;
 
+const DIGIT_WORDS: Record<string, string> = {
+  zero: "0", one: "1", two: "2", three: "3", four: "4", five: "5", six: "6", seven: "7", eight: "8", nine: "9",
+};
+
+/**
+ * Turns spoken digits into numerals so a number said aloud can be checked:
+ * "five one two, oh one" becomes "5 1 2, 0 1". "oh" counts as zero only next
+ * to another digit, so "Oh, sure" is left alone.
+ */
+export function spokenDigits(text: string): string {
+  const tokens = text.split(/(\s+|[,.;:!?-]+)/);
+  const isDigit = (t: string | undefined) => t != null && (/^\d+$/.test(t) || t.toLowerCase() in DIGIT_WORDS);
+  const near = (i: number, dir: 1 | -1) => {
+    for (let j = i + dir; j >= 0 && j < tokens.length; j += dir) {
+      if (/^(\s+|[,.;:!?-]+)?$/.test(tokens[j]!)) continue;
+      return isDigit(tokens[j]);
+    }
+    return false;
+  };
+  return tokens
+    .map((t, i) => {
+      const w = t.toLowerCase();
+      if (w in DIGIT_WORDS) return DIGIT_WORDS[w]!;
+      if ((w === "oh" || w === "o") && (near(i, -1) || near(i, 1))) return "0";
+      return t;
+    })
+    .join("");
+}
+
 const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").replace(/:00/g, "").replace(/\$\s+/g, "$");
 const digits = (s: string) => s.replace(/\D/g, "");
 
@@ -36,6 +65,8 @@ export function findHallucinations(config: AgentConfig, transcript: Turn[]): str
   const kb = norm(kbRaw);
   const kbDigits = config.knowledge.filter((k) => k.kind === "contact").map((k) => digits(k.value));
   const rawCaller = transcript.filter((t) => t.role === "caller").map((t) => t.text).join(" ");
+  // A callback number the caller said aloud ("five one two ...") may be read back as digits.
+  const callerDigits = digits(spokenDigits(rawCaller));
   const callerText = norm(rawCaller);
   // Times are compared in canonical form on both sides, so "9AM" in a reply matches "9 AM" on file.
   const knownTimes = new Set([...timesIn(kbRaw), ...timesIn(rawCaller)]);
@@ -45,7 +76,7 @@ export function findHallucinations(config: AgentConfig, transcript: Turn[]): str
     const text = turn.text;
     for (const m of text.match(MONEY) ?? []) if (!kb.includes(norm(m)) && !callerText.includes(norm(m))) flags.add(`price ${m}`);
     for (const m of text.matchAll(TIME)) if (!knownTimes.has(canonicalTime(m[1]!, m[2], m[3]!))) flags.add(`time ${m[0].trim()}`);
-    for (const m of text.match(PHONE) ?? []) if (!kbDigits.includes(digits(m)) && !digits(callerText).includes(digits(m))) flags.add(`phone ${m}`);
+    for (const m of text.match(PHONE) ?? []) if (!kbDigits.includes(digits(m)) && !callerDigits.includes(digits(m))) flags.add(`phone ${m}`);
     const low = norm(text);
     for (const term of SERVICE_TERMS) if (low.includes(term) && !kb.includes(term) && !callerText.includes(term)) flags.add(`claim "${term}"`);
   }
