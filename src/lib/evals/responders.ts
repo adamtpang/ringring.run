@@ -105,7 +105,11 @@ export function fixtureReply(config: AgentConfig, callerText: string): string {
   }
   if (/\b(do you|can you) (do|fix|handle|repair|install)\b/.test(t)) {
     const s = matchFact(config.knowledge.filter((k) => k.kind === "service" || k.kind === "faq"), callerText);
-    return s ? `Yes, ${s.value.replace(/\.$/, "")} is on file for us. I can have the owner call you back with details. ${CONTACT_ASK}` : unknown;
+    if (!s) return unknown;
+    // A FAQ value is already a sentence ("Water heater repair is listed as a service..."); a service value is a name.
+    const v = s.value.replace(/^yes[,.!]?\s*/i, "").replace(/\.$/, "");
+    const said = v.split(/\s+/).length > 4 ? `Yes. ${v.charAt(0).toUpperCase()}${v.slice(1)}.` : `Yes, ${v} is on file for us.`;
+    return `${said} I can have the owner call you back with details. ${CONTACT_ASK}`;
   }
   return unknown;
 }
