@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Badge, Button, Card } from "@/components/ds";
 import { Wordmark } from "@/components/Logo";
+import { OwnerRag, ragTone } from "@/components/OwnerRag";
+import { ragSections } from "@/lib/walk";
 import {
   CLAIM_LABEL,
   COMING_SOON,
@@ -30,7 +32,7 @@ const STAR_ROWS = [
   ["one", "1"],
 ] as const;
 
-function Tile({ value, label }: { value: string; label: string }) {
+function Tile({ value, label }: { value: React.ReactNode; label: string }) {
   return (
     <div className="min-w-0 rounded-md bg-surface p-3 shadow-card sm:p-4">
       <div className="text-title-2 font-semibold tabular-nums tracking-tight">{value}</div>
@@ -91,6 +93,8 @@ export function OwnerPreview({ page }: { page: PreviewPage }) {
   const featured = featuredTicket(page);
   const draft = featured ? sampleDraft(page.name, page.phone) : null;
   const featuredQuote = featured ? featured.text.replace(/\s+/g, " ").trim() : "";
+  const rag = ragSections(page.kit);
+  const ratingTone = ragTone(rag.header?.status);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-[var(--space-gutter)] py-5 sm:py-8">
@@ -125,8 +129,10 @@ export function OwnerPreview({ page }: { page: PreviewPage }) {
         </p>
       </div>
 
+      <OwnerRag kit={page.kit} />
+
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <Tile value={`${fmtRating(page.rating)}★`} label={`${fmtInt(page.reviewCount)} Google reviews`} />
+        <Tile value={<span className={ratingTone}>{`${fmtRating(page.rating)}★`}</span>} label={`${fmtInt(page.reviewCount)} Google reviews`} />
         {page.non5Total != null && <Tile value={fmtInt(page.non5Total)} label="reviews under 5★ on Google" />}
         {page.sample && page.tickets.length > 0 && (
           <Tile value={`${unanswered} of ${page.tickets.length}`} label="under 5★ we read, no reply" />
@@ -318,9 +324,14 @@ export function OwnerPreview({ page }: { page: PreviewPage }) {
 
       <footer className="mt-6 flex flex-col gap-1 border-t border-hairline pt-3 text-caption text-subtle sm:flex-row sm:items-center sm:justify-between">
         <p>Public Google data, scraped {PULLED}. Nothing on this page is estimated.</p>
-        <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent">
-          {CONTACT_EMAIL}
-        </a>
+        <span className="flex flex-wrap gap-x-4 gap-y-1">
+          <a href={`/c/${page.slug}`} className="text-accent">
+            Customer review link
+          </a>
+          <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent">
+            {CONTACT_EMAIL}
+          </a>
+        </span>
       </footer>
     </div>
   );
