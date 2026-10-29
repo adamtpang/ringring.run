@@ -325,6 +325,12 @@ export function OwnerPreview({ page }: { page: PreviewPage }) {
       <footer className="mt-6 flex flex-col gap-1 border-t border-hairline pt-3 text-caption text-subtle sm:flex-row sm:items-center sm:justify-between">
         <p>Public Google data, scraped {PULLED}. Nothing on this page is estimated.</p>
         <span className="flex flex-wrap gap-x-4 gap-y-1">
+          <a href={`/path?b=${page.slug}`} className="text-accent">
+            Your path to #1
+          </a>
+          <a href={`/roi?slug=${page.slug}`} className="text-accent">
+            Time and money
+          </a>
           <a href={`/c/${page.slug}`} className="text-accent">
             Customer review link
           </a>
