@@ -1,0 +1,1984 @@
+{
+  "pulled": "2026-10-28",
+  "note": "Baked by scripts/bake-preview-pages.py from the Oct 28, 2026 public Google scrape. Do not edit by hand.",
+  "pages": [
+    {
+      "slug": "lees-tailor",
+      "kit": "1-lees-tailor",
+      "placeId": "ChIJj3oyW6e1RIYRi2l6b46OTME",
+      "name": "Lee's Custom Tailor & Alterations",
+      "categories": [
+        "Tailor",
+        "Clothing alteration service"
+      ],
+      "address": "718 Brazos St, Austin, TX 78701",
+      "rating": 4.7,
+      "reviewCount": 94,
+      "phone": "(512) 480-0046",
+      "phoneStatus": "listed",
+      "website": null,
+      "websiteStatus": "not_listed",
+      "wednesdayHours": "9 AM to 6 PM",
+      "ageLine": "unclear",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Lee's%20Custom%20Tailor%20%26%20Alterations&query_place_id=ChIJj3oyW6e1RIYRi2l6b46OTME",
+      "distribution": {
+        "one": 6,
+        "two": 1,
+        "three": 0,
+        "four": 1,
+        "five": 86
+      },
+      "non5Total": 8,
+      "sample": {
+        "read": 50,
+        "total": 94,
+        "full": false
+      },
+      "tickets": [
+        {
+          "stars": 1,
+          "date": "2026-07-10",
+          "text": "Ruined two pairs of pants and then refused to fix them saying there was nothing he could do. Would not recommend",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 1,
+          "date": "2026-05-06",
+          "text": "Quite rude.",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 1,
+          "date": "2025-09-02",
+          "text": "I don’t mind paying $18 for a shirt hem but I expect good quality work, especially on something so simple. It’s not a straight line, has a major overlap, and has holes so it’s peeling.",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 1,
+          "date": "2024-04-16",
+          "text": "Terrible service",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2023-10-09",
+          "text": "Came with a large group they were very accommodating.",
+          "replied": false,
+          "themes": []
+        }
+      ],
+      "recency": {
+        "newest": "2026-08-12",
+        "n90": 1,
+        "complete90": true,
+        "sun": "Jul 10, 2026 (1★)",
+        "read": 50,
+        "total": 94
+      },
+      "peers": null,
+      "sources": {
+        "listing": "walk-kit-v2/data/reviews.json",
+        "reviews": "walk-kit-v3/data/reviews.json",
+        "recency": "walk-kit-v3/dated-v2/recency.json",
+        "age": "walk-kit-v3/dated-v2/local_seo.json",
+        "peers": null
+      }
+    },
+    {
+      "slug": "brazos-barbershop",
+      "kit": "2-brazos-barbershop",
+      "placeId": "ChIJGy_IiCi1RIYR1yu7GQiwJ50",
+      "name": "Brazos Barbershop",
+      "categories": [
+        "Barber shop"
+      ],
+      "address": "714 Brazos St Ste B 714-A, Austin, TX 78701",
+      "rating": 4.9,
+      "reviewCount": 108,
+      "phone": "(737) 400-5251",
+      "phoneStatus": "listed",
+      "website": "https://www.brazosbarbershop.com/",
+      "websiteStatus": "listed",
+      "wednesdayHours": "8 AM to 6 PM",
+      "ageLine": "unclear",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Brazos%20Barbershop&query_place_id=ChIJGy_IiCi1RIYR1yu7GQiwJ50",
+      "distribution": {
+        "one": 3,
+        "two": 0,
+        "three": 0,
+        "four": 2,
+        "five": 103
+      },
+      "non5Total": 5,
+      "sample": {
+        "read": 50,
+        "total": 108,
+        "full": false
+      },
+      "tickets": [
+        {
+          "stars": 1,
+          "date": "2026-02-01",
+          "text": "",
+          "replied": true,
+          "themes": []
+        },
+        {
+          "stars": 1,
+          "date": "2024-10-26",
+          "text": "",
+          "replied": true,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2024-02-29",
+          "text": "",
+          "replied": false,
+          "themes": []
+        }
+      ],
+      "recency": {
+        "newest": "2026-10-16",
+        "n90": 4,
+        "complete90": true,
+        "sun": "None: all replied",
+        "read": 50,
+        "total": 108
+      },
+      "peers": null,
+      "sources": {
+        "listing": "walk-kit-v2/data/reviews.json",
+        "reviews": "walk-kit-v3/data/reviews.json",
+        "recency": "walk-kit-v3/dated-v2/recency.json",
+        "age": "walk-kit-v3/dated-v2/local_seo.json",
+        "peers": null
+      }
+    },
+    {
+      "slug": "wild-about-music",
+      "kit": "3-wild-about-music",
+      "placeId": "ChIJb-aJ0Qm1RIYRlaPGsEQ2FBk",
+      "name": "Wild About Music",
+      "categories": [
+        "Gift shop",
+        "Art gallery",
+        "Clothing store",
+        "Guitar store"
+      ],
+      "address": "615 Congress Ave, Austin, TX 78701",
+      "rating": 4.6,
+      "reviewCount": 474,
+      "phone": "(512) 708-1700",
+      "phoneStatus": "listed",
+      "website": "http://www.wildaboutmusic.com/",
+      "websiteStatus": "listed",
+      "wednesdayHours": "10 AM to 9 PM",
+      "ageLine": "On Texas record since Sep 1995",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Wild%20About%20Music&query_place_id=ChIJb-aJ0Qm1RIYRlaPGsEQ2FBk",
+      "distribution": {
+        "one": 6,
+        "two": 11,
+        "three": 22,
+        "four": 92,
+        "five": 343
+      },
+      "non5Total": 131,
+      "sample": {
+        "read": 50,
+        "total": 474,
+        "full": false
+      },
+      "tickets": [
+        {
+          "stars": 1,
+          "date": "2024-02-14",
+          "text": "",
+          "replied": true,
+          "themes": []
+        },
+        {
+          "stars": 3,
+          "date": "2024-09-27",
+          "text": "Nothing different",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2025-06-11",
+          "text": "Nice store if you fan of music",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2025-04-06",
+          "text": "We just happened to see this shop on our way to lunch next door. This  is a fantastic guitar and touristy shop in downtown Austin.  The artwork on the walls are great; there is plenty to of things to buy and browse. Staff  friendly and welcoming. Well worth the quick visit.",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2024-05-19",
+          "text": "As. Gift shop is great. The instrument/music store part can improve.",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2024-03-07",
+          "text": "I thought it was a music instrument store but most of the products are souvenirs",
+          "replied": false,
+          "themes": []
+        }
+      ],
+      "recency": {
+        "newest": "2026-10-03",
+        "n90": 3,
+        "complete90": true,
+        "sun": "Sep 27, 2024 (3★)",
+        "read": 50,
+        "total": 474
+      },
+      "peers": {
+        "note": "gift shop + souvenir store + record store (Big Henry's Vinyl & Gifts)",
+        "rows": [
+          {
+            "name": "Big Henry's Vinyl & Gifts",
+            "you": false,
+            "rating": 4.7,
+            "reviews": 78,
+            "awayM": 328
+          },
+          {
+            "name": "Love, Tito's",
+            "you": false,
+            "rating": 4.7,
+            "reviews": 62,
+            "awayM": 487
+          },
+          {
+            "name": "Texas Capitol Visitors Center Gift Shop",
+            "you": false,
+            "rating": 4.7,
+            "reviews": 11,
+            "awayM": 541
+          },
+          {
+            "name": "Wild About Music",
+            "you": true,
+            "rating": 4.6,
+            "reviews": 474,
+            "awayM": null
+          },
+          {
+            "name": "Texas Capitol Gift Shop",
+            "you": false,
+            "rating": 4.5,
+            "reviews": 298,
+            "awayM": 814
+          },
+          {
+            "name": "Lucky Lizard Curios & Gifts",
+            "you": false,
+            "rating": 4.3,
+            "reviews": 55,
+            "awayM": 383
+          }
+        ]
+      },
+      "sources": {
+        "listing": "walk-kit-v2/data/reviews.json",
+        "reviews": "walk-kit-v3/data/reviews.json",
+        "recency": "walk-kit-v3/dated-v2/recency.json",
+        "age": "walk-kit-v3/dated-v2/local_seo.json",
+        "peers": "walk-kit-v3/peers/peers.json"
+      }
+    },
+    {
+      "slug": "lucky-lizard",
+      "kit": "4-lucky-lizard",
+      "placeId": "ChIJpduvU6a1RIYR7OsAQa0VsJk",
+      "name": "Lucky Lizard Curios & Gifts",
+      "categories": [
+        "Gift shop"
+      ],
+      "address": "412 E 6th St, Austin, TX 78701",
+      "rating": 4.3,
+      "reviewCount": 55,
+      "phone": "(512) 476-5493",
+      "phoneStatus": "listed",
+      "website": "https://luckylizard.bustis.com/",
+      "websiteStatus": "listed",
+      "wednesdayHours": "10 AM to 7 PM",
+      "ageLine": "unclear",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Lucky%20Lizard%20Curios%20%26%20Gifts&query_place_id=ChIJpduvU6a1RIYR7OsAQa0VsJk",
+      "distribution": {
+        "one": 3,
+        "two": 2,
+        "three": 3,
+        "four": 13,
+        "five": 34
+      },
+      "non5Total": 21,
+      "sample": {
+        "read": 50,
+        "total": 55,
+        "full": false
+      },
+      "tickets": [
+        {
+          "stars": 1,
+          "date": "2026-09-12",
+          "text": "Poor service",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 2,
+          "date": "2026-08-08",
+          "text": "",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 2,
+          "date": "2024-10-16",
+          "text": "Looked like a cool place but the hours on Google are incorrect so I showed up at about 8pm and then were closed when maps said they were open until midnight.",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 1,
+          "date": "2021-09-18",
+          "text": "Horrible experience. We had some friends in from out of town who wanted to get some souvenirs before returning home. We decided to try this place out since it had good reviews. We walked into an empty shop and were immediately confronted by the cashier asking if we had masks. When we stated we didn't (since most places no longer require them) she refused to even let us enter and told us to go buy masks before we came back. I'm sorry,  but if you are still planning to require masks, you should either offer them customers complementary or sell them in your shop. We ended up finding another cool shop next door that allowed us to enter and shop without masks. My friends spent over $100 on souvenirs at the other shop. We have friends in from out of town all the time and I am always looking for cool places to take them. I can confidently say that this shop will never receive my service again while the shop next door has gained a couple new loyal customers. Talk about a bad experience.",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 1,
+          "date": "2021-08-02",
+          "text": "",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 3,
+          "date": "2024-04-06",
+          "text": "A tiny gift shop for the museum of the weird, which you need tickets to see. Most everything for sale is generic trinkets on the odd style and not unique to the area. Kind of disappointing but clerk was very polite and friendly",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 3,
+          "date": "2019-02-27",
+          "text": "Curious curios shop, loads of interesting oddities and a museum to boot. Had I more time, I definitely hit the sideshow museum up.",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2025-11-30",
+          "text": "Pretty cool",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2022-02-28",
+          "text": "",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2021-06-08",
+          "text": "",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2021-05-04",
+          "text": "Neat place to send some time",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2019-07-08",
+          "text": "Strange or should I say weird since it is in Austin. Friendly staff and busy.",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2019-06-27",
+          "text": "",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2019-06-19",
+          "text": "",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2019-03-09",
+          "text": "Hahaha is this my uncle or my grandpa... he told me they sale these wooden Indians here.. hmmm",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2018-09-18",
+          "text": "",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2018-07-30",
+          "text": "",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2018-07-05",
+          "text": "Little touristy, but nice staff and one of the only places with postcards in Austin",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2017-04-12",
+          "text": "",
+          "replied": false,
+          "themes": []
+        }
+      ],
+      "recency": {
+        "newest": "2026-09-12",
+        "n90": 2,
+        "complete90": true,
+        "sun": "Sep 12, 2026 (1★)",
+        "read": 50,
+        "total": 55
+      },
+      "peers": {
+        "note": "gift shop + souvenir store + record store",
+        "rows": [
+          {
+            "name": "Big Henry's Vinyl & Gifts",
+            "you": false,
+            "rating": 4.7,
+            "reviews": 78,
+            "awayM": 189
+          },
+          {
+            "name": "Love, Tito's",
+            "you": false,
+            "rating": 4.7,
+            "reviews": 62,
+            "awayM": 724
+          },
+          {
+            "name": "Texas Capitol Visitors Center Gift Shop",
+            "you": false,
+            "rating": 4.7,
+            "reviews": 11,
+            "awayM": 624
+          },
+          {
+            "name": "Wild About Music",
+            "you": false,
+            "rating": 4.6,
+            "reviews": 474,
+            "awayM": 383
+          },
+          {
+            "name": "Texas Capitol Gift Shop",
+            "you": false,
+            "rating": 4.5,
+            "reviews": 298,
+            "awayM": 961
+          },
+          {
+            "name": "Lucky Lizard Curios & Gifts",
+            "you": true,
+            "rating": 4.3,
+            "reviews": 55,
+            "awayM": null
+          }
+        ]
+      },
+      "sources": {
+        "listing": "walk-kit-v2/data/reviews.json",
+        "reviews": "walk-kit-v3/data/reviews.json",
+        "recency": "walk-kit-v3/dated-v2/recency.json",
+        "age": "walk-kit-v3/dated-v2/local_seo.json",
+        "peers": "walk-kit-v3/peers/peers.json"
+      }
+    },
+    {
+      "slug": "sapori",
+      "kit": "5-sapori",
+      "placeId": "ChIJp7tO_dy1RIYRW9_xLOG_ehs",
+      "name": "Sapori Italian Roots",
+      "categories": [
+        "Restaurant"
+      ],
+      "address": "800 Brazos St Ste 215, Austin, TX 78701",
+      "rating": 4.7,
+      "reviewCount": 1081,
+      "phone": "(737) 393-3784",
+      "phoneStatus": "listed",
+      "website": "https://saporiatx.com/",
+      "websiteStatus": "listed",
+      "wednesdayHours": "11 AM to 10 PM",
+      "ageLine": "On Texas record since Jun 2023",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Sapori%20Italian%20Roots&query_place_id=ChIJp7tO_dy1RIYRW9_xLOG_ehs",
+      "distribution": {
+        "one": 27,
+        "two": 17,
+        "three": 30,
+        "four": 55,
+        "five": 952
+      },
+      "non5Total": 129,
+      "sample": {
+        "read": 50,
+        "total": 1081,
+        "full": false
+      },
+      "tickets": [
+        {
+          "stars": 1,
+          "date": "2026-09-11",
+          "text": "Worst lasagna. Old and not fresh .",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 2,
+          "date": "2026-10-17",
+          "text": "",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 2,
+          "date": "2026-10-01",
+          "text": "Limited bar menu. Food arrived way too hot. Fettuccini Alfredo had a fishy taste. Extremely loud inside. Wait staff looked unkempt. Not recommended.",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 3,
+          "date": "2026-10-19",
+          "text": "Muy buena atención, son amables y atentos\nTe llevan panecillos de cortesía\nSolo la salsa de pollo parmesano no tenía sabor, era como la de bote",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 3,
+          "date": "2026-10-09",
+          "text": "The food is okay, not great. Atmosphere is small, but cute.  Lots of unhoused people outside, which didn't make us feel the most safe as they were a little aggressive in trying to get money from people and trying to get the attention of drivers passing by.\nBoth dishes we had were very peppery tasting, but not overwhelming.  The biggest issue we had was as our server was mixing the oil by shaking it, he didn't make sure the top was completely on.  The oil got on the table, my arm, and more importantly, my shirt.  I hoped it would come out in the wash, but it did not.  He did apologize, but maybe offering a free drink or dessert would've made the situation better.  I'm sure he's a great server as we had no other issues during our visit, but it would've gone a long way offering some small comp, especially since my shirt is ruined.",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2026-10-14",
+          "text": "I had the fettuccine Alfredo. It was ok. I would hazard a guess that it contained cream and flour. Incorrect. Three ingredients: butter, Parmesan cheese, and some pasta water. Same as carbonara: no creme. Some reviews praised it for not being heavy. Maybe make a traditional and less heavy. It's SUPPOSED to be enough calories to feed a family of 6. The pasta is house made an' all. Why would you go to that effort, but then cover it in biscuit gravy? I dunno. It was ok.",
+          "replied": false,
+          "themes": []
+        },
+        {
+          "stars": 4,
+          "date": "2026-10-03",
+          "text": "We went for the first time.The manager Annalisa noticed that our food order was taking too long.\nShe let us know, made sure things moved fast, and gave a freebie on the beers.\nThe mistake became irrelevant once she took action. And the food was very good.",
+          "replied": false,
+          "themes": []
+        }
+      ],
+      "recency": {
+        "newest": "2026-10-19",
+        "n90": 50,
+        "complete90": false,
+        "sun": "Oct 19, 2026 (3★)",
+        "read": 50,
+        "total": 1081
+      },
+      "peers": null,
+      "sources": {
+        "listing": "walk-kit-v2/data/reviews.json",
+        "reviews": "walk-kit-v3/data/reviews.json",
+        "recency": "walk-kit-v3/dated-v2/recency.json",
+        "age": "walk-kit-v3/dated-v2/local_seo.json",
+        "peers": null
+      }
+    },
+    {
+      "slug": "anas-mart",
+      "kit": "6-anas-mart",
+      "placeId": "ChIJCUKHRae1RIYRnZkmnukUCY0",
+      "name": "Ana's Mart",
+      "categories": [
+        "Grocery store"
+      ],
+      "address": "800 Brazos St #200, Austin, TX 78701",
+      "rating": 4,
+      "reviewCount": 26,
+      "phone": "(512) 469-0962",
+      "phoneStatus": "listed",
+      "website": "https://twitter.com/AnasMartATX",
+      "websiteStatus": "x_link_only",
+      "wednesdayHours": "6 AM to 12 AM",
+      "ageLine": "On Texas record since May 2010",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Ana's%20Mart&query_place_id=ChIJCUKHRae1RIYRnZkmnukUCY0",
+      "distribution": {
+        "one": 4,
+        "two": 2,
+        "three": 1,
+        "four": 1,
+        "five": 18
+      },
+      "non5Total": 8,
+      "sample": {
+        "read": 26,
+        "total": 26,
+        "full": true
+      },
+      "tickets": [
+        {
+          "stars": 1,
+          "date": "2026-05-26",
+          "text": "Outrageously over priced. I went around the corner to 7-11 and got things for half the price!",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-09-21",
+          "text": "I purchased 2 Red Bulls which were priced at $5.75 both and a very small chips and didn't pay attention when I paid. Ended up paying $14. This is ridiculous. Be careful and check the price before you pay otherwise they will double or triple charge you.",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2024-11-12",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2024-01-27",
+          "text": "Please change your hours to when you're actually going to be there.",
+          "replied": false,
+          "themes": [
+            "hours_reliability"
+          ]
+        },
+        {
+          "stars": 2,
+          "date": "2025-02-07",
+          "text": "Tiny tiny place no fresh meats no fresh vegetables just cup of soup chilled drinks prepackaged food ready to eat",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 2,
+          "date": "2024-07-09",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2013-03-08",
+          "text": "It's ok in a pinch if you're on this end of downtown, but I find the selection to be a bit less and the prices to be a bit higher than other downtown markets. If I have time I walk farther to them.",
+          "replied": true,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 4,
+          "date": "2020-01-17",
+          "text": "On 8th & Congress in Austin: compact \"7-11\" type convenience store ... of course you pay extra for convenience ...",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        }
+      ],
+      "recency": {
+        "newest": "2026-08-27",
+        "n90": 2,
+        "complete90": true,
+        "sun": "May 25, 2026 (1★)",
+        "read": 26,
+        "total": 26
+      },
+      "peers": {
+        "note": "convenience/grocery/souvenir-food mart",
+        "rows": [
+          {
+            "name": "Ana's Mart",
+            "you": true,
+            "rating": 4,
+            "reviews": 26,
+            "awayM": null
+          },
+          {
+            "name": "Shop 24",
+            "you": false,
+            "rating": 3.7,
+            "reviews": 30,
+            "awayM": 286
+          },
+          {
+            "name": "CVS",
+            "you": false,
+            "rating": 3.4,
+            "reviews": 196,
+            "awayM": 337
+          },
+          {
+            "name": "Lone Star Souvenir & Food Mart",
+            "you": false,
+            "rating": 3,
+            "reviews": 184,
+            "awayM": 455
+          },
+          {
+            "name": "7-Eleven",
+            "you": false,
+            "rating": 2.7,
+            "reviews": 86,
+            "awayM": 87
+          },
+          {
+            "name": "7-Eleven",
+            "you": false,
+            "rating": 2.6,
+            "reviews": 91,
+            "awayM": 175
+          }
+        ]
+      },
+      "sources": {
+        "listing": "halfmile/p2_items.json",
+        "reviews": "halfmile/tickets.json",
+        "recency": "walk-kit-v3/dated-v2/recency.json",
+        "age": "walk-kit-v3/dated-v2/local_seo.json",
+        "peers": "walk-kit-v3/peers/peers.json"
+      }
+    },
+    {
+      "slug": "antler-vc",
+      "kit": "7-antler-vc",
+      "placeId": "ChIJN0jxIgC1RIYR_Z1uL-sbR44",
+      "name": "Antler VC",
+      "categories": [
+        "Corporate office"
+      ],
+      "address": "800 Brazos St #340, Austin, TX 78701",
+      "rating": 4,
+      "reviewCount": 2,
+      "phone": null,
+      "phoneStatus": "not_captured",
+      "website": null,
+      "websiteStatus": "not_captured",
+      "wednesdayHours": "9 AM to 6 PM",
+      "ageLine": "unclear",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Antler%20VC&query_place_id=ChIJN0jxIgC1RIYR_Z1uL-sbR44",
+      "distribution": null,
+      "non5Total": null,
+      "sample": null,
+      "tickets": [],
+      "recency": null,
+      "peers": null,
+      "sources": {
+        "listing": "building-800-brazos.json",
+        "reviews": null,
+        "recency": null,
+        "age": "walk-kit-v3/dated-v2/local_seo.json",
+        "peers": null
+      }
+    },
+    {
+      "slug": "pleblab",
+      "kit": "8-pleblab",
+      "placeId": "ChIJjY-oGla1RIYRPtgk7Fl4TPo",
+      "name": "PlebLab",
+      "categories": [
+        "Corporate office"
+      ],
+      "address": "800 Brazos St Ste 250, Austin, TX 78701",
+      "rating": 5,
+      "reviewCount": 7,
+      "phone": "(512) 200-3198",
+      "phoneStatus": "listed",
+      "website": "https://pleblab.dev/",
+      "websiteStatus": "listed",
+      "wednesdayHours": "Open 24 hours",
+      "ageLine": "Since 2021",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=PlebLab&query_place_id=ChIJjY-oGla1RIYRPtgk7Fl4TPo",
+      "distribution": null,
+      "non5Total": null,
+      "sample": null,
+      "tickets": [],
+      "recency": null,
+      "peers": null,
+      "sources": {
+        "listing": "building-800-brazos.json",
+        "reviews": null,
+        "recency": null,
+        "age": "walk-kit-v3/dated-v2/local_seo.json",
+        "peers": null
+      }
+    },
+    {
+      "slug": "blindside-tattoo",
+      "kit": "9-blindside-tattoo",
+      "placeId": "ChIJ877Bgqe1RIYRrAUoBg8zMpg",
+      "name": "BlindSide Tattoo & Piercing",
+      "categories": [
+        "Tattoo shop",
+        "Ear piercing service",
+        "Tattoo and piercing shop"
+      ],
+      "address": "211 E 6th St, Austin, TX 78701",
+      "rating": 4.4,
+      "reviewCount": 271,
+      "phone": "(512) 236-1126",
+      "phoneStatus": "listed",
+      "website": "https://blindsidetattoos.com/",
+      "websiteStatus": "listed",
+      "wednesdayHours": "12 PM to 2:30 AM",
+      "ageLine": "Est. 2005",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=BlindSide%20Tattoo%20%26%20Piercing&query_place_id=ChIJ877Bgqe1RIYRrAUoBg8zMpg",
+      "distribution": {
+        "one": 28,
+        "two": 8,
+        "three": 2,
+        "four": 13,
+        "five": 220
+      },
+      "non5Total": 51,
+      "sample": {
+        "read": 60,
+        "total": 271,
+        "full": false
+      },
+      "tickets": [
+        {
+          "stars": 1,
+          "date": "2026-03-17",
+          "text": "I guess making an appointment doesn’t mean anything anymore. I made a 4 o’clock appointment at the south first location. Nobody was there to open the door. I couldn’t even get a call or a text saying that they wouldn’t be able to make the appointment. I don’t live close so it was a drive for me.  Really unprofessional.",
+          "replied": false,
+          "themes": [
+            "staff_attitude",
+            "wait_speed",
+            "booking_comms"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-02-14",
+          "text": "Wanted to come back to this place because they did my septum. Called ahead of time to ask if there was a piercer available, they said they’d get me in if I got there before 2am. Got there at 1:30 after driving from round rock and was told the piercer will come get me. Was left in the lobby for 30 minutes to then was told the piercer left. This place could seriously use some proper management.",
+          "replied": false,
+          "themes": [
+            "wait_speed",
+            "booking_comms"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-07-15",
+          "text": "The shop was darkish and I was the only potential client at the time. Couldn't do a tattoo because of my service dog. Black dude with the Majin Buu cut suggested, through mouthfuls of food, to replace my service dog with a human to get service.",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-07-13",
+          "text": "Called over phone to ask a simple and quick question this man answered already giving attitude and gave a passive aggressive answer yeah already a red flag no matter how good their tattoos are .",
+          "replied": false,
+          "themes": [
+            "staff_attitude",
+            "booking_comms"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-05-24",
+          "text": "Went in to buy a piercing, employee upfront was very rude and unwelcoming",
+          "replied": false,
+          "themes": [
+            "staff_attitude"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2024-11-16",
+          "text": "Was stoked to see they were open after midnight, went in and there was a couple in front of me, I guess they weren't able to figure out what they wanted so they left...the guy at the counter got my attention and directed me to the piercer....I told him that I would like to have my lobes stretched to a 2G but after the piercer inspected the jewelry display, he informed me that he didn't have jewelry that wouldn't damage my ears so I was a little let down that i was turned down for a simple lobe stretch.... especially after I braved 6th Street to get there 😂",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2024-10-07",
+          "text": "I’m so glad I didn’t get a tattoo. The owner oblivious though I was not very street smart, considering the job I do.\n\nI found the owner of the shop very rude. I when into ask for a quote of a tattoo. I wasn’t keen with the price he offered and my friend was. He kept going on he didn’t accept not interested. When he ask why “I said I can get one back home for half the price. He then said you’re not at home and “I won all this awards”\nso has my tattoo artist.",
+          "replied": false,
+          "themes": [
+            "staff_attitude",
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2024-10-05",
+          "text": "Very disappointing service. My friend lost a piece of their jewelry from a piercing in an intimate spot and one the piercers gave my friend a huge attitude when she asked if it's okay to accompany them in the backroom (with the piercer) to fix our friend's piercing. Made MULTIPLE comments on how we \"insinuated\" he was a predator after asking if one of us could stay with our friend out of comfort. After his unnecessary, defensive comments I would NOT recommend this place for women/non-men. The (whte, bald, round, tatted, gauged) man was rude to my friends from the start and I would not come back here.",
+          "replied": false,
+          "themes": [
+            "staff_attitude",
+            "quality"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2024-10-05",
+          "text": "Was very rude. Friend was getting help with a piercing in an intimate area and piercer was extremely rude when asked a friend could be in the room, for the clients comfort. Worker was very rude asking if we were insinuating that we were saying they were going to assault our friend. Will never. NEVER ever. Come here.",
+          "replied": false,
+          "themes": [
+            "staff_attitude"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2024-06-23",
+          "text": "TERRIBLE MANAGEMENT! VANIA the manager or whatever she claimed to be yelled and cussed out her employee in front of us and made sure to let us know walk ins are not welcomed because she had appointments (she was not tattooing us) easily cost the shop $500 she should be embarrassed. her attitude was disgusting and the owner should be notified to train their employees better!",
+          "replied": false,
+          "themes": [
+            "staff_attitude",
+            "billing_price",
+            "booking_comms"
+          ]
+        },
+        {
+          "stars": 4,
+          "date": "2025-07-31",
+          "text": "Visited here recently on visit to Austin , I contacted the studio via email day before to see if a next day walk in was available , they relied to me virtually straight away , were extremely helpful and booked myself and my wife in for a 1pm appo8ntment .. so booking was helpful and seamless.\n\nWhen we attended we showed them what we both wanted , just a small momentum of our visit to Texas , a design was created then a quote was given to us , this was a no obligation quote we didn't feel under pressure to go ahead , although we did\n\nBoth happy with the result , no issues with our visit .\n\nMust add that I'm personally heavily tattooed and have alot of experience with studios across the world\n\nThis studio is hygienic, efficient , priced pretty much as everywhere else and doing a good job",
+          "replied": false,
+          "themes": [
+            "billing_price",
+            "booking_comms",
+            "cleanliness"
+          ]
+        },
+        {
+          "stars": 4,
+          "date": "2025-07-21",
+          "text": "they’re lil scary but they coo people, LOVE the tattoo i got, got priced $80 for a small",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 4,
+          "date": "2024-10-27",
+          "text": "Staff was friendly! My tattoo was a little pricey but that was to be expected in downtown Austin.",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        }
+      ],
+      "recency": {
+        "newest": "2026-10-23",
+        "n90": 6,
+        "complete90": true,
+        "sun": "Mar 17, 2026 (1★)",
+        "read": 60,
+        "total": 271
+      },
+      "peers": null,
+      "sources": {
+        "listing": "halfmile/p2_items.json",
+        "reviews": "halfmile/tickets.json",
+        "recency": "walk-kit-v3/dated-v2/recency.json",
+        "age": "walk-kit-v3/dated-v2/local_seo.json",
+        "peers": null
+      }
+    },
+    {
+      "slug": "shop-24",
+      "kit": "10-shop-24",
+      "placeId": "ChIJJRkLgqe1RIYRQvbDSMn4kok",
+      "name": "Shop 24",
+      "categories": [
+        "Convenience store",
+        "Grocery store",
+        "Souvenir store"
+      ],
+      "address": "213 E 6th St, Austin, TX 78701",
+      "rating": 3.7,
+      "reviewCount": 30,
+      "phone": "(512) 478-7310",
+      "phoneStatus": "listed",
+      "website": null,
+      "websiteStatus": "not_listed",
+      "wednesdayHours": "Open 24 hours",
+      "ageLine": "On Texas record since Sep 2000",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Shop%2024&query_place_id=ChIJJRkLgqe1RIYRQvbDSMn4kok",
+      "distribution": {
+        "one": 5,
+        "two": 1,
+        "three": 6,
+        "four": 4,
+        "five": 14
+      },
+      "non5Total": 16,
+      "sample": {
+        "read": 30,
+        "total": 30,
+        "full": true
+      },
+      "tickets": [
+        {
+          "stars": 1,
+          "date": "2026-04-08",
+          "text": "I believe that the 2 men working night shift here, when I came in recently, are actively stealing money from customers. I came into the store with 2 other family members. They made their purchase first and noticed on their receipt they had been charged for an item that they didn’t purchase. They told the employees and were refunded the money in cash. I made my purchase next and was also charged for an item I didn’t purchase. I told them and was refunded in cash. It seems they are charging fairly small amounts I would guess as to not be noticed.",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2024-11-26",
+          "text": "0 stars if i could\nI had a very disappointing experience at this convenience store. The staff were extremely unhelpful and seemed more interested in their phones than assisting customers. The store itself was poorly organized, with cluttered aisles and expired items on the shelves. To top it off, the cleanliness was unacceptable—sticky floors and unpleasant odors throughout the store. I would not recommend this location to anyone, as there are plenty of better options nearby.",
+          "replied": false,
+          "themes": [
+            "booking_comms",
+            "quality",
+            "cleanliness"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2024-06-16",
+          "text": "Store is horrible and smells like pisssss the prices are so over price even for downtown",
+          "replied": false,
+          "themes": [
+            "billing_price",
+            "cleanliness"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2026-03-10",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2022-06-12",
+          "text": "Worst experience ever. I can’t buy a beer myself beer because I’m with my niece who is 14.",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2019-11-06",
+          "text": "I have lived in Austin for 6 years now and have never been in this store. It was super cold outside last week in the early AM and I was on my scooter. my hands were numb so I stopped in to see if I could get some gloves. Found a decent pair for not too much and figured I should get cigarettes. What a rip off. I was confused on my way back home why it was so expensive, but figured it was prob the glove... When I looked at the receipt I nearly fainted. Never in my 20 years of smoking have I ever paid $17 for a pack of cigs. I was ripped off perhaps the guy behind the counter thought I was visiting. Scary thing about it\nis he prob does it to every visitor.  I will never go there again",
+          "replied": true,
+          "themes": [
+            "billing_price",
+            "quality"
+          ]
+        },
+        {
+          "stars": 2,
+          "date": "2018-11-20",
+          "text": "I went for Blue Bell ice cream. While I wasn’t there long, it was enough time to experience relatively rude and unfriendly staff. Maybe the night shift needs more guidance.",
+          "replied": false,
+          "themes": [
+            "staff_attitude"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2022-02-28",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2019-06-30",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2018-12-17",
+          "text": "Good place to pick up t shirts. Why don't they have individual beers?? Better than your tourist shop prices for souvenirs",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2018-06-02",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2016-11-23",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 4,
+          "date": "2023-03-27",
+          "text": "Affordable souvenirs and snacks.",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 4,
+          "date": "2020-06-04",
+          "text": "A pretty standard souvenir shop.",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 4,
+          "date": "2019-03-12",
+          "text": "They carry Argus Cider",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 4,
+          "date": "2017-07-22",
+          "text": "This is a pretty good store in the middle of the city with hundreds of Austin/University of Texas/States of Texas items. I bought a few things here, and would return in the future.",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        }
+      ],
+      "recency": {
+        "newest": "2026-09-03",
+        "n90": 1,
+        "complete90": true,
+        "sun": "Apr 8, 2026 (1★)",
+        "read": 30,
+        "total": 30
+      },
+      "peers": {
+        "note": "convenience/grocery/souvenir-food mart",
+        "rows": [
+          {
+            "name": "Ana's Mart",
+            "you": false,
+            "rating": 4,
+            "reviews": 26,
+            "awayM": 286
+          },
+          {
+            "name": "Shop 24",
+            "you": true,
+            "rating": 3.7,
+            "reviews": 30,
+            "awayM": null
+          },
+          {
+            "name": "CVS",
+            "you": false,
+            "rating": 3.4,
+            "reviews": 196,
+            "awayM": 232
+          },
+          {
+            "name": "Lone Star Souvenir & Food Mart",
+            "you": false,
+            "rating": 3,
+            "reviews": 184,
+            "awayM": 292
+          },
+          {
+            "name": "7-Eleven",
+            "you": false,
+            "rating": 2.7,
+            "reviews": 86,
+            "awayM": 371
+          },
+          {
+            "name": "7-Eleven",
+            "you": false,
+            "rating": 2.6,
+            "reviews": 91,
+            "awayM": 179
+          }
+        ]
+      },
+      "sources": {
+        "listing": "halfmile/p2_items.json",
+        "reviews": "halfmile/tickets.json",
+        "recency": "walk-kit-v3/dated-v2/recency.json",
+        "age": "walk-kit-v3/dated-v2/local_seo.json",
+        "peers": "walk-kit-v3/peers/peers.json"
+      }
+    },
+    {
+      "slug": "small-victory",
+      "kit": "11-small-victory",
+      "placeId": "ChIJKakp4Am1RIYRB-4OSSKKrPo",
+      "name": "Small Victory",
+      "categories": [
+        "Bar",
+        "Cocktail bar"
+      ],
+      "address": "108 E 7th St, Austin, TX 78701",
+      "rating": 4.7,
+      "reviewCount": 507,
+      "phone": "(512) 666-8718",
+      "phoneStatus": "listed",
+      "website": "http://smallvictory.bar/",
+      "websiteStatus": "listed",
+      "wednesdayHours": "5 PM to 1 AM",
+      "ageLine": "On Texas record since Nov 2015",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Small%20Victory&query_place_id=ChIJKakp4Am1RIYRB-4OSSKKrPo",
+      "distribution": {
+        "one": 6,
+        "two": 12,
+        "three": 18,
+        "four": 62,
+        "five": 409
+      },
+      "non5Total": 98,
+      "sample": {
+        "read": 60,
+        "total": 507,
+        "full": false
+      },
+      "tickets": [
+        {
+          "stars": 2,
+          "date": "2026-10-24",
+          "text": "Worst cocktails I’ve had in Austin ever and very expensive and single ply toilet paper.",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 2,
+          "date": "2025-11-22",
+          "text": "Low rating for quality of drinks. Service and atmosphere were excellent. My husband and I are a bit of martini enthusiasts. For a bar that has a center fold of a martini, they weren’t good. Ordered a vesper and one of their signatures. We suspect the quality of the liquor is just not that good. Came back with a slight headache just from a few sips before leaving the drinks. The lemon peel was huge for the glass. Not sure if on purpose or just not refined.",
+          "replied": false,
+          "themes": [
+            "quality"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-07-19",
+          "text": "According to their thermostat it was a toasty 85 degrees inside… in July…. In Texas… They checked on us once with warm tap water. The drinks took a while so we were only able to order two small cocktails in a hour. If it’s your first time, you’re better off spending your money elsewhere, the bartenders connected better with people they knew already and didn’t say thank you or bye like they did with others. We spent $90 for 4 cocktails and mixed nuts. We left looking for a spot to end the night on a better note and found Higbies. Spent $65 for 4 cocktails, two shots, a bag of takis, good music, and funny bartenders.",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2026-06-07",
+          "text": "The bar atmosphere was cozy. The low ABV cocktails were not pleasant. In order to drink them we had to add water. Even then it didn’t improve the flavor. It was average at best. I also ordered the rosé -and it was served as a  mixture of red and white- very very dark for any rosé. I really wished our bartender would have explained that before ordering it.",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2025-07-19",
+          "text": "The cocktails were tasty. The service was not great and it was very hot in there. I would not go back",
+          "replied": false,
+          "themes": [
+            "crowd_noise"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2025-06-27",
+          "text": "Barmen kaba, içki lezzetli, ortam fena değil",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2025-06-09",
+          "text": "Not much of a vibe here. The drinks are ok, the bartenders are efficient but not very engaging or friendly, not rude just would rather be on their phone than have a conversation. Won't return.",
+          "replied": false,
+          "themes": [
+            "staff_attitude",
+            "booking_comms"
+          ]
+        },
+        {
+          "stars": 4,
+          "date": "2026-10-18",
+          "text": "토욜 저녁에 방문했고 커플과 친구들끼리 오는 사람이 대부분이다\n난 혼자가서 강한 마티니 한잔 마시고 분위기도 마시고 니왔어\n가격은 18불에 팁 포함 25불을 결제했어",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 4,
+          "date": "2026-10-04",
+          "text": "Solid wine selection and great coffee. The space is a bit small so get there early if you want a seat. Friendly service and a nice Austin vibe.",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 4,
+          "date": "2025-12-07",
+          "text": "One of my favorite places all year round. The bat is low key and almost feels like a speakeasy. Cocktail menu features a broad array of classics and old timey themes like bucks and daisies. Cheese and charcuterie tray was fantastic too",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        }
+      ],
+      "recency": {
+        "newest": "2026-10-24",
+        "n90": 12,
+        "complete90": true,
+        "sun": "Oct 24, 2026 (2★)",
+        "read": 60,
+        "total": 507
+      },
+      "peers": {
+        "note": "bar (Google category 'Bar'; includes Sans Bar, a non-alcoholic bar)",
+        "rows": [
+          {
+            "name": "Bar Grotta",
+            "you": false,
+            "rating": 5,
+            "reviews": 31,
+            "awayM": 126
+          },
+          {
+            "name": "Upstairs at Caroline",
+            "you": false,
+            "rating": 4.8,
+            "reviews": 6993,
+            "awayM": 46
+          },
+          {
+            "name": "Small Victory",
+            "you": true,
+            "rating": 4.7,
+            "reviews": 507,
+            "awayM": null
+          },
+          {
+            "name": "Sans Bar",
+            "you": false,
+            "rating": 4.7,
+            "reviews": 111,
+            "awayM": 304
+          },
+          {
+            "name": "The Rustic Tap",
+            "you": false,
+            "rating": 4.4,
+            "reviews": 917,
+            "awayM": 727
+          },
+          {
+            "name": "Star Bar",
+            "you": false,
+            "rating": 4.1,
+            "reviews": 551,
+            "awayM": 667
+          }
+        ]
+      },
+      "sources": {
+        "listing": "halfmile/p2_items.json",
+        "reviews": "halfmile/tickets.json",
+        "recency": "walk-kit-v3/dated-v2/recency.json",
+        "age": "walk-kit-v3/dated-v2/local_seo.json",
+        "peers": "walk-kit-v3/peers/peers.json"
+      }
+    },
+    {
+      "slug": "lone-star-souvenir",
+      "kit": "12-lone-star-souvenir",
+      "placeId": "ChIJr3szW6a1RIYRkM7LRpnBIO0",
+      "name": "Lone Star Souvenir & Food Mart",
+      "categories": [
+        "Convenience store",
+        "Souvenir store"
+      ],
+      "address": "502 E 6th St, Austin, TX 78701",
+      "rating": 3,
+      "reviewCount": 184,
+      "phone": "(512) 350-2503",
+      "phoneStatus": "listed",
+      "website": null,
+      "websiteStatus": "not_listed",
+      "wednesdayHours": "Open 24 hours",
+      "ageLine": "On Texas record since Mar 2012",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Lone%20Star%20Souvenir%20%26%20Food%20Mart&query_place_id=ChIJr3szW6a1RIYRkM7LRpnBIO0",
+      "distribution": {
+        "one": 88,
+        "two": 2,
+        "three": 4,
+        "four": 8,
+        "five": 82
+      },
+      "non5Total": 102,
+      "sample": {
+        "read": 60,
+        "total": 184,
+        "full": false
+      },
+      "tickets": [
+        {
+          "stars": 1,
+          "date": "2026-10-28",
+          "text": "Scammers! They charged me $232.70 for a single pack of cigarettes that was supposed to be $16. They refused to refund my money",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-10-25",
+          "text": "Unprofessional",
+          "replied": false,
+          "themes": [
+            "staff_attitude"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-09-03",
+          "text": "They will threaten to call ice on you",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-08-27",
+          "text": "Owner yells racist remarks at people. Do not shop here",
+          "replied": false,
+          "themes": [
+            "staff_attitude"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-07-28",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-07-24",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-07-22",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-07-19",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-07-15",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-07-11",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-07-08",
+          "text": "The owner was yelling racist remarks, cursing at people of color, and threatening to call ICE on them. That behavior is completely unprofessional and unacceptable for someone representing a business. I’ve also seen many people publicly speak out and share similar concerns about this place, yet it doesn’t seem to be getting the attention it deserves. I hope the appropriate people look into these complaints. Because of what I witnessed, I avoid this store on 6th Street.",
+          "replied": false,
+          "themes": [
+            "staff_attitude"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-07-03",
+          "text": "This place is roach infested",
+          "replied": false,
+          "themes": [
+            "cleanliness"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-07-02",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-06-25",
+          "text": "Place was dirty, prices way to high, and owner rude and inconsiderate",
+          "replied": false,
+          "themes": [
+            "staff_attitude",
+            "billing_price",
+            "cleanliness"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-06-24",
+          "text": "If I could give this place one star, I would I recently was told by a friend of mine that the store owner is racist. If you’re Hispanic go in there. He will call ice on you or at least threaten to call ice on you even if you have been born in the state of Texas or in the USA he just thinks if you’re Hispanic then you’re illegal what a work we live in today 🤦🏽‍♀️😒 I hope this place gets shut down or at least new employees bc this is not right! Austin Texas this is not who we represent!",
+          "replied": false,
+          "themes": [
+            "staff_attitude"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-06-19",
+          "text": "Owner was very racist and homophobic. Started asking me weird questions about my sexuality and then started calling me slurs after I mentioned he was going to overcharge me by accident. Would not be coming back",
+          "replied": false,
+          "themes": [
+            "staff_attitude",
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-06-15",
+          "text": "Owner is unbelievably rude, no reason to come in here at all. There are better places in Austin.",
+          "replied": false,
+          "themes": [
+            "staff_attitude"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-05-02",
+          "text": "Literally as soon as I walked him I was told to leave no reason I have never been here before I asked why and he just told me to go",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-04-19",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-04-17",
+          "text": "Saw a fellow wheel chair person fly out the front door. Didn't think anything of it, but I come inside, a family is blocking the path and register. I just park out the way out so I can enter when they leave. Cashier tells me to wait outside though I'm not blocking anyone. I didn't really want to return, but clearly he just meant to exile me forever since I wrote this whole thing. I'm not returning.",
+          "replied": false,
+          "themes": [
+            "wait_speed"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-04-17",
+          "text": "This place is a ripoff. First red flag should have been that nothing is marked with a price. Got a gallon of water, liter of water, a 2 liter of soda, a 20 oz soda and 2 magnets. Total price, $48. And of course, they didn't give us a receipt. Lets just say the magnets were $10/each. That still means the average cost of the remaining 4 items was $7/each.",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-02-04",
+          "text": "와... 여기 조심하세요!!\n가격표가 없어 설마설마 했는데 1리터 물2병, 탄산수1병, 치토스 하나에 54불 이라고 하네요..   상세 가격 물어보니 물 한병에 14불.. 당장 제자리에 돌려 놓고 나오는데, 사장님은 또 왜 친절한지..  한명만 걸려라 영업이네요.",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2026-02-03",
+          "text": "사기꾼 물3개 치토스 하나에 54달러 나옴\n\nThis is a total rip-off. Three bottles of water and one bag of Cheetos cost $54",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-11-19",
+          "text": "HUGE SCAM. They charged me three times the marked value and then trespassed me, even pulling a taser on me, just because I wouldn’t leave without an itemized receipt.",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-11-17",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-10-29",
+          "text": "Avoid. Avoid avoid avoid.",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 2,
+          "date": "2026-07-17",
+          "text": "Everything is tacky.",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 2,
+          "date": "2026-06-19",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-10-27",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-10-23",
+          "text": "SCAM , I got charged 250$ for one bottle of water, one juice and a powerade. I don’t understand how this store is still open.",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-10-14",
+          "text": "Biggest scammers EVER!!! We were charged $250 for a few snacks. Asked for receipt and they couldn’t even print our original receipt. The guy instead decided to re-ring everything we got and told us it’s only $50 and that it was a bank error. Went to the police who also wanted to do absolutely nothing about it. What a corrupt system… DO NOT GO HEREE!",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-10-12",
+          "text": "SCAM! Got charged for $246 for some convenience store snacks and water bottles. Asked for receipt and they handed me this saying I paid cash. Disputed with bank! Save your time and money!",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-09-04",
+          "text": "The guy told me it was $12 then charged me $24 and wouldn’t give me my money back. Complete scam and based on the other reviews it seems like they do this a lot. They clearly take advantage of people.",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-08-31",
+          "text": "I had to leave the store because one man that worked there kept telling me that no recording is allowed in the store but i was only using my phone as a mirror. I informed him about this, but he repeated that no recording is allowed in the store. When i showed him my phone and asked him if it looked like i was recording ? He said i had to leave the store because i was arguing with him lol. Guess some stores dont have to sell merchandise to make money. Horrible attitude.",
+          "replied": false,
+          "themes": [
+            "staff_attitude",
+            "booking_comms"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-07-06",
+          "text": "This place is a rip off. Charged $5 per post card",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-07-06",
+          "text": "Charged my card $75 bucks for 1 thing that was $20 , they will take advantage of you if you’re under the influence",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-06-30",
+          "text": "Not open 24/7",
+          "replied": false,
+          "themes": [
+            "other"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-05-21",
+          "text": "Do not come here they over charge went in to get 3 Gatorade and they charge me 26 dollars for em",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-04-26",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-04-16",
+          "text": "This place scammed me. I bought crackers water and a magnet. Was told it was about $20. They charged me for $249. All the reviews of this place being a scam is correct. I will be reporting this place to the Better Business Bureau and INS. This place has been around for years and seemingly have been reported multiple times and nothing has happened which reveals Austin’s lack of protection for its citizens. This store preys on vulnerable people on 6th street and the City of Austin is responsible for not doing a proper investigation and not shutting this place down. Austin needs to do better at protecting its citizens from predators like this company",
+          "replied": false,
+          "themes": [
+            "billing_price",
+            "booking_comms"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-04-09",
+          "text": "As many others have said they will over charge you. Charge me $140 for a couple of waters.",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 1,
+          "date": "2025-02-21",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2026-03-10",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        },
+        {
+          "stars": 3,
+          "date": "2025-12-03",
+          "text": "Went there to buy some souvenirs. We got some good offers and the prices were reasonable. But the environment wasn’t great,  too many homeless people around, which felt a bit scary.",
+          "replied": false,
+          "themes": [
+            "billing_price"
+          ]
+        },
+        {
+          "stars": 4,
+          "date": "2026-08-12",
+          "text": "",
+          "replied": false,
+          "themes": [
+            "no_text"
+          ]
+        }
+      ],
+      "recency": {
+        "newest": "2026-10-28",
+        "n90": 5,
+        "complete90": true,
+        "sun": "Oct 28, 2026 (1★)",
+        "read": 60,
+        "total": 184
+      },
+      "peers": {
+        "note": "convenience/grocery/souvenir-food mart",
+        "rows": [
+          {
+            "name": "Ana's Mart",
+            "you": false,
+            "rating": 4,
+            "reviews": 26,
+            "awayM": 455
+          },
+          {
+            "name": "Shop 24",
+            "you": false,
+            "rating": 3.7,
+            "reviews": 30,
+            "awayM": 292
+          },
+          {
+            "name": "CVS",
+            "you": false,
+            "rating": 3.4,
+            "reviews": 196,
+            "awayM": 524
+          },
+          {
+            "name": "Lone Star Souvenir & Food Mart",
+            "you": true,
+            "rating": 3,
+            "reviews": 184,
+            "awayM": null
+          },
+          {
+            "name": "7-Eleven",
+            "you": false,
+            "rating": 2.7,
+            "reviews": 86,
+            "awayM": 536
+          },
+          {
+            "name": "7-Eleven",
+            "you": false,
+            "rating": 2.6,
+            "reviews": 91,
+            "awayM": 444
+          }
+        ]
+      },
+      "sources": {
+        "listing": "halfmile/p2_items.json",
+        "reviews": "halfmile/tickets.json",
+        "recency": "walk-kit-v3/dated-v2/recency.json",
+        "age": "walk-kit-v3/dated-v2/local_seo.json",
+        "peers": "walk-kit-v3/peers/peers.json"
+      }
+    }
+  ]
+}
