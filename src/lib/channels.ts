@@ -92,7 +92,8 @@ export interface ChannelState {
 }
 export function currentStates(rows: ChannelOptin[]): ChannelState[] {
   return CHANNELS.map((c) => {
-    const latest = rows.filter((r) => r.channel === c.id).sort((a, b) => b.consented_at.localeCompare(a.consented_at))[0];
+    const matched = rows.filter((r) => r.channel === c.id);
+    const latest = matched.sort((a, b) => b.consented_at.localeCompare(a.consented_at) || b.created_at.localeCompare(a.created_at) || rows.indexOf(a) - rows.indexOf(b))[0];
     return latest
       ? { channel: c.id, status: latest.status, contact: latest.status === "withdrawn" ? null : maskContact(latest.contact), consented_at: latest.consented_at }
       : { channel: c.id, status: "none", contact: null, consented_at: null };
