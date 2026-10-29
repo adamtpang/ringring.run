@@ -1,0 +1,702 @@
+{
+  "_rule": {
+    "rating": "green >= 4.5, amber 4.0-4.4, red < 4.0",
+    "reply_rate (tiles 'a/b' about replies/answers)": "green >= 50%, amber 20-49%, red < 20%",
+    "total_google_reviews": "green >= 100, amber 10-99, red < 10",
+    "complaint_counts (tiles: under 5 stars / one-stars / about X / unanswered)": "red, or amber when the business replies to >= 50% of reviews read",
+    "problem_row_counts": "red if newest review on it is within 12 months; amber if older (> 12 months, tagged OLDER); green if all those reviews were answered; amber for listing items with no count",
+    "newest_1-3_star_with_no_reply": "green if none (all replied); red if within 12 months; amber if older",
+    "doing_well_items": "always green; built only from scraped facts (rating >= 4.5, reviews >= 100, reply rate >= 50%, all low reviews answered, >= 3 reviews in last 90 days, >= 100 photos, website+hours+phone listed); fallback = best listing fact",
+    "neutral": "review tags, reviews in 12 months / 90 days tiles, dates: black"
+  },
+  "1-lees-tailor": [
+    {
+      "label": "newest reviews with a reply",
+      "value": "0/50",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "one-stars, unanswered",
+      "value": "4",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "reviews in 12 months",
+      "value": "11",
+      "status": "neutral",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.7",
+      "status": "green",
+      "section": "header"
+    },
+    {
+      "label": "Newest 1-3 star with no reply",
+      "value": "Jul 10, 2026 (1★)",
+      "status": "red",
+      "section": "recency"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.7 ★",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Alteration came out wrong",
+      "value": "2 reviews, 1-star",
+      "status": "red",
+      "section": "improve"
+    },
+    {
+      "label": "Rude or poor service",
+      "value": "2 reviews, 1-star",
+      "status": "red",
+      "section": "improve"
+    },
+    {
+      "label": "No reply to any review",
+      "value": "0 of 50 answered",
+      "status": "red",
+      "section": "improve"
+    }
+  ],
+  "2-brazos-barbershop": [
+    {
+      "label": "newest reviews replied to",
+      "value": "42/50",
+      "status": "green",
+      "section": "found"
+    },
+    {
+      "label": "reviews under 5 stars",
+      "value": "3",
+      "status": "amber",
+      "section": "found"
+    },
+    {
+      "label": "reviews in the last 90 days",
+      "value": "4",
+      "status": "neutral",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.9",
+      "status": "green",
+      "section": "header"
+    },
+    {
+      "label": "Newest 1-3 star with no reply",
+      "value": "None: all replied",
+      "status": "green",
+      "section": "recency"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.9 ★",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Google reviews",
+      "value": "108",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "of your newest reviews replied to",
+      "value": "42/50",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "1-stars with no text",
+      "value": "2 reviews, both answered",
+      "status": "green",
+      "section": "improve"
+    },
+    {
+      "label": "Short Friday, closed weekends",
+      "value": "Fri closes 2:30 PM",
+      "status": "amber",
+      "section": "improve"
+    }
+  ],
+  "3-wild-about-music": [
+    {
+      "label": "reviews from the last 12 months with a reply",
+      "value": "1/20",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "review tags: souvenirs vs guitars",
+      "value": "32 vs 25",
+      "status": "neutral",
+      "section": "found"
+    },
+    {
+      "label": "Google reviews",
+      "value": "474",
+      "status": "green",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.6",
+      "status": "green",
+      "section": "header"
+    },
+    {
+      "label": "Newest 1-3 star with no reply",
+      "value": "Sep 27, 2024 (3★)",
+      "status": "amber",
+      "section": "recency"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.6 ★",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Google reviews",
+      "value": "474",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "reviews in the last 90 days",
+      "value": "3",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Expected more instruments",
+      "value": "2 reviews",
+      "status": "amber",
+      "section": "improve"
+    },
+    {
+      "label": "Nothing new or different",
+      "value": "1 review, 3-star",
+      "status": "amber",
+      "section": "improve"
+    },
+    {
+      "label": "Reviews mostly unanswered",
+      "value": "1 of 20 in 12 months",
+      "status": "red",
+      "section": "improve"
+    }
+  ],
+  "4-lucky-lizard": [
+    {
+      "label": "newest reviews with a reply",
+      "value": "0/50",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "reviews under 5 stars",
+      "value": "19",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "reviews in 12 months",
+      "value": "5",
+      "status": "neutral",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.3",
+      "status": "amber",
+      "section": "header"
+    },
+    {
+      "label": "Newest 1-3 star with no reply",
+      "value": "Sep 12, 2026 (1★)",
+      "status": "red",
+      "section": "recency"
+    },
+    {
+      "label": "Website, hours and phone on Google",
+      "value": "Listed",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Poor service",
+      "value": "2 reviews, 1-star",
+      "status": "red",
+      "section": "improve"
+    },
+    {
+      "label": "Google hours were wrong",
+      "value": "1 review, 2-star",
+      "status": "amber",
+      "section": "improve"
+    },
+    {
+      "label": "Generic or touristy stock",
+      "value": "2 reviews",
+      "status": "amber",
+      "section": "improve"
+    }
+  ],
+  "5-sapori": [
+    {
+      "label": "reviews under 5 stars, Sep 11 to Oct 19",
+      "value": "7",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "of those answered",
+      "value": "0/7",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "about the Alfredo",
+      "value": "2",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.7",
+      "status": "green",
+      "section": "header"
+    },
+    {
+      "label": "Newest 1-3 star with no reply",
+      "value": "Oct 19, 2026 (3★)",
+      "status": "red",
+      "section": "recency"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.7 ★",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Google reviews",
+      "value": "1,081",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "reviews in the last 90 days (at least)",
+      "value": "50",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Food fell short",
+      "value": "5 reviews",
+      "status": "red",
+      "section": "improve"
+    },
+    {
+      "label": "Loud inside, slow food",
+      "value": "2 reviews",
+      "status": "red",
+      "section": "improve"
+    },
+    {
+      "label": "Felt unsafe outside",
+      "value": "1 review, 3-star",
+      "status": "red",
+      "section": "improve"
+    }
+  ],
+  "6-anas-mart": [
+    {
+      "label": "reviews with a reply",
+      "value": "1/26",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "reviews under 5 stars",
+      "value": "8",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "one-stars about price, no reply",
+      "value": "2",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.0",
+      "status": "amber",
+      "section": "header"
+    },
+    {
+      "label": "Newest 1-3 star with no reply",
+      "value": "May 25, 2026 (1★)",
+      "status": "red",
+      "section": "recency"
+    },
+    {
+      "label": "Hours and phone on Google",
+      "value": "Listed",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Prices too high or overcharged",
+      "value": "2 reviews, 1-star",
+      "status": "red",
+      "section": "improve"
+    },
+    {
+      "label": "Small selection",
+      "value": "2 reviews",
+      "status": "amber",
+      "section": "improve"
+    },
+    {
+      "label": "Hours on Google not kept",
+      "value": "1 review, 1-star",
+      "status": "amber",
+      "section": "improve"
+    }
+  ],
+  "7-antler-vc": [
+    {
+      "label": "Google reviews in total",
+      "value": "2",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.0",
+      "status": "amber",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.0",
+      "status": "amber",
+      "section": "header"
+    },
+    {
+      "label": "Hours on Google",
+      "value": "Listed",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Very few reviews",
+      "value": "2 on Google",
+      "status": "red",
+      "section": "improve"
+    }
+  ],
+  "8-pleblab": [
+    {
+      "label": "Google rating",
+      "value": "5.0",
+      "status": "green",
+      "section": "found"
+    },
+    {
+      "label": "Google reviews in total",
+      "value": "7",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "5.0",
+      "status": "green",
+      "section": "header"
+    },
+    {
+      "label": "Google rating",
+      "value": "5.0 ★",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Website, hours and phone on Google",
+      "value": "Listed",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Very few reviews",
+      "value": "7 on Google",
+      "status": "red",
+      "section": "improve"
+    }
+  ],
+  "9-blindside-tattoo": [
+    {
+      "label": "reviews under 5 stars with a reply",
+      "value": "0/13",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "one-stars about rude staff",
+      "value": "7",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "newest reviews with a reply",
+      "value": "8/60",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.4",
+      "status": "amber",
+      "section": "header"
+    },
+    {
+      "label": "Newest 1-3 star with no reply",
+      "value": "Mar 17, 2026 (1★)",
+      "status": "red",
+      "section": "recency"
+    },
+    {
+      "label": "Google reviews",
+      "value": "271",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "reviews in the last 90 days",
+      "value": "6",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Website, hours and phone on Google",
+      "value": "Listed",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Rude or unwelcoming staff",
+      "value": "7 reviews, 1-star",
+      "status": "amber",
+      "section": "improve"
+    },
+    {
+      "label": "Appointment or walk-in not kept",
+      "value": "2 reviews, 1-star",
+      "status": "red",
+      "section": "improve"
+    },
+    {
+      "label": "Low reviews go unanswered",
+      "value": "0 of 13 answered",
+      "status": "red",
+      "section": "improve"
+    }
+  ],
+  "10-shop-24": [
+    {
+      "label": "reviews with a reply",
+      "value": "2/30",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "reviews under 5 stars",
+      "value": "16",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "3.7",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "3.7",
+      "status": "red",
+      "section": "header"
+    },
+    {
+      "label": "Newest 1-3 star with no reply",
+      "value": "Apr 8, 2026 (1★)",
+      "status": "red",
+      "section": "recency"
+    },
+    {
+      "label": "Hours and phone on Google",
+      "value": "Listed",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Charged wrong or overpriced",
+      "value": "3 reviews, 1-star",
+      "status": "red",
+      "section": "improve"
+    },
+    {
+      "label": "Dirty, bad smell",
+      "value": "2 reviews, 1-star",
+      "status": "amber",
+      "section": "improve"
+    },
+    {
+      "label": "Unhelpful or rude staff",
+      "value": "2 reviews",
+      "status": "amber",
+      "section": "improve"
+    }
+  ],
+  "11-small-victory": [
+    {
+      "label": "newest reviews with a reply",
+      "value": "0/60",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "of those under 5 stars",
+      "value": "10",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "about drink quality",
+      "value": "3",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.7",
+      "status": "green",
+      "section": "header"
+    },
+    {
+      "label": "Newest 1-3 star with no reply",
+      "value": "Oct 24, 2026 (2★)",
+      "status": "red",
+      "section": "recency"
+    },
+    {
+      "label": "Google rating",
+      "value": "4.7 ★",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Google reviews",
+      "value": "507",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "reviews in the last 90 days",
+      "value": "12",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Drinks fell short",
+      "value": "3 reviews",
+      "status": "red",
+      "section": "improve"
+    },
+    {
+      "label": "Too hot inside",
+      "value": "2 reviews",
+      "status": "amber",
+      "section": "improve"
+    },
+    {
+      "label": "Bartenders not engaging",
+      "value": "2 reviews",
+      "status": "amber",
+      "section": "improve"
+    }
+  ],
+  "12-lone-star-souvenir": [
+    {
+      "label": "newest reviews with a reply",
+      "value": "0/60",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "of those under 5 stars",
+      "value": "45",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "about overcharging",
+      "value": "14",
+      "status": "red",
+      "section": "found"
+    },
+    {
+      "label": "Google rating",
+      "value": "3.0",
+      "status": "red",
+      "section": "header"
+    },
+    {
+      "label": "Newest 1-3 star with no reply",
+      "value": "Oct 28, 2026 (1★)",
+      "status": "red",
+      "section": "recency"
+    },
+    {
+      "label": "Google reviews",
+      "value": "184",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "reviews in the last 90 days",
+      "value": "5",
+      "status": "green",
+      "section": "doing_well"
+    },
+    {
+      "label": "Overcharged at the register",
+      "value": "14 reviews, 1-star",
+      "status": "red",
+      "section": "improve"
+    },
+    {
+      "label": "Rude owner or staff",
+      "value": "10 reviews, 1-star",
+      "status": "red",
+      "section": "improve"
+    },
+    {
+      "label": "Dirty or pests",
+      "value": "2 reviews, 1-star",
+      "status": "red",
+      "section": "improve"
+    }
+  ]
+}
