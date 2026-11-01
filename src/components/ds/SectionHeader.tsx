@@ -26,7 +26,7 @@ export function SectionHeader({
   return (
     <div className={cx("flex flex-wrap items-end justify-between gap-x-6 gap-y-3", align === "center" && "flex-col items-center text-center", className)}>
       <div className={cx("min-w-0", align === "center" && "mx-auto")}>
-        {eyebrow && <p className="mb-2 text-eyebrow uppercase text-accent">{eyebrow}</p>}
+        {eyebrow && <div className="mb-2 text-eyebrow uppercase text-accent">{eyebrow}</div>}
         <H className={cx(titleSize, "text-balance")}>{title}</H>
         {description && (
           <p className={cx("mt-1.5 max-w-2xl text-pretty text-muted", size === "sm" ? "text-footnote" : "text-callout", align === "center" && "mx-auto")}>
