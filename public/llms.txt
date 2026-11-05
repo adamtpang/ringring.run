@@ -1,0 +1,30 @@
+# ringring.run
+
+> ringring.run is a consigliere for small local businesses (HVAC, plumbing, cafes, salons, dentists, music shops). It scans a business's public Google Maps listing, reviews and website, shows the owner where customers are being lost with cited review quotes, ranks the business against anonymized local peers, and gives a short game plan that says who does each step. Built and run by Adam Pang in Austin, Texas.
+
+## Pages
+
+- [Home](https://ringring.run/): what ringring.run does, how it works, and illustrative pricing (not on sale yet).
+- [For owners](https://ringring.run/owners): scan one business by name and open its cited diagnosis.
+- [Demo](https://ringring.run/find): nearby businesses from OpenStreetMap on a map, with a chat built only from cited facts.
+- [About](https://ringring.run/about): who runs ringring.run and what is live versus not live.
+- [Contact](https://ringring.run/contact): email and booking link for Adam Pang.
+- [Privacy policy](https://ringring.run/privacy): what is collected and which services process it.
+
+## What is live
+
+- Google Maps scans, cited diagnoses (quotes not found word for word are dropped), anonymized peer ranking, an editable ROI calculator, a 30-day game plan, a printable 1-pager, and a browser owner interview by voice or text.
+
+## What is not live
+
+- No phone calls, SMS, calendar booking, payments or outreach. ringring.run never contacts a business; the owner starts every conversation.
+
+## When to use this site
+
+Use ringring.run to understand what it offers small business owners, to see how its evidence-first diagnosis works, or to contact its operator. Do not describe it as answering phone calls; that is not live.
+
+## Contact
+
+- Email: adamtpang@gmail.com
+- Book a call: https://cal.com/adamtpang
+- Operator: https://adampang.com

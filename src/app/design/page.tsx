@@ -3,7 +3,7 @@ import { LogoMark, RingEmblem, Wordmark } from "@/components/Logo";
 import { MarketingFooter, MarketingHeader } from "@/components/MarketingChrome";
 import { Badge, Button, Card, Field, SectionHeader, Stat, StatGrid, Timeline, TimelineStep } from "@/components/ds";
 
-export const metadata: Metadata = { title: "Design system", description: "Tokens, palette, type, and components behind ringring.run." };
+export const metadata: Metadata = { title: "Design system", description: "Tokens, palette, type, and components behind ringring.run.", alternates: { canonical: "/design" } };
 
 // Light and dark values mirror src/app/tokens.css. Contrast is computed here, not typed in.
 type Swatch = { name: string; token: string; light: string; dark: string; text?: boolean; on?: string };

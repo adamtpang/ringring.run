@@ -1,8 +1,45 @@
+import type { Metadata } from "next";
+import Link from "next/link";
 import { RingEmblem } from "@/components/Logo";
 import { MarketingFooter, MarketingHeader } from "@/components/MarketingChrome";
 import { ModeSwitch } from "@/components/ModeSwitch";
 import { Badge, ButtonLink, Card, SectionHeader } from "@/components/ds";
 import { MODES } from "@/lib/modes";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://ringring.run/#organization",
+      name: "ringring.run",
+      url: "https://ringring.run/",
+      logo: "https://ringring.run/icon.png",
+      description:
+        "Evidence-first diagnosis for small local businesses: scans the public Google Maps listing, reviews and website, and cites every finding.",
+      founder: { "@type": "Person", name: "Adam Pang", url: "https://adampang.com" },
+      contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "adamtpang@gmail.com", url: "https://ringring.run/contact" },
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://ringring.run/#website",
+      name: "ringring.run",
+      url: "https://ringring.run/",
+      publisher: { "@id": "https://ringring.run/#organization" },
+    },
+  ],
+};
+
+// Self-contained passages: each one names ringring.run or its subject and stands alone when quoted.
+const about = [
+  "ringring.run is a consigliere for small local businesses such as HVAC companies, plumbers, cafes, salons, dentists and music shops. The scanner reads what the public already says about a business on its Google Maps listing, in its reviews and on its website, then shows the owner where customers are being lost, with real review quotes as proof.",
+  "Every finding in a ringring.run diagnosis cites its source: a review, a listing field or a line from the business website. A code check compares each quote with the scraped text and drops any quote that does not appear word for word, so an owner never sees a problem the evidence does not support.",
+  "The ringring.run game plan ranks fixes and labels who does each step: Ringy does this, Ringy does this after your OK, or you do this. Dollar estimates come from an editable ROI calculator, and each input shows where it came from, whether a listing fact, a vendor pricing page or a labeled assumption.",
+  "Peer ranking compares a business with anonymized local peers. The current Austin benchmark covers 111 businesses in 6 industries, scanned on October 26, 2026, and the tier formula is shown next to the result. Peer names stay hidden, and reviews that contain allegations are never quoted.",
+  "Owners can talk to Ringy, the ringring.run assistant, through a short interview in the browser, by voice or by typing. Answers are saved to the business profile only after the owner reviews them. Phone calls, SMS and outreach are not live: ringring.run never contacts a business, and the owner starts every conversation.",
+];
 
 // Only what the code does today is marked "Live". Everything else says "Next".
 const steps = [
@@ -40,12 +77,13 @@ function Check({ live }: { live: boolean }) {
 export default function Home() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <MarketingHeader />
       <main className="flex-1">
         {/* Hero */}
         <section className="mx-auto grid max-w-5xl items-center gap-8 px-[var(--space-gutter)] pb-16 pt-12 sm:pt-20 md:grid-cols-[1.2fr_1fr] md:gap-12 md:pb-24">
           <div className="order-2 md:order-1">
-            <p className="text-eyebrow uppercase text-accent">AI voice agent for small businesses</p>
+            <div className="text-eyebrow uppercase text-accent">AI voice agent for small businesses</div>
             <h1 className="mt-4 text-display text-balance">
               Every missed call, <span className="text-muted">found and priced.</span>
             </h1>
@@ -70,6 +108,23 @@ export default function Home() {
           </div>
           <div className="order-1 mx-auto w-48 sm:w-64 md:order-2 md:w-full md:max-w-sm">
             <RingEmblem className="aspect-square w-full" />
+          </div>
+        </section>
+
+        {/* What it is */}
+        <section id="what" className="scroll-mt-14 border-t border-hairline">
+          <div className="mx-auto grid max-w-5xl gap-8 px-[var(--space-gutter)] py-[var(--space-section)] md:grid-cols-[1fr_2fr]">
+            <SectionHeader eyebrow="What it is" title="Ringy talks, Rungy runs." size="lg" />
+            <div className="space-y-5 text-callout text-pretty text-muted">
+              {about.map((t) => (
+                <p key={t.slice(0, 24)}>{t}</p>
+              ))}
+              <p>
+                Questions about ringring.run go to Adam Pang, who builds and runs it in Austin, Texas. Read the{" "}
+                <Link href="/about" className="text-accent underline">about page</Link>, or{" "}
+                <Link href="/contact" className="text-accent underline">contact Adam</Link> by email or by booking a short call.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -120,10 +175,10 @@ export default function Home() {
                 <h3 className="text-title-3">Starter</h3>
                 <Badge tone="warning">Illustrative</Badge>
               </div>
-              <p className="mt-4 flex items-baseline gap-1">
+              <div className="mt-4 flex items-baseline gap-1">
                 <span className="text-display tabular-nums">$149</span>
                 <span className="text-callout text-muted">/ month</span>
-              </p>
+              </div>
               <p className="mt-1 text-footnote text-muted">14-day free trial. Cancel anytime.</p>
               <ul className="mt-6 space-y-3 border-t border-hairline pt-6">
                 {plan.map((f) => (
