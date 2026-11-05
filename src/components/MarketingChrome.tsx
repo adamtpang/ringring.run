@@ -16,6 +16,12 @@ export function MarketingHeader() {
           <Link href="/#pricing" className="pressable hidden rounded-pill px-3 py-1.5 text-muted hover:text-foreground sm:block">
             Pricing
           </Link>
+          <Link href="/path" className="pressable rounded-pill px-3 py-1.5 text-muted hover:text-foreground">
+            Path to #1
+          </Link>
+          <Link href="/roi" className="pressable hidden rounded-pill px-3 py-1.5 text-muted hover:text-foreground sm:block">
+            ROI
+          </Link>
           <ButtonLink href="/find" size="sm" variant="inverse" className="ml-2">
             Try the demo
           </ButtonLink>
